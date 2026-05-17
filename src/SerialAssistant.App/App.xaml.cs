@@ -15,7 +15,8 @@ namespace SerialAssistant.App
             base.OnStartup(e);
 
             ISerialPortScanner scanner = new SerialPortScanner();
-            MainWindowViewModel viewModel = new MainWindowViewModel(scanner);
+            ISerialPortService serialPortService = new SerialPortService();
+            MainWindowViewModel viewModel = new MainWindowViewModel(scanner, serialPortService);
 
             MainWindow mainWindow = new MainWindow();
             mainWindow.DataContext = viewModel;

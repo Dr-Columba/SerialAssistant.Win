@@ -12,34 +12,48 @@ namespace SerialAssistant.App.ViewModels
     public class MainWindowViewModel : BaseViewModel
     {
         private readonly ISerialPortScanner? _scanner;
+        private readonly ISerialPortService? _serialPortService;
+        private SerialConnectionState _connectionState;
         private string _sendText;
         private SendMode _selectedSendMode;
-        private SerialConnectionState _connectionState;
         private string _statusMessage;
         private int _sentBytesCount;
         private bool _isHexDisplay;
+        private string _connectionButtonText;
 
         public MainWindowViewModel()
-            : this(null)
+            : this(null, null)
         {
         }
 
-        public MainWindowViewModel(ISerialPortScanner? scanner)
+        public MainWindowViewModel(ISerialPortScanner? scanner, ISerialPortService? serialPortService)
         {
             _scanner = scanner;
+            _serialPortService = serialPortService;
             SerialSettings = new SerialSettingsViewModel();
             ReceiveDisplay = new ReceiveDisplayViewModel();
             SendModes = new ObservableCollection<SendMode>();
 
             _sendText = string.Empty;
-            _connectionState = SerialConnectionState.Disconnected;
             _statusMessage = "就绪。请点击刷新按钮获取可用串口。";
             _sentBytesCount = 0;
             _selectedSendMode = SendMode.Text;
+            _connectionButtonText = "打开串口";
 
             foreach (SendMode mode in Enum.GetValues<SendMode>())
             {
                 SendModes.Add(mode);
+            }
+
+            if (_serialPortService != null)
+            {
+                _serialPortService.ConnectionStateChanged += OnConnectionStateChanged;
+                _connectionState = _serialPortService.ConnectionState;
+                UpdateConnectionButtonText(_connectionState);
+            }
+            else
+            {
+                _connectionState = SerialConnectionState.Disconnected;
             }
 
             RefreshPortsCommand = new RelayCommand(RefreshPorts);
@@ -108,6 +122,12 @@ namespace SerialAssistant.App.ViewModels
             }
         }
 
+        public string ConnectionButtonText
+        {
+            get => _connectionButtonText;
+            private set => SetProperty(ref _connectionButtonText, value);
+        }
+
         public ICommand RefreshPortsCommand
         {
             get;
@@ -130,6 +150,26 @@ namespace SerialAssistant.App.ViewModels
         {
             get;
             private set;
+        }
+
+        private void UpdateConnectionButtonText(SerialConnectionState state)
+        {
+            ConnectionButtonText = state == SerialConnectionState.Connected ? "关闭串口" : "打开串口";
+        }
+
+        private void OnConnectionStateChanged(object? sender, SerialConnectionState state)
+        {
+            ConnectionState = state;
+            UpdateConnectionButtonText(state);
+
+            if (state == SerialConnectionState.Connected)
+            {
+                SerialSettings.IsSettingsEnabled = false;
+            }
+            else if (state == SerialConnectionState.Disconnected)
+            {
+                SerialSettings.IsSettingsEnabled = true;
+            }
         }
 
         private void RefreshPorts(object? parameter)
@@ -171,18 +211,61 @@ namespace SerialAssistant.App.ViewModels
 
         private bool CanToggleConnection(object? parameter)
         {
-            return true;
+            return _serialPortService != null;
         }
 
         private void ToggleConnection(object? parameter)
         {
+            if (_serialPortService == null)
+            {
+                StatusMessage = "当前阶段尚未接入串口服务。";
+                return;
+            }
+
             if (ConnectionState == SerialConnectionState.Disconnected)
             {
-                StatusMessage = "当前阶段尚未接入串口打开功能。";
+                OpenPort();
             }
             else
             {
-                StatusMessage = "当前阶段尚未接入串口关闭功能。";
+                ClosePort();
+            }
+        }
+
+        private void OpenPort()
+        {
+            var settings = SerialSettings.CreateSettings();
+            var validationResult = SerialSettings.ValidateCurrentSettings();
+
+            if (!validationResult.IsSuccess)
+            {
+                StatusMessage = $"串口参数无效：{validationResult.ErrorMessage}";
+                return;
+            }
+
+            var openResult = _serialPortService!.Open(settings);
+
+            if (openResult.IsSuccess)
+            {
+                StatusMessage = $"串口 {settings.PortName} 已打开。";
+            }
+            else
+            {
+                StatusMessage = $"打开串口失败：{openResult.ErrorMessage}";
+            }
+        }
+
+        private void ClosePort()
+        {
+            var closeResult = _serialPortService!.Close();
+
+            if (closeResult.IsSuccess)
+            {
+                StatusMessage = "串口已关闭。";
+            }
+            else
+            {
+                StatusMessage = $"关闭串口失败：{closeResult.ErrorMessage}";
             }
         }
 

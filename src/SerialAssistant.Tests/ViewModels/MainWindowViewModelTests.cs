@@ -65,7 +65,8 @@ namespace SerialAssistant.Tests.ViewModels
                 SerialPortInfo.Create("COM1"),
                 SerialPortInfo.Create("COM2")
             });
-            var viewModel = new MainWindowViewModel(fakeScanner);
+            var fakeService = new FakeSerialPortService();
+            var viewModel = new MainWindowViewModel(fakeScanner, fakeService);
 
             /* Act */
             viewModel.RefreshPortsCommand.Execute(null);
@@ -86,7 +87,8 @@ namespace SerialAssistant.Tests.ViewModels
                 SerialPortInfo.Create("COM1"),
                 SerialPortInfo.Create("COM2")
             });
-            var viewModel = new MainWindowViewModel(fakeScanner);
+            var fakeService = new FakeSerialPortService();
+            var viewModel = new MainWindowViewModel(fakeScanner, fakeService);
 
             /* Act */
             viewModel.RefreshPortsCommand.Execute(null);
@@ -103,7 +105,8 @@ namespace SerialAssistant.Tests.ViewModels
         {
             /* Arrange */
             var fakeScanner = new FakeSerialPortScanner(new List<SerialPortInfo>());
-            var viewModel = new MainWindowViewModel(fakeScanner);
+            var fakeService = new FakeSerialPortService();
+            var viewModel = new MainWindowViewModel(fakeScanner, fakeService);
 
             /* Act */
             viewModel.RefreshPortsCommand.Execute(null);
@@ -124,7 +127,8 @@ namespace SerialAssistant.Tests.ViewModels
                 SerialPortInfo.Create("COM1"),
                 SerialPortInfo.Create("COM2")
             });
-            var viewModel = new MainWindowViewModel(fakeScanner);
+            var fakeService = new FakeSerialPortService();
+            var viewModel = new MainWindowViewModel(fakeScanner, fakeService);
 
             /* Act */
             viewModel.RefreshPortsCommand.Execute(null);
@@ -141,7 +145,8 @@ namespace SerialAssistant.Tests.ViewModels
         {
             /* Arrange */
             var fakeScanner = new FakeSerialPortScanner(null, true, "Test error");
-            var viewModel = new MainWindowViewModel(fakeScanner);
+            var fakeService = new FakeSerialPortService();
+            var viewModel = new MainWindowViewModel(fakeScanner, fakeService);
 
             /* Act */
             viewModel.RefreshPortsCommand.Execute(null);
@@ -152,10 +157,10 @@ namespace SerialAssistant.Tests.ViewModels
         }
 
         /*
-         * Test ToggleConnectionCommand execution provides status message
+         * Test ToggleConnectionCommand without service provides status message
          */
         [Fact]
-        public void ToggleConnectionCommand_ProvidesStatusMessage()
+        public void ToggleConnectionCommand_WithoutService_ProvidesStatusMessage()
         {
             /* Arrange */
             var viewModel = new MainWindowViewModel();
@@ -165,6 +170,207 @@ namespace SerialAssistant.Tests.ViewModels
 
             /* Assert */
             Assert.Contains("尚未接入", viewModel.StatusMessage);
+        }
+
+        /*
+         * Test Open with valid settings changes state to Connected
+         */
+        [Fact]
+        public void ToggleConnectionCommand_WithValidSettings_ChangesStateToConnected()
+        {
+            /* Arrange */
+            var fakeScanner = new FakeSerialPortScanner(new List<SerialPortInfo>
+            {
+                SerialPortInfo.Create("COM1")
+            });
+            var fakeService = new FakeSerialPortService();
+            var viewModel = new MainWindowViewModel(fakeScanner, fakeService);
+            viewModel.SerialSettings.SelectedPortName = "COM1";
+
+            /* Act */
+            viewModel.ToggleConnectionCommand.Execute(null);
+
+            /* Assert */
+            Assert.Equal(SerialConnectionState.Connected, viewModel.ConnectionState);
+        }
+
+        /*
+         * Test Open成功后 IsSettingsEnabled 为 false
+         */
+        [Fact]
+        public void Open_Success_IsSettingsEnabled_IsFalse()
+        {
+            /* Arrange */
+            var fakeScanner = new FakeSerialPortScanner(new List<SerialPortInfo>
+            {
+                SerialPortInfo.Create("COM1")
+            });
+            var fakeService = new FakeSerialPortService();
+            var viewModel = new MainWindowViewModel(fakeScanner, fakeService);
+            viewModel.SerialSettings.SelectedPortName = "COM1";
+
+            /* Act */
+            viewModel.ToggleConnectionCommand.Execute(null);
+
+            /* Assert */
+            Assert.False(viewModel.SerialSettings.IsSettingsEnabled);
+        }
+
+        /*
+         * Test Open成功时 StatusMessage 包含已打开
+         */
+        [Fact]
+        public void Open_Success_StatusMessage_ContainsOpened()
+        {
+            /* Arrange */
+            var fakeScanner = new FakeSerialPortScanner(new List<SerialPortInfo>
+            {
+                SerialPortInfo.Create("COM1")
+            });
+            var fakeService = new FakeSerialPortService();
+            var viewModel = new MainWindowViewModel(fakeScanner, fakeService);
+            viewModel.SerialSettings.SelectedPortName = "COM1";
+
+            /* Act */
+            viewModel.ToggleConnectionCommand.Execute(null);
+
+            /* Assert */
+            Assert.Contains("已打开", viewModel.StatusMessage);
+        }
+
+        /*
+         * Test Open失败时状态不应为 Connected
+         */
+        [Fact]
+        public void Open_Failure_State_ShouldNotBeConnected()
+        {
+            /* Arrange */
+            var fakeScanner = new FakeSerialPortScanner(new List<SerialPortInfo>
+            {
+                SerialPortInfo.Create("COM1")
+            });
+            var fakeService = new FakeSerialPortService(true, false, "Open failed");
+            var viewModel = new MainWindowViewModel(fakeScanner, fakeService);
+            viewModel.SerialSettings.SelectedPortName = "COM1";
+
+            /* Act */
+            viewModel.ToggleConnectionCommand.Execute(null);
+
+            /* Assert */
+            Assert.NotEqual(SerialConnectionState.Connected, viewModel.ConnectionState);
+        }
+
+        /*
+         * Test Open失败时 IsSettingsEnabled 仍为 true
+         */
+        [Fact]
+        public void Open_Failure_IsSettingsEnabled_IsTrue()
+        {
+            /* Arrange */
+            var fakeScanner = new FakeSerialPortScanner(new List<SerialPortInfo>
+            {
+                SerialPortInfo.Create("COM1")
+            });
+            var fakeService = new FakeSerialPortService(true, false, "Open failed");
+            var viewModel = new MainWindowViewModel(fakeScanner, fakeService);
+            viewModel.SerialSettings.SelectedPortName = "COM1";
+
+            /* Act */
+            viewModel.ToggleConnectionCommand.Execute(null);
+
+            /* Assert */
+            Assert.True(viewModel.SerialSettings.IsSettingsEnabled);
+        }
+
+        /*
+         * Test Open失败时 StatusMessage 包含失败原因
+         */
+        [Fact]
+        public void Open_Failure_StatusMessage_ContainsError()
+        {
+            /* Arrange */
+            var fakeScanner = new FakeSerialPortScanner(new List<SerialPortInfo>
+            {
+                SerialPortInfo.Create("COM1")
+            });
+            var fakeService = new FakeSerialPortService(true, false, "Open failed");
+            var viewModel = new MainWindowViewModel(fakeScanner, fakeService);
+            viewModel.SerialSettings.SelectedPortName = "COM1";
+
+            /* Act */
+            viewModel.ToggleConnectionCommand.Execute(null);
+
+            /* Assert */
+            Assert.Contains("Open failed", viewModel.StatusMessage);
+        }
+
+        /*
+         * Test Close成功时状态变为 Disconnected
+         */
+        [Fact]
+        public void Close_Success_State_IsDisconnected()
+        {
+            /* Arrange */
+            var fakeScanner = new FakeSerialPortScanner(new List<SerialPortInfo>
+            {
+                SerialPortInfo.Create("COM1")
+            });
+            var fakeService = new FakeSerialPortService();
+            var viewModel = new MainWindowViewModel(fakeScanner, fakeService);
+            viewModel.SerialSettings.SelectedPortName = "COM1";
+            viewModel.ToggleConnectionCommand.Execute(null);
+
+            /* Act */
+            viewModel.ToggleConnectionCommand.Execute(null);
+
+            /* Assert */
+            Assert.Equal(SerialConnectionState.Disconnected, viewModel.ConnectionState);
+        }
+
+        /*
+         * Test Close成功时 IsSettingsEnabled 为 true
+         */
+        [Fact]
+        public void Close_Success_IsSettingsEnabled_IsTrue()
+        {
+            /* Arrange */
+            var fakeScanner = new FakeSerialPortScanner(new List<SerialPortInfo>
+            {
+                SerialPortInfo.Create("COM1")
+            });
+            var fakeService = new FakeSerialPortService();
+            var viewModel = new MainWindowViewModel(fakeScanner, fakeService);
+            viewModel.SerialSettings.SelectedPortName = "COM1";
+            viewModel.ToggleConnectionCommand.Execute(null);
+
+            /* Act */
+            viewModel.ToggleConnectionCommand.Execute(null);
+
+            /* Assert */
+            Assert.True(viewModel.SerialSettings.IsSettingsEnabled);
+        }
+
+        /*
+         * Test Close失败时 StatusMessage 包含失败原因
+         */
+        [Fact]
+        public void Close_Failure_StatusMessage_ContainsError()
+        {
+            /* Arrange */
+            var fakeScanner = new FakeSerialPortScanner(new List<SerialPortInfo>
+            {
+                SerialPortInfo.Create("COM1")
+            });
+            var fakeService = new FakeSerialPortService(false, true, "Close failed");
+            var viewModel = new MainWindowViewModel(fakeScanner, fakeService);
+            viewModel.SerialSettings.SelectedPortName = "COM1";
+            viewModel.ToggleConnectionCommand.Execute(null);
+
+            /* Act */
+            viewModel.ToggleConnectionCommand.Execute(null);
+
+            /* Assert */
+            Assert.Contains("关闭串口失败", viewModel.StatusMessage);
         }
 
         /*
@@ -299,13 +505,15 @@ namespace SerialAssistant.Tests.ViewModels
         }
 
         /*
-         * Test ToggleConnectionCommand can execute
+         * Test ToggleConnectionCommand can execute when service exists
          */
         [Fact]
-        public void ToggleConnectionCommand_CanExecute()
+        public void ToggleConnectionCommand_CanExecute_WhenServiceExists()
         {
             /* Arrange */
-            var viewModel = new MainWindowViewModel();
+            var fakeScanner = new FakeSerialPortScanner();
+            var fakeService = new FakeSerialPortService();
+            var viewModel = new MainWindowViewModel(fakeScanner, fakeService);
 
             /* Act & Assert */
             Assert.True(viewModel.ToggleConnectionCommand.CanExecute(null));
@@ -366,6 +574,26 @@ namespace SerialAssistant.Tests.ViewModels
 
             /* Assert */
             Assert.True(viewModel.ReceiveDisplay.IsHexDisplay);
+        }
+
+        /*
+         * Test 参数非法时 ToggleConnectionCommand 不调用 Open
+         */
+        [Fact]
+        public void ToggleConnectionCommand_WithInvalidSettings_DoesNotCallOpen()
+        {
+            /* Arrange */
+            var fakeScanner = new FakeSerialPortScanner(new List<SerialPortInfo>());
+            var fakeService = new FakeSerialPortService();
+            var viewModel = new MainWindowViewModel(fakeScanner, fakeService);
+            viewModel.SerialSettings.SelectedPortName = null;
+
+            /* Act */
+            viewModel.ToggleConnectionCommand.Execute(null);
+
+            /* Assert */
+            Assert.Equal(SerialConnectionState.Disconnected, viewModel.ConnectionState);
+            Assert.Contains("参数无效", viewModel.StatusMessage);
         }
     }
 }
