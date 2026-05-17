@@ -1068,5 +1068,144 @@ namespace SerialAssistant.Tests.ViewModels
             Assert.Contains("接收串口数据失败", viewModel.StatusMessage);
             Assert.Contains("Test receive error", viewModel.StatusMessage);
         }
+
+        /*
+         * Test 加载配置后波特率恢复
+         */
+        [Fact]
+        public void LoadSettings_RestoresBaudRate()
+        {
+            /* Arrange */
+            var fakeScanner = new FakeSerialPortScanner();
+            var fakeService = new FakeSerialPortService();
+            var fakeUiInvoker = new FakeUiThreadInvoker();
+            var fakeSettingsService = new FakeAppSettingsService();
+            var customSettings = new AppSettings
+            {
+                BaudRate = 115200,
+                DataBits = 7,
+                Parity = "Odd",
+                StopBits = "Two",
+                SendMode = SendMode.Hex,
+                DisplayMode = DisplayMode.Hex
+            };
+            fakeSettingsService.Save(customSettings);
+
+            /* Act */
+            var viewModel = new MainWindowViewModel(fakeScanner, fakeService, fakeUiInvoker, fakeSettingsService);
+
+            /* Assert */
+            Assert.Equal(115200, viewModel.SerialSettings.SelectedBaudRate);
+            Assert.Equal(7, viewModel.SerialSettings.SelectedDataBits);
+            Assert.Equal("Odd", viewModel.SerialSettings.SelectedParity);
+            Assert.Equal("Two", viewModel.SerialSettings.SelectedStopBits);
+            Assert.Equal(SendMode.Hex, viewModel.SelectedSendMode);
+            Assert.True(viewModel.ReceiveDisplay.IsHexDisplay);
+        }
+
+        /*
+         * Test 保存配置时调用设置服务
+         */
+        [Fact]
+        public void SaveSettings_CallsSettingsService()
+        {
+            /* Arrange */
+            var fakeScanner = new FakeSerialPortScanner();
+            var fakeService = new FakeSerialPortService();
+            var fakeUiInvoker = new FakeUiThreadInvoker();
+            var fakeSettingsService = new FakeAppSettingsService();
+            var viewModel = new MainWindowViewModel(fakeScanner, fakeService, fakeUiInvoker, fakeSettingsService);
+
+            /* Change settings */
+            viewModel.SerialSettings.SelectedPortName = "COM3";
+            viewModel.SerialSettings.SelectedBaudRate = 9600;
+            viewModel.SelectedSendMode = SendMode.Text;
+            viewModel.ReceiveDisplay.IsHexDisplay = false;
+
+            /* Act */
+            var result = viewModel.SaveSettings();
+
+            /* Assert */
+            Assert.True(result.IsSuccess);
+            Assert.Equal("COM3", fakeSettingsService.GetSavedSettings().LastPortName);
+            Assert.Equal(9600, fakeSettingsService.GetSavedSettings().BaudRate);
+            Assert.Equal(SendMode.Text, fakeSettingsService.GetSavedSettings().SendMode);
+            Assert.Equal(DisplayMode.Text, fakeSettingsService.GetSavedSettings().DisplayMode);
+        }
+
+        /*
+         * Test 保存失败时状态更新正确
+         */
+        [Fact]
+        public void SaveSettings_Failure_ReturnsFailure()
+        {
+            /* Arrange */
+            var fakeScanner = new FakeSerialPortScanner();
+            var fakeService = new FakeSerialPortService();
+            var fakeUiInvoker = new FakeUiThreadInvoker();
+            var fakeSettingsService = new FakeAppSettingsService();
+            fakeSettingsService.SetFailSave(true);
+            var viewModel = new MainWindowViewModel(fakeScanner, fakeService, fakeUiInvoker, fakeSettingsService);
+
+            /* Act */
+            var result = viewModel.SaveSettings();
+
+            /* Assert */
+            Assert.False(result.IsSuccess);
+            Assert.Equal("Save failed.", result.ErrorMessage);
+        }
+
+        /*
+         * Test LastPortName 存在于刷新结果时自动选中
+         */
+        [Fact]
+        public void RefreshPorts_LastPortNameExists_SelectsIt()
+        {
+            /* Arrange */
+            var fakeScanner = new FakeSerialPortScanner(new List<SerialPortInfo>
+            {
+                SerialPortInfo.Create("COM1"),
+                SerialPortInfo.Create("COM2"),
+                SerialPortInfo.Create("COM3")
+            });
+            var fakeService = new FakeSerialPortService();
+            var fakeUiInvoker = new FakeUiThreadInvoker();
+            var fakeSettingsService = new FakeAppSettingsService();
+            var customSettings = new AppSettings { LastPortName = "COM2" };
+            fakeSettingsService.Save(customSettings);
+            var viewModel = new MainWindowViewModel(fakeScanner, fakeService, fakeUiInvoker, fakeSettingsService);
+
+            /* Act */
+            viewModel.RefreshPortsCommand.Execute(null);
+
+            /* Assert */
+            Assert.Equal("COM2", viewModel.SerialSettings.SelectedPortName);
+        }
+
+        /*
+         * Test LastPortName 不存在于刷新结果时选择第一个
+         */
+        [Fact]
+        public void RefreshPorts_LastPortNameNotExists_SelectsFirst()
+        {
+            /* Arrange */
+            var fakeScanner = new FakeSerialPortScanner(new List<SerialPortInfo>
+            {
+                SerialPortInfo.Create("COM1"),
+                SerialPortInfo.Create("COM2")
+            });
+            var fakeService = new FakeSerialPortService();
+            var fakeUiInvoker = new FakeUiThreadInvoker();
+            var fakeSettingsService = new FakeAppSettingsService();
+            var customSettings = new AppSettings { LastPortName = "COM999" };
+            fakeSettingsService.Save(customSettings);
+            var viewModel = new MainWindowViewModel(fakeScanner, fakeService, fakeUiInvoker, fakeSettingsService);
+
+            /* Act */
+            viewModel.RefreshPortsCommand.Execute(null);
+
+            /* Assert */
+            Assert.Equal("COM1", viewModel.SerialSettings.SelectedPortName);
+        }
     }
 }

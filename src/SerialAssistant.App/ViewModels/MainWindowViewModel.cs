@@ -4,6 +4,7 @@ using SerialAssistant.App.Commands;
 using SerialAssistant.Core.Enums;
 using SerialAssistant.Core.Services;
 using SerialAssistant.Core.Utilities;
+using SerialAssistant.Core.Models;
 using System.Text;
 
 namespace SerialAssistant.App.ViewModels
@@ -16,6 +17,8 @@ namespace SerialAssistant.App.ViewModels
         private readonly ISerialPortScanner? _scanner;
         private readonly ISerialPortService? _serialPortService;
         private readonly IUiThreadInvoker? _uiThreadInvoker;
+        private readonly IAppSettingsService? _appSettingsService;
+        private AppSettings _lastLoadedSettings;
         private SerialConnectionState _connectionState;
         private string _sendText;
         private SendMode _selectedSendMode;
@@ -25,20 +28,27 @@ namespace SerialAssistant.App.ViewModels
         private string _connectionButtonText;
 
         public MainWindowViewModel()
-            : this(null, null, null)
+            : this(null, null, null, null)
         {
         }
 
         public MainWindowViewModel(ISerialPortScanner? scanner, ISerialPortService? serialPortService)
-            : this(scanner, serialPortService, null)
+            : this(scanner, serialPortService, null, null)
         {
         }
 
         public MainWindowViewModel(ISerialPortScanner? scanner, ISerialPortService? serialPortService, IUiThreadInvoker? uiThreadInvoker)
+            : this(scanner, serialPortService, uiThreadInvoker, null)
+        {
+        }
+
+        public MainWindowViewModel(ISerialPortScanner? scanner, ISerialPortService? serialPortService, IUiThreadInvoker? uiThreadInvoker, IAppSettingsService? appSettingsService)
         {
             _scanner = scanner;
             _serialPortService = serialPortService;
             _uiThreadInvoker = uiThreadInvoker;
+            _appSettingsService = appSettingsService;
+            _lastLoadedSettings = AppSettings.CreateDefault();
             SerialSettings = new SerialSettingsViewModel();
             ReceiveDisplay = new ReceiveDisplayViewModel();
             SendModes = new ObservableCollection<SendMode>();
@@ -71,6 +81,8 @@ namespace SerialAssistant.App.ViewModels
             ToggleConnectionCommand = new RelayCommand(ToggleConnection, CanToggleConnection);
             SendCommand = new RelayCommand(Send, CanSend);
             ClearReceiveCommand = new RelayCommand(ClearReceive);
+
+            LoadSettings();
         }
 
         public SerialSettingsViewModel SerialSettings
@@ -217,6 +229,24 @@ namespace SerialAssistant.App.ViewModels
                 {
                     SerialSettings.UpdateAvailablePorts(result.Value!);
                     int count = result.Value!.Count;
+
+                    if (count > 0 && !string.IsNullOrEmpty(_lastLoadedSettings.LastPortName))
+                    {
+                        bool found = false;
+                        foreach (var port in result.Value)
+                        {
+                            if (port.PortName == _lastLoadedSettings.LastPortName)
+                            {
+                                SerialSettings.SelectedPortName = _lastLoadedSettings.LastPortName;
+                                found = true;
+                                break;
+                            }
+                        }
+                        if (!found)
+                        {
+                            SerialSettings.SelectedPortName = result.Value[0].PortName;
+                        }
+                    }
 
                     if (count > 0)
                     {
@@ -414,6 +444,58 @@ namespace SerialAssistant.App.ViewModels
             {
                 updateAction();
             }
+        }
+
+        private void LoadSettings()
+        {
+            if (_appSettingsService == null)
+            {
+                return;
+            }
+
+            OperationResult<AppSettings> loadResult = _appSettingsService.Load();
+            if (loadResult.IsSuccess && loadResult.Value != null)
+            {
+                _lastLoadedSettings = loadResult.Value;
+                ApplySettings(_lastLoadedSettings);
+            }
+        }
+
+        private void ApplySettings(AppSettings settings)
+        {
+            if (settings == null)
+            {
+                return;
+            }
+
+            SerialSettings.SelectedBaudRate = settings.BaudRate;
+            SerialSettings.SelectedDataBits = settings.DataBits;
+            SerialSettings.SelectedParity = settings.Parity;
+            SerialSettings.SelectedStopBits = settings.StopBits;
+            SelectedSendMode = settings.SendMode;
+            ReceiveDisplay.IsHexDisplay = (settings.DisplayMode == DisplayMode.Hex);
+            _lastLoadedSettings = settings;
+        }
+
+        public OperationResult SaveSettings()
+        {
+            if (_appSettingsService == null)
+            {
+                return OperationResult.Failure("配置服务不可用。");
+            }
+
+            AppSettings settings = new AppSettings
+            {
+                LastPortName = SerialSettings.SelectedPortName ?? string.Empty,
+                BaudRate = SerialSettings.SelectedBaudRate,
+                DataBits = SerialSettings.SelectedDataBits,
+                Parity = SerialSettings.SelectedParity ?? "None",
+                StopBits = SerialSettings.SelectedStopBits ?? "One",
+                SendMode = SelectedSendMode,
+                DisplayMode = ReceiveDisplay.IsHexDisplay ? DisplayMode.Hex : DisplayMode.Text
+            };
+
+            return _appSettingsService.Save(settings);
         }
     }
 }
