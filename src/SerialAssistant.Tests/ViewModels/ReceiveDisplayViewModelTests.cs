@@ -1,5 +1,6 @@
 using Xunit;
 using SerialAssistant.App.ViewModels;
+using System.Text;
 
 namespace SerialAssistant.Tests.ViewModels
 {
@@ -35,30 +36,6 @@ namespace SerialAssistant.Tests.ViewModels
         }
 
         /*
-         * Test changing received text raises property change
-         */
-        [Fact]
-        public void ReceivedText_ChangeRaisesPropertyChanged()
-        {
-            /* Arrange */
-            var viewModel = new ReceiveDisplayViewModel();
-            bool propertyChangedRaised = false;
-            viewModel.PropertyChanged += (sender, args) =>
-            {
-                if (args.PropertyName == nameof(ReceiveDisplayViewModel.ReceivedText))
-                {
-                    propertyChangedRaised = true;
-                }
-            };
-
-            /* Act */
-            viewModel.ReceivedText = "test data";
-
-            /* Assert */
-            Assert.True(propertyChangedRaised);
-        }
-
-        /*
          * Test clearing receive area clears text
          */
         [Fact]
@@ -66,7 +43,8 @@ namespace SerialAssistant.Tests.ViewModels
         {
             /* Arrange */
             var viewModel = new ReceiveDisplayViewModel();
-            viewModel.ReceivedText = "some data";
+            byte[] data = Encoding.UTF8.GetBytes("some data");
+            viewModel.AddReceivedData(data);
 
             /* Act */
             viewModel.ClearCommand.Execute(null);
@@ -83,7 +61,8 @@ namespace SerialAssistant.Tests.ViewModels
         {
             /* Arrange */
             var viewModel = new ReceiveDisplayViewModel();
-            viewModel.ReceivedText = "some data";
+            byte[] data = Encoding.UTF8.GetBytes("some data");
+            viewModel.AddReceivedData(data);
 
             /* Act */
             viewModel.ClearCommand.Execute(null);
@@ -104,22 +83,6 @@ namespace SerialAssistant.Tests.ViewModels
             /* Act & Assert */
             Assert.NotNull(viewModel.ClearCommand);
             Assert.True(viewModel.ClearCommand.CanExecute(null));
-        }
-
-        /*
-         * Test ReceivedBytesCount updates when text changes
-         */
-        [Fact]
-        public void ReceivedText_ChangeUpdatesCount()
-        {
-            /* Arrange */
-            var viewModel = new ReceiveDisplayViewModel();
-
-            /* Act */
-            viewModel.ReceivedText = "hello";
-
-            /* Assert */
-            Assert.Equal(5, viewModel.ReceivedBytesCount);
         }
 
         /*
@@ -152,20 +115,132 @@ namespace SerialAssistant.Tests.ViewModels
         }
 
         /*
-         * Test AppendText adds text to existing text
+         * Test AddReceivedData adds text data and updates display
          */
         [Fact]
-        public void AppendText_AddsToExistingText()
+        public void AddReceivedData_TextMode_AddsText()
         {
             /* Arrange */
             var viewModel = new ReceiveDisplayViewModel();
-            viewModel.ReceivedText = "first ";
+            viewModel.IsHexDisplay = false;
+            byte[] data = Encoding.UTF8.GetBytes("ABC");
 
             /* Act */
-            viewModel.AppendText("second");
+            viewModel.AddReceivedData(data);
 
             /* Assert */
-            Assert.Equal("first second", viewModel.ReceivedText);
+            Assert.Equal("ABC", viewModel.ReceivedText);
+            Assert.Equal(3, viewModel.ReceivedBytesCount);
+        }
+
+        /*
+         * Test AddReceivedData adds data and updates count
+         */
+        [Fact]
+        public void AddReceivedData_IncreasesCount()
+        {
+            /* Arrange */
+            var viewModel = new ReceiveDisplayViewModel();
+            byte[] data1 = new byte[] { 0x41, 0x42 };
+            byte[] data2 = new byte[] { 0x43, 0x44 };
+
+            /* Act */
+            viewModel.AddReceivedData(data1);
+            viewModel.AddReceivedData(data2);
+
+            /* Assert */
+            Assert.Equal(4, viewModel.ReceivedBytesCount);
+        }
+
+        /*
+         * Test HEX mode displays correct format
+         */
+        [Fact]
+        public void AddReceivedData_HexMode_DisplaysHex()
+        {
+            /* Arrange */
+            var viewModel = new ReceiveDisplayViewModel();
+            viewModel.IsHexDisplay = true;
+            byte[] data = new byte[] { 0x41, 0x42, 0x43 };
+
+            /* Act */
+            viewModel.AddReceivedData(data);
+
+            /* Assert */
+            Assert.Contains("41 42 43", viewModel.ReceivedText);
+        }
+
+        /*
+         * Test switching to HEX mode re-displays existing data as HEX
+         */
+        [Fact]
+        public void IsHexDisplay_True_ReDisplaysAsHex()
+        {
+            /* Arrange */
+            var viewModel = new ReceiveDisplayViewModel();
+            viewModel.IsHexDisplay = false;
+            byte[] data = new byte[] { 0x41, 0x42, 0x43 };
+            viewModel.AddReceivedData(data);
+            Assert.Equal("ABC", viewModel.ReceivedText);
+
+            /* Act */
+            viewModel.IsHexDisplay = true;
+
+            /* Assert */
+            Assert.Contains("41 42 43", viewModel.ReceivedText);
+        }
+
+        /*
+         * Test switching to text mode re-displays existing data as text
+         */
+        [Fact]
+        public void IsHexDisplay_False_ReDisplaysAsText()
+        {
+            /* Arrange */
+            var viewModel = new ReceiveDisplayViewModel();
+            viewModel.IsHexDisplay = true;
+            byte[] data = new byte[] { 0x41, 0x42, 0x43 };
+            viewModel.AddReceivedData(data);
+
+            /* Act */
+            viewModel.IsHexDisplay = false;
+
+            /* Assert */
+            Assert.Equal("ABC", viewModel.ReceivedText);
+        }
+
+        /*
+         * Test AddReceivedData with null data does nothing
+         */
+        [Fact]
+        public void AddReceivedData_NullData_DoesNothing()
+        {
+            /* Arrange */
+            var viewModel = new ReceiveDisplayViewModel();
+
+            /* Act */
+            viewModel.AddReceivedData(null!);
+
+            /* Assert */
+            Assert.Equal(string.Empty, viewModel.ReceivedText);
+            Assert.Equal(0, viewModel.ReceivedBytesCount);
+        }
+
+        /*
+         * Test AddReceivedData with empty array does nothing
+         */
+        [Fact]
+        public void AddReceivedData_EmptyData_DoesNothing()
+        {
+            /* Arrange */
+            var viewModel = new ReceiveDisplayViewModel();
+
+            /* Act */
+            viewModel.AddReceivedData(Array.Empty<byte>());
+
+            /* Assert */
+            Assert.Equal(string.Empty, viewModel.ReceivedText);
+            Assert.Equal(0, viewModel.ReceivedBytesCount);
         }
     }
 }

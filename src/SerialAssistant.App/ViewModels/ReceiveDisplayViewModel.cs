@@ -1,5 +1,7 @@
 using System.Windows.Input;
 using SerialAssistant.App.Commands;
+using SerialAssistant.Core.Utilities;
+using System.Text;
 
 namespace SerialAssistant.App.ViewModels
 {
@@ -8,12 +10,14 @@ namespace SerialAssistant.App.ViewModels
      */
     public class ReceiveDisplayViewModel : BaseViewModel
     {
+        private List<byte> _receivedData;
         private string _receivedText;
         private bool _isHexDisplay;
         private int _receivedBytesCount;
 
         public ReceiveDisplayViewModel()
         {
+            _receivedData = new List<byte>();
             _receivedText = string.Empty;
             _receivedBytesCount = 0;
 
@@ -23,19 +27,19 @@ namespace SerialAssistant.App.ViewModels
         public string ReceivedText
         {
             get => _receivedText;
-            set
-            {
-                if (SetProperty(ref _receivedText, value))
-                {
-                    ReceivedBytesCount = System.Text.Encoding.UTF8.GetByteCount(value);
-                }
-            }
+            private set => SetProperty(ref _receivedText, value);
         }
 
         public bool IsHexDisplay
         {
             get => _isHexDisplay;
-            set => SetProperty(ref _isHexDisplay, value);
+            set
+            {
+                if (SetProperty(ref _isHexDisplay, value))
+                {
+                    UpdateDisplayText();
+                }
+            }
         }
 
         public int ReceivedBytesCount
@@ -50,15 +54,43 @@ namespace SerialAssistant.App.ViewModels
             private set;
         }
 
-        private void Clear(object? parameter)
+        public void AddReceivedData(byte[] data)
         {
-            ReceivedText = string.Empty;
-            ReceivedBytesCount = 0;
+            if (data == null || data.Length == 0)
+            {
+                return;
+            }
+
+            _receivedData.AddRange(data);
+            ReceivedBytesCount = _receivedData.Count;
+            UpdateDisplayText();
         }
 
-        public void AppendText(string text)
+        private void UpdateDisplayText()
         {
-            ReceivedText += text;
+            if (_receivedData.Count == 0)
+            {
+                ReceivedText = string.Empty;
+                return;
+            }
+
+            byte[] dataArray = _receivedData.ToArray();
+
+            if (IsHexDisplay)
+            {
+                ReceivedText = HexConverter.ToHexString(dataArray);
+            }
+            else
+            {
+                ReceivedText = Encoding.UTF8.GetString(dataArray);
+            }
+        }
+
+        private void Clear(object? parameter)
+        {
+            _receivedData.Clear();
+            ReceivedText = string.Empty;
+            ReceivedBytesCount = 0;
         }
     }
 }

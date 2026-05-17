@@ -63,6 +63,7 @@ namespace SerialAssistant.Infrastructure.Serial
                 if (_serialPort != null)
                 {
                     _serialPort.Close();
+                    _serialPort.DataReceived -= OnSerialPortDataReceived;
                     _serialPort.Dispose();
                     _serialPort = null;
                 }
@@ -78,6 +79,7 @@ namespace SerialAssistant.Infrastructure.Serial
                     WriteTimeout = settings.WriteTimeout
                 };
 
+                _serialPort.DataReceived += OnSerialPortDataReceived;
                 _serialPort.Open();
                 ConnectionState = SerialConnectionState.Connected;
 
@@ -118,6 +120,7 @@ namespace SerialAssistant.Infrastructure.Serial
 
                 if (_serialPort != null)
                 {
+                    _serialPort.DataReceived -= OnSerialPortDataReceived;
                     _serialPort.Close();
                     _serialPort.Dispose();
                     _serialPort = null;
@@ -140,7 +143,47 @@ namespace SerialAssistant.Infrastructure.Serial
                 return OperationResult.Failure("串口服务已释放。");
             }
 
-            return OperationResult.Failure("当前阶段尚未实现数据发送功能。");
+            try
+            {
+                if (data == null)
+                {
+                    return OperationResult.Failure("发送数据不能为空。");
+                }
+
+                if (data.Length == 0)
+                {
+                    return OperationResult.Failure("发送数据长度不能为 0。");
+                }
+
+                if (ConnectionState != SerialConnectionState.Connected)
+                {
+                    return OperationResult.Failure("串口未打开，无法发送。");
+                }
+
+                if (_serialPort == null || !_serialPort.IsOpen)
+                {
+                    return OperationResult.Failure("串口未打开，无法发送。");
+                }
+
+                _serialPort.Write(data, 0, data.Length);
+                return OperationResult.Success();
+            }
+            catch (InvalidOperationException ex)
+            {
+                return OperationResult.Failure($"发送失败：{ex.Message}");
+            }
+            catch (TimeoutException ex)
+            {
+                return OperationResult.Failure($"发送超时：{ex.Message}");
+            }
+            catch (IOException ex)
+            {
+                return OperationResult.Failure($"发送 IO 错误：{ex.Message}");
+            }
+            catch (Exception ex)
+            {
+                return OperationResult.Failure($"发送时发生错误：{ex.Message}");
+            }
         }
 
         public event EventHandler<SerialReceiveData>? DataReceived;
@@ -174,6 +217,41 @@ namespace SerialAssistant.Infrastructure.Serial
             };
         }
 
+        private void OnSerialPortDataReceived(object sender, SerialDataReceivedEventArgs e)
+        {
+            if (_serialPort == null || !_serialPort.IsOpen || _disposed)
+            {
+                return;
+            }
+
+            try
+            {
+                int bytesToRead = _serialPort.BytesToRead;
+                if (bytesToRead <= 0)
+                {
+                    return;
+                }
+
+                byte[] buffer = new byte[bytesToRead];
+                int bytesRead = _serialPort.Read(buffer, 0, bytesToRead);
+
+                if (bytesRead <= 0)
+                {
+                    return;
+                }
+
+                byte[] data = new byte[bytesRead];
+                Array.Copy(buffer, 0, data, 0, bytesRead);
+
+                SerialReceiveData receiveData = SerialReceiveData.Create(data);
+                DataReceived?.Invoke(this, receiveData);
+            }
+            catch (Exception ex)
+            {
+                ErrorOccurred?.Invoke(this, ex);
+            }
+        }
+
         public void Dispose()
         {
             if (_disposed)
@@ -183,6 +261,7 @@ namespace SerialAssistant.Infrastructure.Serial
 
             if (_serialPort != null)
             {
+                _serialPort.DataReceived -= OnSerialPortDataReceived;
                 if (_serialPort.IsOpen)
                 {
                     _serialPort.Close();

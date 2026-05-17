@@ -134,20 +134,56 @@ namespace SerialAssistant.Tests.Infrastructure
         }
 
         /*
-         * Test Send returns Failure (not implemented)
+         * Test Send returns Failure when not open
          */
         [Fact]
-        public void Send_ReturnsFailure()
+        public void Send_WhenNotOpen_ReturnsFailure()
+        {
+            /* Arrange */
+            var service = new SerialPortService();
+            var data = new byte[] { 0x41, 0x42, 0x43 };
+
+            /* Act */
+            var result = service.Send(data);
+
+            /* Assert */
+            Assert.False(result.IsSuccess);
+            Assert.Contains("串口未打开", result.ErrorMessage);
+        }
+
+        /*
+         * Test Send with null data returns Failure
+         */
+        [Fact]
+        public void Send_NullData_ReturnsFailure()
         {
             /* Arrange */
             var service = new SerialPortService();
 
             /* Act */
-            var result = service.Send(new byte[] { 0x41, 0x42 });
+            var result = service.Send(null!);
 
             /* Assert */
             Assert.False(result.IsSuccess);
-            Assert.Contains("尚未实现", result.ErrorMessage);
+            Assert.Contains("不能为空", result.ErrorMessage);
+        }
+
+        /*
+         * Test Send with empty data returns Failure
+         */
+        [Fact]
+        public void Send_EmptyData_ReturnsFailure()
+        {
+            /* Arrange */
+            var service = new SerialPortService();
+            var data = Array.Empty<byte>();
+
+            /* Act */
+            var result = service.Send(data);
+
+            /* Assert */
+            Assert.False(result.IsSuccess);
+            Assert.Contains("长度不能为 0", result.ErrorMessage);
         }
 
         /*

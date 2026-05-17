@@ -1,5 +1,6 @@
 using System.Windows;
 using SerialAssistant.App.ViewModels;
+using SerialAssistant.App.UI;
 using SerialAssistant.Core.Services;
 using SerialAssistant.Infrastructure.Serial;
 
@@ -16,7 +17,8 @@ namespace SerialAssistant.App
 
             ISerialPortScanner scanner = new SerialPortScanner();
             ISerialPortService serialPortService = new SerialPortService();
-            MainWindowViewModel viewModel = new MainWindowViewModel(scanner, serialPortService);
+            IUiThreadInvoker uiThreadInvoker = new DispatcherUiThreadInvoker(Dispatcher);
+            MainWindowViewModel viewModel = new MainWindowViewModel(scanner, serialPortService, uiThreadInvoker);
 
             MainWindow mainWindow = new MainWindow();
             mainWindow.DataContext = viewModel;

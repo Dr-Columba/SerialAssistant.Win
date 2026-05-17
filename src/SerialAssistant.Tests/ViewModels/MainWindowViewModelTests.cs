@@ -3,6 +3,8 @@ using SerialAssistant.App.ViewModels;
 using SerialAssistant.Core.Enums;
 using SerialAssistant.Core.Models;
 using SerialAssistant.Tests.Infrastructure;
+using SerialAssistant.Tests.UI;
+using System.Text;
 
 namespace SerialAssistant.Tests.ViewModels
 {
@@ -249,7 +251,7 @@ namespace SerialAssistant.Tests.ViewModels
             {
                 SerialPortInfo.Create("COM1")
             });
-            var fakeService = new FakeSerialPortService(true, false, "Open failed");
+            var fakeService = new FakeSerialPortService(true, false, false, "Open failed");
             var viewModel = new MainWindowViewModel(fakeScanner, fakeService);
             viewModel.SerialSettings.SelectedPortName = "COM1";
 
@@ -271,7 +273,7 @@ namespace SerialAssistant.Tests.ViewModels
             {
                 SerialPortInfo.Create("COM1")
             });
-            var fakeService = new FakeSerialPortService(true, false, "Open failed");
+            var fakeService = new FakeSerialPortService(true, false, false, "Open failed");
             var viewModel = new MainWindowViewModel(fakeScanner, fakeService);
             viewModel.SerialSettings.SelectedPortName = "COM1";
 
@@ -293,7 +295,7 @@ namespace SerialAssistant.Tests.ViewModels
             {
                 SerialPortInfo.Create("COM1")
             });
-            var fakeService = new FakeSerialPortService(true, false, "Open failed");
+            var fakeService = new FakeSerialPortService(true, false, false, "Open failed");
             var viewModel = new MainWindowViewModel(fakeScanner, fakeService);
             viewModel.SerialSettings.SelectedPortName = "COM1";
 
@@ -361,7 +363,7 @@ namespace SerialAssistant.Tests.ViewModels
             {
                 SerialPortInfo.Create("COM1")
             });
-            var fakeService = new FakeSerialPortService(false, true, "Close failed");
+            var fakeService = new FakeSerialPortService(false, true, false, null, "Close failed");
             var viewModel = new MainWindowViewModel(fakeScanner, fakeService);
             viewModel.SerialSettings.SelectedPortName = "COM1";
             viewModel.ToggleConnectionCommand.Execute(null);
@@ -397,8 +399,12 @@ namespace SerialAssistant.Tests.ViewModels
         public void ClearReceiveCommand_ClearsReceiveArea()
         {
             /* Arrange */
-            var viewModel = new MainWindowViewModel();
-            viewModel.ReceiveDisplay.ReceivedText = "some data";
+            var fakeScanner = new FakeSerialPortScanner();
+            var fakeService = new FakeSerialPortService();
+            var fakeUiInvoker = new FakeUiThreadInvoker();
+            var viewModel = new MainWindowViewModel(fakeScanner, fakeService, fakeUiInvoker);
+            byte[] data = System.Text.Encoding.UTF8.GetBytes("some data");
+            viewModel.ReceiveDisplay.AddReceivedData(data);
 
             /* Act */
             viewModel.ClearReceiveCommand.Execute(null);
@@ -414,8 +420,12 @@ namespace SerialAssistant.Tests.ViewModels
         public void ClearReceiveCommand_ClearsReceiveCount()
         {
             /* Arrange */
-            var viewModel = new MainWindowViewModel();
-            viewModel.ReceiveDisplay.ReceivedText = "some data";
+            var fakeScanner = new FakeSerialPortScanner();
+            var fakeService = new FakeSerialPortService();
+            var fakeUiInvoker = new FakeUiThreadInvoker();
+            var viewModel = new MainWindowViewModel(fakeScanner, fakeService, fakeUiInvoker);
+            byte[] data = System.Text.Encoding.UTF8.GetBytes("some data");
+            viewModel.ReceiveDisplay.AddReceivedData(data);
 
             /* Act */
             viewModel.ClearReceiveCommand.Execute(null);
@@ -534,17 +544,40 @@ namespace SerialAssistant.Tests.ViewModels
         }
 
         /*
-         * Test SendCommand can execute when SendText is not empty
+         * Test SendCommand can execute when SendText is not empty and connected
          */
         [Fact]
-        public void SendCommand_CanExecute_WhenSendTextNotEmpty()
+        public void SendCommand_CanExecute_WhenSendTextNotEmpty_AndConnected()
         {
             /* Arrange */
-            var viewModel = new MainWindowViewModel();
+            var fakeScanner = new FakeSerialPortScanner(new List<SerialPortInfo> { SerialPortInfo.Create("COM1") });
+            var fakeService = new FakeSerialPortService();
+            var viewModel = new MainWindowViewModel(fakeScanner, fakeService);
+
+            /* Connect first */
+            viewModel.SerialSettings.SelectedPortName = "COM1";
+            viewModel.ToggleConnectionCommand.Execute(null);
+
             viewModel.SendText = "test data";
 
             /* Act & Assert */
             Assert.True(viewModel.SendCommand.CanExecute(null));
+        }
+
+        /*
+         * Test SendCommand cannot execute when not connected, even if SendText is not empty
+         */
+        [Fact]
+        public void SendCommand_CannotExecute_WhenNotConnected_EvenIfSendTextNotEmpty()
+        {
+            /* Arrange */
+            var fakeScanner = new FakeSerialPortScanner();
+            var fakeService = new FakeSerialPortService();
+            var viewModel = new MainWindowViewModel(fakeScanner, fakeService);
+            viewModel.SendText = "test data";
+
+            /* Act & Assert */
+            Assert.False(viewModel.SendCommand.CanExecute(null));
         }
 
         /*
@@ -594,6 +627,446 @@ namespace SerialAssistant.Tests.ViewModels
             /* Assert */
             Assert.Equal(SerialConnectionState.Disconnected, viewModel.ConnectionState);
             Assert.Contains("参数无效", viewModel.StatusMessage);
+        }
+
+        /*
+         * Test 未连接时 SendCommand 不发送
+         */
+        [Fact]
+        public void SendCommand_WhenNotConnected_DoesNotSend()
+        {
+            /* Arrange */
+            var fakeScanner = new FakeSerialPortScanner();
+            var fakeService = new FakeSerialPortService();
+            var viewModel = new MainWindowViewModel(fakeScanner, fakeService);
+            viewModel.SendText = "Hello";
+
+            /* Act */
+            viewModel.SendCommand.Execute(null);
+
+            /* Assert */
+            Assert.Empty(fakeService.SentData);
+            Assert.Contains("串口未打开", viewModel.StatusMessage);
+        }
+
+        /*
+         * Test 文本模式发送正确数据
+         */
+        [Fact]
+        public void SendCommand_TextMode_SendsCorrectData()
+        {
+            /* Arrange */
+            var fakeScanner = new FakeSerialPortScanner();
+            var fakeService = new FakeSerialPortService();
+            var viewModel = new MainWindowViewModel(fakeScanner, fakeService);
+
+            /* Open port first */
+            viewModel.SerialSettings.SelectedPortName = "COM1";
+            viewModel.ToggleConnectionCommand.Execute(null);
+
+            viewModel.SelectedSendMode = SendMode.Text;
+            viewModel.SendText = "ABC";
+
+            /* Act */
+            viewModel.SendCommand.Execute(null);
+
+            /* Assert */
+            Assert.Single(fakeService.SentData);
+            Assert.Equal(Encoding.UTF8.GetBytes("ABC"), fakeService.SentData[0]);
+            Assert.Equal(3, viewModel.SentBytesCount);
+            Assert.Contains("已发送", viewModel.StatusMessage);
+        }
+
+        /*
+         * Test HEX 模式发送正确数据（带空格）
+         */
+        [Fact]
+        public void SendCommand_HexMode_WithSpaces_SendsCorrectData()
+        {
+            /* Arrange */
+            var fakeScanner = new FakeSerialPortScanner();
+            var fakeService = new FakeSerialPortService();
+            var viewModel = new MainWindowViewModel(fakeScanner, fakeService);
+
+            /* Open port first */
+            viewModel.SerialSettings.SelectedPortName = "COM1";
+            viewModel.ToggleConnectionCommand.Execute(null);
+
+            viewModel.SelectedSendMode = SendMode.Hex;
+            viewModel.SendText = "41 42 43";
+
+            /* Act */
+            viewModel.SendCommand.Execute(null);
+
+            /* Assert */
+            Assert.Single(fakeService.SentData);
+            Assert.Equal(new byte[] { 0x41, 0x42, 0x43 }, fakeService.SentData[0]);
+            Assert.Equal(3, viewModel.SentBytesCount);
+            Assert.Contains("已发送", viewModel.StatusMessage);
+        }
+
+        /*
+         * Test HEX 模式发送正确数据（不带空格）
+         */
+        [Fact]
+        public void SendCommand_HexMode_WithoutSpaces_SendsCorrectData()
+        {
+            /* Arrange */
+            var fakeScanner = new FakeSerialPortScanner();
+            var fakeService = new FakeSerialPortService();
+            var viewModel = new MainWindowViewModel(fakeScanner, fakeService);
+
+            /* Open port first */
+            viewModel.SerialSettings.SelectedPortName = "COM1";
+            viewModel.ToggleConnectionCommand.Execute(null);
+
+            viewModel.SelectedSendMode = SendMode.Hex;
+            viewModel.SendText = "414243";
+
+            /* Act */
+            viewModel.SendCommand.Execute(null);
+
+            /* Assert */
+            Assert.Single(fakeService.SentData);
+            Assert.Equal(new byte[] { 0x41, 0x42, 0x43 }, fakeService.SentData[0]);
+            Assert.Equal(3, viewModel.SentBytesCount);
+            Assert.Contains("已发送", viewModel.StatusMessage);
+        }
+
+        /*
+         * Test 非法 HEX 不发送
+         */
+        [Fact]
+        public void SendCommand_InvalidHex_DoesNotSend()
+        {
+            /* Arrange */
+            var fakeScanner = new FakeSerialPortScanner();
+            var fakeService = new FakeSerialPortService();
+            var viewModel = new MainWindowViewModel(fakeScanner, fakeService);
+
+            /* Open port first */
+            viewModel.SerialSettings.SelectedPortName = "COM1";
+            viewModel.ToggleConnectionCommand.Execute(null);
+
+            viewModel.SelectedSendMode = SendMode.Hex;
+            viewModel.SendText = "41 4G";
+
+            /* Act */
+            viewModel.SendCommand.Execute(null);
+
+            /* Assert */
+            Assert.Empty(fakeService.SentData);
+            Assert.Contains("HEX 格式错误", viewModel.StatusMessage);
+        }
+
+        /*
+         * Test 奇数长度 HEX 不发送
+         */
+        [Fact]
+        public void SendCommand_OddLengthHex_DoesNotSend()
+        {
+            /* Arrange */
+            var fakeScanner = new FakeSerialPortScanner();
+            var fakeService = new FakeSerialPortService();
+            var viewModel = new MainWindowViewModel(fakeScanner, fakeService);
+
+            /* Open port first */
+            viewModel.SerialSettings.SelectedPortName = "COM1";
+            viewModel.ToggleConnectionCommand.Execute(null);
+
+            viewModel.SelectedSendMode = SendMode.Hex;
+            viewModel.SendText = "414";
+
+            /* Act */
+            viewModel.SendCommand.Execute(null);
+
+            /* Assert */
+            Assert.Empty(fakeService.SentData);
+            Assert.Contains("HEX 格式错误", viewModel.StatusMessage);
+        }
+
+        /*
+         * Test 发送失败时状态更新正确
+         */
+        [Fact]
+        public void SendCommand_Failure_UpdatesStatusMessage()
+        {
+            /* Arrange */
+            var fakeScanner = new FakeSerialPortScanner();
+            var fakeService = new FakeSerialPortService(shouldFailSend: true, sendErrorMessage: "Fake send failure");
+            var viewModel = new MainWindowViewModel(fakeScanner, fakeService);
+
+            /* Open port first */
+            viewModel.SerialSettings.SelectedPortName = "COM1";
+            viewModel.ToggleConnectionCommand.Execute(null);
+
+            viewModel.SelectedSendMode = SendMode.Text;
+            viewModel.SendText = "Hello";
+
+            /* Act */
+            viewModel.SendCommand.Execute(null);
+
+            /* Assert */
+            Assert.Empty(fakeService.SentData);
+            Assert.Contains("发送失败", viewModel.StatusMessage);
+            Assert.Contains("Fake send failure", viewModel.StatusMessage);
+        }
+
+        /*
+         * Test 空内容不发送
+         */
+        [Fact]
+        public void SendCommand_EmptyText_DoesNotSend()
+        {
+            /* Arrange */
+            var fakeScanner = new FakeSerialPortScanner();
+            var fakeService = new FakeSerialPortService();
+            var viewModel = new MainWindowViewModel(fakeScanner, fakeService);
+
+            /* Open port first */
+            viewModel.SerialSettings.SelectedPortName = "COM1";
+            viewModel.ToggleConnectionCommand.Execute(null);
+
+            viewModel.SendText = string.Empty;
+
+            /* Act */
+            viewModel.SendCommand.Execute(null);
+
+            /* Assert */
+            Assert.Empty(fakeService.SentData);
+            Assert.Contains("发送内容不能为空", viewModel.StatusMessage);
+        }
+
+        /*
+         * Test 接收事件触发后 ReceivedBytesCount 增加
+         */
+        [Fact]
+        public void DataReceived_UpdatesReceivedBytesCount()
+        {
+            /* Arrange */
+            var fakeScanner = new FakeSerialPortScanner();
+            var fakeService = new FakeSerialPortService();
+            var fakeUiInvoker = new FakeUiThreadInvoker();
+            var viewModel = new MainWindowViewModel(fakeScanner, fakeService, fakeUiInvoker);
+
+            /* Open port first */
+            viewModel.SerialSettings.SelectedPortName = "COM1";
+            viewModel.ToggleConnectionCommand.Execute(null);
+
+            byte[] data = new byte[] { 0x41, 0x42, 0x43 };
+
+            /* Act */
+            fakeService.SimulateDataReceived(data);
+
+            /* Assert */
+            Assert.Equal(3, viewModel.ReceiveDisplay.ReceivedBytesCount);
+        }
+
+        /*
+         * Test 接收事件触发后 ReceivedText 更新
+         */
+        [Fact]
+        public void DataReceived_UpdatesReceivedText()
+        {
+            /* Arrange */
+            var fakeScanner = new FakeSerialPortScanner();
+            var fakeService = new FakeSerialPortService();
+            var fakeUiInvoker = new FakeUiThreadInvoker();
+            var viewModel = new MainWindowViewModel(fakeScanner, fakeService, fakeUiInvoker);
+
+            /* Open port first */
+            viewModel.SerialSettings.SelectedPortName = "COM1";
+            viewModel.ToggleConnectionCommand.Execute(null);
+
+            viewModel.IsHexDisplay = false;
+            byte[] data = System.Text.Encoding.UTF8.GetBytes("ABC");
+
+            /* Act */
+            fakeService.SimulateDataReceived(data);
+
+            /* Assert */
+            Assert.Equal("ABC", viewModel.ReceiveDisplay.ReceivedText);
+        }
+
+        /*
+         * Test 文本模式接收 ABC 显示 ABC
+         */
+        [Fact]
+        public void DataReceived_TextMode_DisplaysABC()
+        {
+            /* Arrange */
+            var fakeScanner = new FakeSerialPortScanner();
+            var fakeService = new FakeSerialPortService();
+            var fakeUiInvoker = new FakeUiThreadInvoker();
+            var viewModel = new MainWindowViewModel(fakeScanner, fakeService, fakeUiInvoker);
+
+            /* Open port first */
+            viewModel.SerialSettings.SelectedPortName = "COM1";
+            viewModel.ToggleConnectionCommand.Execute(null);
+
+            viewModel.IsHexDisplay = false;
+            byte[] data = System.Text.Encoding.UTF8.GetBytes("ABC");
+
+            /* Act */
+            fakeService.SimulateDataReceived(data);
+
+            /* Assert */
+            Assert.Equal("ABC", viewModel.ReceiveDisplay.ReceivedText);
+        }
+
+        /*
+         * Test HEX 模式接收 ABC 显示 41 42 43
+         */
+        [Fact]
+        public void DataReceived_HexMode_Displays414243()
+        {
+            /* Arrange */
+            var fakeScanner = new FakeSerialPortScanner();
+            var fakeService = new FakeSerialPortService();
+            var fakeUiInvoker = new FakeUiThreadInvoker();
+            var viewModel = new MainWindowViewModel(fakeScanner, fakeService, fakeUiInvoker);
+
+            /* Open port first */
+            viewModel.SerialSettings.SelectedPortName = "COM1";
+            viewModel.ToggleConnectionCommand.Execute(null);
+
+            viewModel.IsHexDisplay = true;
+            byte[] data = new byte[] { 0x41, 0x42, 0x43 };
+
+            /* Act */
+            fakeService.SimulateDataReceived(data);
+
+            /* Assert */
+            Assert.Contains("41 42 43", viewModel.ReceiveDisplay.ReceivedText);
+        }
+
+        /*
+         * Test 多次接收后计数累计
+         */
+        [Fact]
+        public void DataReceived_Multiple_CountAccumulates()
+        {
+            /* Arrange */
+            var fakeScanner = new FakeSerialPortScanner();
+            var fakeService = new FakeSerialPortService();
+            var fakeUiInvoker = new FakeUiThreadInvoker();
+            var viewModel = new MainWindowViewModel(fakeScanner, fakeService, fakeUiInvoker);
+
+            /* Open port first */
+            viewModel.SerialSettings.SelectedPortName = "COM1";
+            viewModel.ToggleConnectionCommand.Execute(null);
+
+            byte[] data1 = new byte[] { 0x41, 0x42 };
+            byte[] data2 = new byte[] { 0x43, 0x44 };
+
+            /* Act */
+            fakeService.SimulateDataReceived(data1);
+            fakeService.SimulateDataReceived(data2);
+
+            /* Assert */
+            Assert.Equal(4, viewModel.ReceiveDisplay.ReceivedBytesCount);
+        }
+
+        /*
+         * Test ClearReceiveCommand 清空接收文本
+         */
+        [Fact]
+        public void ClearReceiveCommand_ClearsReceivedText()
+        {
+            /* Arrange */
+            var fakeScanner = new FakeSerialPortScanner();
+            var fakeService = new FakeSerialPortService();
+            var fakeUiInvoker = new FakeUiThreadInvoker();
+            var viewModel = new MainWindowViewModel(fakeScanner, fakeService, fakeUiInvoker);
+
+            /* Open port and receive data */
+            viewModel.SerialSettings.SelectedPortName = "COM1";
+            viewModel.ToggleConnectionCommand.Execute(null);
+            byte[] data = System.Text.Encoding.UTF8.GetBytes("ABC");
+            fakeService.SimulateDataReceived(data);
+
+            /* Act */
+            viewModel.ClearReceiveCommand.Execute(null);
+
+            /* Assert */
+            Assert.Equal(string.Empty, viewModel.ReceiveDisplay.ReceivedText);
+            Assert.Contains("接收区已清空", viewModel.StatusMessage);
+        }
+
+        /*
+         * Test ClearReceiveCommand 清空接收计数
+         */
+        [Fact]
+        public void ClearReceiveCommand_ClearsReceivedCount()
+        {
+            /* Arrange */
+            var fakeScanner = new FakeSerialPortScanner();
+            var fakeService = new FakeSerialPortService();
+            var fakeUiInvoker = new FakeUiThreadInvoker();
+            var viewModel = new MainWindowViewModel(fakeScanner, fakeService, fakeUiInvoker);
+
+            /* Open port and receive data */
+            viewModel.SerialSettings.SelectedPortName = "COM1";
+            viewModel.ToggleConnectionCommand.Execute(null);
+            byte[] data = System.Text.Encoding.UTF8.GetBytes("ABC");
+            fakeService.SimulateDataReceived(data);
+
+            /* Act */
+            viewModel.ClearReceiveCommand.Execute(null);
+
+            /* Assert */
+            Assert.Equal(0, viewModel.ReceiveDisplay.ReceivedBytesCount);
+        }
+
+        /*
+         * Test 接收后 StatusMessage 更新
+         */
+        [Fact]
+        public void DataReceived_UpdatesStatusMessage()
+        {
+            /* Arrange */
+            var fakeScanner = new FakeSerialPortScanner();
+            var fakeService = new FakeSerialPortService();
+            var fakeUiInvoker = new FakeUiThreadInvoker();
+            var viewModel = new MainWindowViewModel(fakeScanner, fakeService, fakeUiInvoker);
+
+            /* Open port first */
+            viewModel.SerialSettings.SelectedPortName = "COM1";
+            viewModel.ToggleConnectionCommand.Execute(null);
+
+            byte[] data = new byte[] { 0x41, 0x42, 0x43 };
+
+            /* Act */
+            fakeService.SimulateDataReceived(data);
+
+            /* Assert */
+            Assert.Contains("已接收", viewModel.StatusMessage);
+        }
+
+        /*
+         * Test 错误发生后 StatusMessage 更新
+         */
+        [Fact]
+        public void ErrorOccurred_UpdatesStatusMessage()
+        {
+            /* Arrange */
+            var fakeScanner = new FakeSerialPortScanner();
+            var fakeService = new FakeSerialPortService();
+            var fakeUiInvoker = new FakeUiThreadInvoker();
+            var viewModel = new MainWindowViewModel(fakeScanner, fakeService, fakeUiInvoker);
+
+            /* Open port first */
+            viewModel.SerialSettings.SelectedPortName = "COM1";
+            viewModel.ToggleConnectionCommand.Execute(null);
+
+            Exception ex = new Exception("Test receive error");
+
+            /* Act */
+            fakeService.SimulateErrorOccurred(ex);
+
+            /* Assert */
+            Assert.Contains("接收串口数据失败", viewModel.StatusMessage);
+            Assert.Contains("Test receive error", viewModel.StatusMessage);
         }
     }
 }

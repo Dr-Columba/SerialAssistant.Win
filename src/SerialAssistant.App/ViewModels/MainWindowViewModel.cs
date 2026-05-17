@@ -3,6 +3,8 @@ using System.Windows.Input;
 using SerialAssistant.App.Commands;
 using SerialAssistant.Core.Enums;
 using SerialAssistant.Core.Services;
+using SerialAssistant.Core.Utilities;
+using System.Text;
 
 namespace SerialAssistant.App.ViewModels
 {
@@ -13,6 +15,7 @@ namespace SerialAssistant.App.ViewModels
     {
         private readonly ISerialPortScanner? _scanner;
         private readonly ISerialPortService? _serialPortService;
+        private readonly IUiThreadInvoker? _uiThreadInvoker;
         private SerialConnectionState _connectionState;
         private string _sendText;
         private SendMode _selectedSendMode;
@@ -22,14 +25,20 @@ namespace SerialAssistant.App.ViewModels
         private string _connectionButtonText;
 
         public MainWindowViewModel()
-            : this(null, null)
+            : this(null, null, null)
         {
         }
 
         public MainWindowViewModel(ISerialPortScanner? scanner, ISerialPortService? serialPortService)
+            : this(scanner, serialPortService, null)
+        {
+        }
+
+        public MainWindowViewModel(ISerialPortScanner? scanner, ISerialPortService? serialPortService, IUiThreadInvoker? uiThreadInvoker)
         {
             _scanner = scanner;
             _serialPortService = serialPortService;
+            _uiThreadInvoker = uiThreadInvoker;
             SerialSettings = new SerialSettingsViewModel();
             ReceiveDisplay = new ReceiveDisplayViewModel();
             SendModes = new ObservableCollection<SendMode>();
@@ -48,6 +57,8 @@ namespace SerialAssistant.App.ViewModels
             if (_serialPortService != null)
             {
                 _serialPortService.ConnectionStateChanged += OnConnectionStateChanged;
+                _serialPortService.DataReceived += OnDataReceived;
+                _serialPortService.ErrorOccurred += OnErrorOccurred;
                 _connectionState = _serialPortService.ConnectionState;
                 UpdateConnectionButtonText(_connectionState);
             }
@@ -77,7 +88,13 @@ namespace SerialAssistant.App.ViewModels
         public string SendText
         {
             get => _sendText;
-            set => SetProperty(ref _sendText, value);
+            set
+            {
+                if (SetProperty(ref _sendText, value))
+                {
+                    (SendCommand as RelayCommand)?.RaiseCanExecuteChanged();
+                }
+            }
         }
 
         public ObservableCollection<SendMode> SendModes
@@ -89,13 +106,25 @@ namespace SerialAssistant.App.ViewModels
         public SendMode SelectedSendMode
         {
             get => _selectedSendMode;
-            set => SetProperty(ref _selectedSendMode, value);
+            set
+            {
+                if (SetProperty(ref _selectedSendMode, value))
+                {
+                    (SendCommand as RelayCommand)?.RaiseCanExecuteChanged();
+                }
+            }
         }
 
         public SerialConnectionState ConnectionState
         {
             get => _connectionState;
-            private set => SetProperty(ref _connectionState, value);
+            private set
+            {
+                if (SetProperty(ref _connectionState, value))
+                {
+                    (SendCommand as RelayCommand)?.RaiseCanExecuteChanged();
+                }
+            }
         }
 
         public string StatusMessage
@@ -271,25 +300,120 @@ namespace SerialAssistant.App.ViewModels
 
         private bool CanSend(object? parameter)
         {
-            return !string.IsNullOrEmpty(SendText);
+            if (_serialPortService == null)
+            {
+                return false;
+            }
+
+            if (ConnectionState != SerialConnectionState.Connected)
+            {
+                return false;
+            }
+
+            if (string.IsNullOrWhiteSpace(SendText))
+            {
+                return false;
+            }
+
+            return true;
         }
 
         private void Send(object? parameter)
         {
-            if (ConnectionState != SerialConnectionState.Connected)
+            if (_serialPortService == null)
             {
-                StatusMessage = "当前阶段尚未接入串口发送功能。";
+                StatusMessage = "当前阶段尚未接入串口服务。";
                 return;
             }
 
-            SentBytesCount += System.Text.Encoding.UTF8.GetByteCount(SendText);
-            StatusMessage = "数据已发送（占位）。";
+            if (ConnectionState != SerialConnectionState.Connected)
+            {
+                StatusMessage = "串口未打开，无法发送。";
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(SendText))
+            {
+                StatusMessage = "发送内容不能为空。";
+                return;
+            }
+
+            byte[] data;
+
+            if (SelectedSendMode == SendMode.Text)
+            {
+                data = Encoding.UTF8.GetBytes(SendText);
+            }
+            else
+            {
+                var hexResult = HexConverter.FromHexString(SendText);
+                if (!hexResult.IsSuccess)
+                {
+                    StatusMessage = $"HEX 格式错误：{hexResult.ErrorMessage}";
+                    return;
+                }
+
+                data = hexResult.Value!;
+
+                if (data.Length == 0)
+                {
+                    StatusMessage = "发送内容不能为空。";
+                    return;
+                }
+            }
+
+            var sendResult = _serialPortService.Send(data);
+
+            if (sendResult.IsSuccess)
+            {
+                SentBytesCount += data.Length;
+                StatusMessage = $"已发送 {data.Length} 字节。";
+            }
+            else
+            {
+                StatusMessage = $"发送失败：{sendResult.ErrorMessage}";
+            }
         }
 
         private void ClearReceive(object? parameter)
         {
             ReceiveDisplay.ClearCommand.Execute(null);
             StatusMessage = "接收区已清空。";
+        }
+
+        private void OnDataReceived(object? sender, Core.Models.SerialReceiveData e)
+        {
+            Action updateAction = () =>
+            {
+                ReceiveDisplay.AddReceivedData(e.Data);
+                StatusMessage = $"已接收 {e.Data.Length} 字节。";
+            };
+
+            if (_uiThreadInvoker != null)
+            {
+                _uiThreadInvoker.Invoke(updateAction);
+            }
+            else
+            {
+                updateAction();
+            }
+        }
+
+        private void OnErrorOccurred(object? sender, Exception e)
+        {
+            Action updateAction = () =>
+            {
+                StatusMessage = $"接收串口数据失败：{e.Message}";
+            };
+
+            if (_uiThreadInvoker != null)
+            {
+                _uiThreadInvoker.Invoke(updateAction);
+            }
+            else
+            {
+                updateAction();
+            }
         }
     }
 }
