@@ -879,6 +879,8 @@ namespace SerialAssistant.Tests.ViewModels
             viewModel.ToggleConnectionCommand.Execute(null);
 
             viewModel.IsHexDisplay = false;
+            viewModel.ReceiveDisplay.ShowTimestamp = false;
+            viewModel.ReceiveDisplay.ShowDirection = false;
             byte[] data = System.Text.Encoding.UTF8.GetBytes("ABC");
 
             /* Act */
@@ -905,6 +907,8 @@ namespace SerialAssistant.Tests.ViewModels
             viewModel.ToggleConnectionCommand.Execute(null);
 
             viewModel.IsHexDisplay = false;
+            viewModel.ReceiveDisplay.ShowTimestamp = false;
+            viewModel.ReceiveDisplay.ShowDirection = false;
             byte[] data = System.Text.Encoding.UTF8.GetBytes("ABC");
 
             /* Act */
