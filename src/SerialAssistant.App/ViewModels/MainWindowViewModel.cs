@@ -54,6 +54,7 @@ namespace SerialAssistant.App.ViewModels
             ReceiveDisplay = new ReceiveDisplayViewModel();
             SendModes = new ObservableCollection<SendMode>();
             SendLineEndings = new ObservableCollection<SendLineEnding>();
+            ReceiveBufferSizeOptions = new ObservableCollection<int>();
 
             _sendText = string.Empty;
             _statusMessage = "就绪。请点击刷新按钮获取可用串口。";
@@ -71,6 +72,11 @@ namespace SerialAssistant.App.ViewModels
             {
                 SendLineEndings.Add(ending);
             }
+
+            ReceiveBufferSizeOptions.Add(65536);
+            ReceiveBufferSizeOptions.Add(262144);
+            ReceiveBufferSizeOptions.Add(1048576);
+            ReceiveBufferSizeOptions.Add(4194304);
 
             if (_serialPortService != null)
             {
@@ -136,6 +142,12 @@ namespace SerialAssistant.App.ViewModels
         }
 
         public ObservableCollection<SendLineEnding> SendLineEndings
+        {
+            get;
+            private set;
+        }
+
+        public ObservableCollection<int> ReceiveBufferSizeOptions
         {
             get;
             private set;
@@ -514,6 +526,7 @@ namespace SerialAssistant.App.ViewModels
             ReceiveDisplay.IsHexDisplay = (settings.DisplayMode == DisplayMode.Hex);
             ReceiveDisplay.ShowTimestamp = settings.ShowTimestamp;
             ReceiveDisplay.ShowDirection = settings.ShowDirection;
+            ReceiveDisplay.MaxDisplayBytes = settings.MaxDisplayBytes;
             _lastLoadedSettings = settings;
         }
 
@@ -535,7 +548,8 @@ namespace SerialAssistant.App.ViewModels
                 DisplayMode = ReceiveDisplay.IsHexDisplay ? DisplayMode.Hex : DisplayMode.Text,
                 SendLineEnding = SelectedSendLineEnding,
                 ShowTimestamp = ReceiveDisplay.ShowTimestamp,
-                ShowDirection = ReceiveDisplay.ShowDirection
+                ShowDirection = ReceiveDisplay.ShowDirection,
+                MaxDisplayBytes = ReceiveDisplay.MaxDisplayBytes
             };
 
             return _appSettingsService.Save(settings);

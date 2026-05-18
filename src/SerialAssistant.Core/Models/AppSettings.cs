@@ -67,6 +67,12 @@ namespace SerialAssistant.Core.Models
             set;
         } = true;
 
+        public int MaxDisplayBytes
+        {
+            get;
+            set;
+        } = 262144;
+
         public static AppSettings CreateDefault()
         {
             return new AppSettings
@@ -80,7 +86,8 @@ namespace SerialAssistant.Core.Models
                 DisplayMode = DisplayMode.Text,
                 SendLineEnding = SendLineEnding.None,
                 ShowTimestamp = true,
-                ShowDirection = true
+                ShowDirection = true,
+                MaxDisplayBytes = 262144
             };
         }
     }

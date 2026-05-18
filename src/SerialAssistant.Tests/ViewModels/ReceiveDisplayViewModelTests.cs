@@ -764,5 +764,79 @@ namespace SerialAssistant.Tests.ViewModels
             /* Assert */
             Assert.True(viewModel.TrimmedRecordCount >= 1);
         }
+
+        /*
+         * Test MaxDisplayBytes set to smaller value trims old records
+         */
+        [Fact]
+        public void MaxDisplayBytes_SetToSmaller_TrimsOldRecords()
+        {
+            /* Arrange */
+            var viewModel = new ReceiveDisplayViewModel();
+            viewModel.ShowTimestamp = false;
+            viewModel.ShowDirection = false;
+
+            viewModel.AddRxData(new byte[] { 1, 2, 3 });
+            viewModel.AddRxData(new byte[] { 4, 5, 6 });
+            viewModel.AddRxData(new byte[] { 7, 8, 9 });
+
+            /* Act */
+            viewModel.MaxDisplayBytes = 6;
+
+            /* Assert */
+            Assert.True(viewModel.CurrentDisplayBytes <= 6);
+        }
+
+        /*
+         * Test MaxDisplayBytes set to 0 uses default 262144
+         */
+        [Fact]
+        public void MaxDisplayBytes_SetTo0_UsesDefault()
+        {
+            /* Arrange */
+            var viewModel = new ReceiveDisplayViewModel();
+
+            /* Act */
+            viewModel.MaxDisplayBytes = 0;
+
+            /* Assert */
+            Assert.Equal(262144, viewModel.MaxDisplayBytes);
+        }
+
+        /*
+         * Test MaxDisplayBytes set to negative uses default 262144
+         */
+        [Fact]
+        public void MaxDisplayBytes_SetToNegative_UsesDefault()
+        {
+            /* Arrange */
+            var viewModel = new ReceiveDisplayViewModel();
+
+            /* Act */
+            viewModel.MaxDisplayBytes = -100;
+
+            /* Assert */
+            Assert.Equal(262144, viewModel.MaxDisplayBytes);
+        }
+
+        /*
+         * Test single large record is kept when MaxDisplayBytes is set smaller
+         */
+        [Fact]
+        public void MaxDisplayBytes_SetSmaller_KeepsSingleLargeRecord()
+        {
+            /* Arrange */
+            var viewModel = new ReceiveDisplayViewModel();
+            viewModel.ShowTimestamp = false;
+            viewModel.ShowDirection = false;
+            var largeData = new byte[20];
+
+            /* Act */
+            viewModel.AddRxData(largeData);
+            viewModel.MaxDisplayBytes = 10;
+
+            /* Assert */
+            Assert.Equal(20, viewModel.CurrentDisplayBytes);
+        }
     }
 }

@@ -1856,5 +1856,81 @@ namespace SerialAssistant.Tests.ViewModels
             Assert.True(result.IsSuccess);
             Assert.False(fakeSettingsService.GetSavedSettings().ShowDirection);
         }
+
+        /*
+         * Test ReceiveBufferSizeOptions 包含预期的选项
+         */
+        [Fact]
+        public void ReceiveBufferSizeOptions_ContainsExpectedOptions()
+        {
+            /* Arrange */
+            var viewModel = new MainWindowViewModel();
+
+            /* Act & Assert */
+            Assert.Contains(65536, viewModel.ReceiveBufferSizeOptions);
+            Assert.Contains(262144, viewModel.ReceiveBufferSizeOptions);
+            Assert.Contains(1048576, viewModel.ReceiveBufferSizeOptions);
+            Assert.Contains(4194304, viewModel.ReceiveBufferSizeOptions);
+        }
+
+        /*
+         * Test 加载配置后恢复 MaxDisplayBytes
+         */
+        [Fact]
+        public void LoadSettings_RestoresMaxDisplayBytes()
+        {
+            /* Arrange */
+            var fakeScanner = new FakeSerialPortScanner();
+            var fakeService = new FakeSerialPortService();
+            var fakeUiInvoker = new FakeUiThreadInvoker();
+            var fakeSettingsService = new FakeAppSettingsService();
+            var customSettings = new AppSettings { MaxDisplayBytes = 65536 };
+            fakeSettingsService.Save(customSettings);
+
+            /* Act */
+            var viewModel = new MainWindowViewModel(fakeScanner, fakeService, fakeUiInvoker, fakeSettingsService);
+
+            /* Assert */
+            Assert.Equal(65536, viewModel.ReceiveDisplay.MaxDisplayBytes);
+        }
+
+        /*
+         * Test 保存配置时保存 MaxDisplayBytes
+         */
+        [Fact]
+        public void SaveSettings_SavesMaxDisplayBytes()
+        {
+            /* Arrange */
+            var fakeScanner = new FakeSerialPortScanner();
+            var fakeService = new FakeSerialPortService();
+            var fakeUiInvoker = new FakeUiThreadInvoker();
+            var fakeSettingsService = new FakeAppSettingsService();
+            var viewModel = new MainWindowViewModel(fakeScanner, fakeService, fakeUiInvoker, fakeSettingsService);
+            viewModel.ReceiveDisplay.MaxDisplayBytes = 1048576;
+
+            /* Act */
+            var result = viewModel.SaveSettings();
+
+            /* Assert */
+            Assert.True(result.IsSuccess);
+            Assert.Equal(1048576, fakeSettingsService.GetSavedSettings().MaxDisplayBytes);
+        }
+
+        /*
+         * Test 默认配置 ReceiveDisplay.MaxDisplayBytes 为 262144
+         */
+        [Fact]
+        public void DefaultConfig_MaxDisplayBytes_Is262144()
+        {
+            /* Arrange */
+            var fakeScanner = new FakeSerialPortScanner();
+            var fakeService = new FakeSerialPortService();
+            var fakeUiInvoker = new FakeUiThreadInvoker();
+            var fakeSettingsService = new FakeAppSettingsService();
+            var viewModel = new MainWindowViewModel(fakeScanner, fakeService, fakeUiInvoker, fakeSettingsService);
+
+            /* Act & Assert */
+            Assert.Equal(262144, viewModel.ReceiveDisplay.MaxDisplayBytes);
+        }
     }
 }

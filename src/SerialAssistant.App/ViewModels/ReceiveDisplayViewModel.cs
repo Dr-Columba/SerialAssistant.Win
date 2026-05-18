@@ -85,7 +85,20 @@ namespace SerialAssistant.App.ViewModels
         public int MaxDisplayBytes
         {
             get => _maxDisplayBytes;
-            set => SetProperty(ref _maxDisplayBytes, value);
+            set
+            {
+                int safeValue = value;
+                if (safeValue <= 0)
+                {
+                    safeValue = 262144;
+                }
+
+                if (SetProperty(ref _maxDisplayBytes, safeValue))
+                {
+                    TrimExcessRecords();
+                    UpdateDisplayText();
+                }
+            }
         }
 
         public int CurrentDisplayBytes

@@ -349,5 +349,95 @@ namespace SerialAssistant.Tests.Infrastructure
             /* Cleanup */
             File.Delete(testPath);
         }
+
+        /*
+         * Test 默认配置 MaxDisplayBytes 为 262144
+         */
+        [Fact]
+        public void Load_DefaultConfig_MaxDisplayBytes_Is262144()
+        {
+            /* Arrange */
+            string testPath = CreateTestFilePath();
+            if (File.Exists(testPath))
+            {
+                File.Delete(testPath);
+            }
+            var service = new JsonAppSettingsService(testPath);
+
+            /* Act */
+            var result = service.Load();
+
+            /* Assert */
+            Assert.True(result.IsSuccess);
+            Assert.NotNull(result.Value);
+            Assert.Equal(262144, result.Value.MaxDisplayBytes);
+
+            /* Cleanup */
+            File.Delete(testPath);
+        }
+
+        /*
+         * Test 保存后加载能恢复 MaxDisplayBytes
+         */
+        [Fact]
+        public void Load_AfterSave_RestoresMaxDisplayBytes()
+        {
+            /* Arrange */
+            string testPath = CreateTestFilePath();
+            if (File.Exists(testPath))
+            {
+                File.Delete(testPath);
+            }
+            var service = new JsonAppSettingsService(testPath);
+            var originalSettings = new AppSettings
+            {
+                MaxDisplayBytes = 1048576
+            };
+
+            /* Act */
+            service.Save(originalSettings);
+            var result = service.Load();
+
+            /* Assert */
+            Assert.True(result.IsSuccess);
+            Assert.NotNull(result.Value);
+            Assert.Equal(1048576, result.Value.MaxDisplayBytes);
+
+            /* Cleanup */
+            File.Delete(testPath);
+        }
+
+        /*
+         * Test 旧配置文件缺少 MaxDisplayBytes 时使用默认值 262144
+         */
+        [Fact]
+        public void Load_OldConfigWithoutMaxDisplayBytes_UsesDefault262144()
+        {
+            /* Arrange */
+            string testPath = CreateTestFilePath();
+            string oldJson = @"{
+                ""LastPortName"": ""COM3"",
+                ""BaudRate"": 9600,
+                ""DataBits"": 8,
+                ""Parity"": ""None"",
+                ""StopBits"": ""One"",
+                ""SendMode"": 0,
+                ""DisplayMode"": 0,
+                ""SendLineEnding"": 0
+            }";
+            File.WriteAllText(testPath, oldJson, Encoding.UTF8);
+            var service = new JsonAppSettingsService(testPath);
+
+            /* Act */
+            var result = service.Load();
+
+            /* Assert */
+            Assert.True(result.IsSuccess);
+            Assert.NotNull(result.Value);
+            Assert.Equal(262144, result.Value.MaxDisplayBytes);
+
+            /* Cleanup */
+            File.Delete(testPath);
+        }
     }
 }
