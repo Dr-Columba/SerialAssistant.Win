@@ -55,6 +55,18 @@ namespace SerialAssistant.Core.Models
             set;
         } = SendLineEnding.None;
 
+        public bool ShowTimestamp
+        {
+            get;
+            set;
+        } = true;
+
+        public bool ShowDirection
+        {
+            get;
+            set;
+        } = true;
+
         public static AppSettings CreateDefault()
         {
             return new AppSettings
@@ -66,7 +78,9 @@ namespace SerialAssistant.Core.Models
                 StopBits = "One",
                 SendMode = SendMode.Text,
                 DisplayMode = DisplayMode.Text,
-                SendLineEnding = SendLineEnding.None
+                SendLineEnding = SendLineEnding.None,
+                ShowTimestamp = true,
+                ShowDirection = true
             };
         }
     }

@@ -512,6 +512,8 @@ namespace SerialAssistant.App.ViewModels
             SelectedSendMode = settings.SendMode;
             SelectedSendLineEnding = settings.SendLineEnding;
             ReceiveDisplay.IsHexDisplay = (settings.DisplayMode == DisplayMode.Hex);
+            ReceiveDisplay.ShowTimestamp = settings.ShowTimestamp;
+            ReceiveDisplay.ShowDirection = settings.ShowDirection;
             _lastLoadedSettings = settings;
         }
 
@@ -531,7 +533,9 @@ namespace SerialAssistant.App.ViewModels
                 StopBits = SerialSettings.SelectedStopBits ?? "One",
                 SendMode = SelectedSendMode,
                 DisplayMode = ReceiveDisplay.IsHexDisplay ? DisplayMode.Hex : DisplayMode.Text,
-                SendLineEnding = SelectedSendLineEnding
+                SendLineEnding = SelectedSendLineEnding,
+                ShowTimestamp = ReceiveDisplay.ShowTimestamp,
+                ShowDirection = ReceiveDisplay.ShowDirection
             };
 
             return _appSettingsService.Save(settings);

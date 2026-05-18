@@ -89,6 +89,14 @@
                               IsChecked="{Binding IsHexDisplay}"
                               VerticalAlignment="Center"
                               Margin="0,0,20,0" />
+                    <CheckBox Content="显示时间戳"
+                              IsChecked="{Binding ReceiveDisplay.ShowTimestamp}"
+                              VerticalAlignment="Center"
+                              Margin="0,0,20,0" />
+                    <CheckBox Content="显示方向"
+                              IsChecked="{Binding ReceiveDisplay.ShowDirection}"
+                              VerticalAlignment="Center"
+                              Margin="0,0,20,0" />
                     <TextBlock Text="接收计数:" VerticalAlignment="Center" Margin="0,0,5,0" />
                     <TextBlock Text="{Binding ReceiveDisplay.ReceivedBytesCount}" VerticalAlignment="Center" FontWeight="Bold" />
                     <Button Content="清空接收区"

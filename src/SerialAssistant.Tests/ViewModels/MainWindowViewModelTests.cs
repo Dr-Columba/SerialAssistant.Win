@@ -1764,5 +1764,97 @@ namespace SerialAssistant.Tests.ViewModels
             Assert.Equal(string.Empty, viewModel.ReceiveDisplay.ReceivedText);
             Assert.Equal(0, viewModel.ReceiveDisplay.ReceivedBytesCount);
         }
+
+        /*
+         * Test 加载配置时恢复 ShowTimestamp
+         */
+        [Fact]
+        public void LoadSettings_RestoresShowTimestamp()
+        {
+            /* Arrange */
+            var fakeScanner = new FakeSerialPortScanner();
+            var fakeService = new FakeSerialPortService();
+            var fakeUiInvoker = new FakeUiThreadInvoker();
+            var fakeSettingsService = new FakeAppSettingsService();
+            var customSettings = new AppSettings
+            {
+                ShowTimestamp = false
+            };
+            fakeSettingsService.Save(customSettings);
+
+            /* Act */
+            var viewModel = new MainWindowViewModel(fakeScanner, fakeService, fakeUiInvoker, fakeSettingsService);
+
+            /* Assert */
+            Assert.False(viewModel.ReceiveDisplay.ShowTimestamp);
+        }
+
+        /*
+         * Test 加载配置时恢复 ShowDirection
+         */
+        [Fact]
+        public void LoadSettings_RestoresShowDirection()
+        {
+            /* Arrange */
+            var fakeScanner = new FakeSerialPortScanner();
+            var fakeService = new FakeSerialPortService();
+            var fakeUiInvoker = new FakeUiThreadInvoker();
+            var fakeSettingsService = new FakeAppSettingsService();
+            var customSettings = new AppSettings
+            {
+                ShowDirection = false
+            };
+            fakeSettingsService.Save(customSettings);
+
+            /* Act */
+            var viewModel = new MainWindowViewModel(fakeScanner, fakeService, fakeUiInvoker, fakeSettingsService);
+
+            /* Assert */
+            Assert.False(viewModel.ReceiveDisplay.ShowDirection);
+        }
+
+        /*
+         * Test 保存配置时保存 ShowTimestamp
+         */
+        [Fact]
+        public void SaveSettings_SavesShowTimestamp()
+        {
+            /* Arrange */
+            var fakeScanner = new FakeSerialPortScanner();
+            var fakeService = new FakeSerialPortService();
+            var fakeUiInvoker = new FakeUiThreadInvoker();
+            var fakeSettingsService = new FakeAppSettingsService();
+            var viewModel = new MainWindowViewModel(fakeScanner, fakeService, fakeUiInvoker, fakeSettingsService);
+            viewModel.ReceiveDisplay.ShowTimestamp = false;
+
+            /* Act */
+            var result = viewModel.SaveSettings();
+
+            /* Assert */
+            Assert.True(result.IsSuccess);
+            Assert.False(fakeSettingsService.GetSavedSettings().ShowTimestamp);
+        }
+
+        /*
+         * Test 保存配置时保存 ShowDirection
+         */
+        [Fact]
+        public void SaveSettings_SavesShowDirection()
+        {
+            /* Arrange */
+            var fakeScanner = new FakeSerialPortScanner();
+            var fakeService = new FakeSerialPortService();
+            var fakeUiInvoker = new FakeUiThreadInvoker();
+            var fakeSettingsService = new FakeAppSettingsService();
+            var viewModel = new MainWindowViewModel(fakeScanner, fakeService, fakeUiInvoker, fakeSettingsService);
+            viewModel.ReceiveDisplay.ShowDirection = false;
+
+            /* Act */
+            var result = viewModel.SaveSettings();
+
+            /* Assert */
+            Assert.True(result.IsSuccess);
+            Assert.False(fakeSettingsService.GetSavedSettings().ShowDirection);
+        }
     }
 }

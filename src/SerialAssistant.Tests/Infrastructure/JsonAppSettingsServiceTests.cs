@@ -182,6 +182,8 @@ namespace SerialAssistant.Tests.Infrastructure
             Assert.Equal(Core.Enums.SendMode.Text, result.Value.SendMode);
             Assert.Equal(Core.Enums.DisplayMode.Text, result.Value.DisplayMode);
             Assert.Equal(Core.Enums.SendLineEnding.None, result.Value.SendLineEnding);
+            Assert.True(result.Value.ShowTimestamp);
+            Assert.True(result.Value.ShowDirection);
 
             /* Cleanup */
             File.Delete(testPath);
@@ -245,6 +247,104 @@ namespace SerialAssistant.Tests.Infrastructure
             Assert.True(result.IsSuccess);
             Assert.NotNull(result.Value);
             Assert.Equal(Core.Enums.SendLineEnding.None, result.Value.SendLineEnding);
+            Assert.True(result.Value.ShowTimestamp);
+            Assert.True(result.Value.ShowDirection);
+
+            /* Cleanup */
+            File.Delete(testPath);
+        }
+
+        /*
+         * Test 保存后加载能恢复 ShowTimestamp
+         */
+        [Fact]
+        public void Load_AfterSave_RestoresShowTimestamp()
+        {
+            /* Arrange */
+            string testPath = CreateTestFilePath();
+            if (File.Exists(testPath))
+            {
+                File.Delete(testPath);
+            }
+            var service = new JsonAppSettingsService(testPath);
+            var originalSettings = new AppSettings
+            {
+                ShowTimestamp = false
+            };
+
+            /* Act */
+            service.Save(originalSettings);
+            var result = service.Load();
+
+            /* Assert */
+            Assert.True(result.IsSuccess);
+            Assert.NotNull(result.Value);
+            Assert.False(result.Value.ShowTimestamp);
+
+            /* Cleanup */
+            File.Delete(testPath);
+        }
+
+        /*
+         * Test 保存后加载能恢复 ShowDirection
+         */
+        [Fact]
+        public void Load_AfterSave_RestoresShowDirection()
+        {
+            /* Arrange */
+            string testPath = CreateTestFilePath();
+            if (File.Exists(testPath))
+            {
+                File.Delete(testPath);
+            }
+            var service = new JsonAppSettingsService(testPath);
+            var originalSettings = new AppSettings
+            {
+                ShowDirection = false
+            };
+
+            /* Act */
+            service.Save(originalSettings);
+            var result = service.Load();
+
+            /* Assert */
+            Assert.True(result.IsSuccess);
+            Assert.NotNull(result.Value);
+            Assert.False(result.Value.ShowDirection);
+
+            /* Cleanup */
+            File.Delete(testPath);
+        }
+
+        /*
+         * Test 旧配置文件缺少 ShowTimestamp 和 ShowDirection 时使用默认值 true
+         */
+        [Fact]
+        public void Load_OldConfigWithoutShowSettings_UsesDefaultTrue()
+        {
+            /* Arrange */
+            string testPath = CreateTestFilePath();
+            string oldJson = @"{
+                ""LastPortName"": ""COM3"",
+                ""BaudRate"": 9600,
+                ""DataBits"": 8,
+                ""Parity"": ""None"",
+                ""StopBits"": ""One"",
+                ""SendMode"": 0,
+                ""DisplayMode"": 0,
+                ""SendLineEnding"": 0
+            }";
+            File.WriteAllText(testPath, oldJson, Encoding.UTF8);
+            var service = new JsonAppSettingsService(testPath);
+
+            /* Act */
+            var result = service.Load();
+
+            /* Assert */
+            Assert.True(result.IsSuccess);
+            Assert.NotNull(result.Value);
+            Assert.True(result.Value.ShowTimestamp);
+            Assert.True(result.Value.ShowDirection);
 
             /* Cleanup */
             File.Delete(testPath);
