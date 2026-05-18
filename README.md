@@ -19,9 +19,12 @@ SerialAssistant.Win is a desktop application for serial port communication on Wi
 1. **Serial Port Scanning**: Auto-detect available COM ports
 2. **Serial Port Connection**: Open and close serial ports with configurable parameters
 3. **Text and HEX Mode Send**: Send data in text or HEX format
-4. **Text and HEX Mode Receive**: Display received data in text or HEX format
-5. **Clear Receive Buffer**: Clear received data and reset receive count
-6. **Configuration Persistence**: Save and load serial port settings and preferences
+4. **Send Line Ending**: Support None/CR/LF/CRLF line endings for text mode send
+5. **TX/RX Direction Marking**: Display TX (transmit) and RX (receive) records in receive area
+6. **Timestamp Display**: Optional timestamp display for communication records
+7. **Text and HEX Mode Receive**: Display received data in text or HEX format
+8. **Clear Receive Buffer**: Clear received data and reset receive count
+9. **Configuration Persistence**: Save and load serial port settings, display preferences, and line ending options
 
 ## Project Structure
 
@@ -130,6 +133,7 @@ Application settings are stored at:
 - No protocol parsing
 - No cycle/scheduled transmission
 - No complex settings page
+- No send history buffer
 
 ## Development Phases
 
@@ -143,7 +147,9 @@ The project follows a phased development approach:
 6. **Phase 5**: Data Transmission
 7. **Phase 6**: Data Reception and Display
 8. **Phase 7**: Basic Configuration Persistence
-9. **Phase 8**: Full Quality Check and Final Review (Current)
+9. **Phase 8**: Full Quality Check and Final Review
+10. **Feature A**: Send Line Ending Options (None/CR/LF/CRLF)
+11. **Feature B**: TX/RX Direction Marking and Timestamp Display
 
 ## Code Style
 

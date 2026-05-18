@@ -329,3 +329,192 @@ This ensures thread safety for WPF data binding.
 ## Current Status
 
 All Phases 0-7 complete. Full serial port functionality with configuration persistence.
+
+## Communication Records (Feature B)
+
+### CommunicationDirection Enum
+
+Located in `SerialAssistant.Core.Enums.CommunicationDirection`, this enum represents the direction of communication:
+
+- **Tx**: Transmit (data sent by the application)
+- **Rx**: Receive (data received from serial port)
+
+### CommunicationRecord Model
+
+Located in `SerialAssistant.Core.Models.CommunicationRecord`, this model represents a single communication record:
+
+```csharp
+public class CommunicationRecord
+{
+    public CommunicationDirection Direction { get; }
+    public byte[] Data { get; }
+    public DateTime Timestamp { get; }
+}
+```
+
+Key points:
+- Direction indicates TX or RX
+- Data contains the original byte array (cloned to avoid external reference)
+- Timestamp records when the communication occurred
+
+### ReceiveDisplayViewModel Communication Records
+
+`ReceiveDisplayViewModel` maintains a `List<CommunicationRecord>` internally instead of a simple byte list. This enables:
+
+- TX/RX direction tracking
+- Timestamp recording
+- Historical record reformatting on display mode change
+
+Key properties:
+- **ShowTimestamp**: Controls whether timestamps are displayed (default: true)
+- **ShowDirection**: Controls whether TX/RX markers are displayed (default: true)
+- **IsHexDisplay**: Controls whether data is displayed as text or HEX
+
+Display format examples:
+- ShowTimestamp=true, ShowDirection=true: `[12:34:56.123] TX ABC`
+- ShowTimestamp=false, ShowDirection=true: `TX ABC`
+- ShowTimestamp=true, ShowDirection=false: `[12:34:56.123] ABC`
+- ShowTimestamp=false, ShowDirection=false: `ABC`
+
+### TX Record Flow (Send Success)
+
+```
+User clicks "Send" with valid data
+    ↓
+MainWindowViewModel.SendCommand.Execute
+    ↓
+Validates input (text/HEX format)
+    ↓
+If text mode, applies SendLineEnding (None/CR/LF/CRLF)
+    ↓
+ISerialPortService.Send(byte[] data)
+    ↓
+SerialPortService calls SerialPort.Write
+    ↓
+Returns OperationResult
+    ↓
+If success:
+    - SentBytesCount increases
+    - ReceiveDisplay.AddTxData(data) is called
+    - StatusMessage updated
+```
+
+### RX Record Flow (Data Received)
+
+```
+SerialPort.DataReceived event fires
+    ↓
+SerialPortService handler reads BytesToRead
+    ↓
+Reads bytes into buffer
+    ↓
+Invokes DataReceived event
+    ↓
+MainWindowViewModel.OnDataReceived receives data
+    ↓
+Creates updateAction for updating ReceiveDisplayViewModel
+    ↓
+Calls IUiThreadInvoker.Invoke(updateAction) to switch to UI thread
+    ↓
+ReceiveDisplayViewModel.AddRxData(data) is called
+    ↓
+CommunicationRecord created with Rx direction
+    ↓
+Record added to internal list
+    ↓
+ReceivedBytesCount increases
+    ↓
+Display text reformatted with current ShowTimestamp/ShowDirection settings
+```
+
+### Display Reformatting on Settings Change
+
+When ShowTimestamp, ShowDirection, or IsHexDisplay changes:
+1. Property setter in ReceiveDisplayViewModel triggers UpdateDisplayText()
+2. All CommunicationRecords are re-iterated
+3. Display format applied according to current settings
+4. ReceivedText property updated
+5. UI binding updates automatically
+
+### Configuration for Display Settings
+
+**AppSettings fields:**
+```csharp
+public bool ShowTimestamp { get; set; } = true;
+public bool ShowDirection { get; set; } = true;
+```
+
+**Load flow:**
+```
+Application starts
+    ↓
+JsonAppSettingsService.Load returns AppSettings
+    ↓
+MainWindowViewModel.ApplySettings
+    ↓
+ReceiveDisplay.ShowTimestamp = settings.ShowTimestamp
+    ↓
+ReceiveDisplay.ShowDirection = settings.ShowDirection
+```
+
+**Save flow:**
+```
+Application closing
+    ↓
+MainWindowViewModel.SaveSettings creates AppSettings
+    ↓
+AppSettings.ShowTimestamp = ReceiveDisplay.ShowTimestamp
+    ↓
+AppSettings.ShowDirection = ReceiveDisplay.ShowDirection
+    ↓
+JsonAppSettingsService.Save writes to settings.json
+```
+
+Note: Communication records (TX/RX history) are NOT saved to configuration. Only display preferences are persisted.
+
+## Send Line Ending (Feature A)
+
+### SendLineEnding Enum
+
+Located in `SerialAssistant.Core.Enums.SendLineEnding`, this enum represents line ending options:
+
+- **None**: No line ending appended
+- **CR**: Carriage Return (0x0D)
+- **LF**: Line Feed (0x0A)
+- **CRLF**: Carriage Return + Line Feed (0x0D 0x0A)
+
+### Text Mode Send with Line Ending
+
+```
+User selects Text mode, enters "ABC", selects CRLF
+    ↓
+MainWindowViewModel.SendCommand.Execute
+    ↓
+Converts "ABC" to UTF-8 bytes: [0x41, 0x42, 0x43]
+    ↓
+Appends line ending based on SelectedSendLineEnding:
+    - None: [0x41, 0x42, 0x43]
+    - CR: [0x41, 0x42, 0x43, 0x0D]
+    - LF: [0x41, 0x42, 0x43, 0x0A]
+    - CRLF: [0x41, 0x42, 0x43, 0x0D, 0x0A]
+    ↓
+ISerialPortService.Send(byte[] data)
+    ↓
+TX record added with actual bytes sent (including line ending)
+```
+
+### HEX Mode Send Behavior
+
+HEX mode does NOT append line endings, even if SendLineEnding is set. This maintains data precision for binary protocols.
+
+```
+User selects HEX mode, enters "41 42 43"
+    ↓
+HexConverter.FromHexString validates and converts
+    ↓
+Byte array: [0x41, 0x42, 0x43]
+    ↓
+No line ending appended regardless of SendLineEnding setting
+    ↓
+ISerialPortService.Send([0x41, 0x42, 0x43])
+```

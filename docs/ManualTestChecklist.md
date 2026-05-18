@@ -56,14 +56,29 @@ This document provides a step-by-step manual testing guide for SerialAssistant.W
 - [ ] **Step 5.3** Enter text (e.g., "Hello World")
 - [ ] **Step 5.4** Click "发送" (Send) button
 - [ ] **Step 5.5** Verify status shows success message
+- [ ] **Step 5.6** Verify TX record appears in receive area
+
+#### Send Line Ending (Feature A)
+- [ ] **Step 5.7** Select "None" line ending
+- [ ] **Step 5.8** Send "ABC", verify TX record shows exactly "ABC"
+- [ ] **Step 5.9** Select "CR" line ending
+- [ ] **Step 5.10** Send "ABC", verify TX record shows "ABC" + 0x0D
+- [ ] **Step 5.11** Select "LF" line ending
+- [ ] **Step 5.12** Send "ABC", verify TX record shows "ABC" + 0x0A
+- [ ] **Step 5.13** Select "CRLF" line ending
+- [ ] **Step 5.14** Send "ABC", verify TX record shows "ABC" + 0x0D 0x0A
 
 #### HEX Mode Send
-- [ ] **Step 5.6** Select "HEX" send mode
-- [ ] **Step 5.7** Enter valid HEX (e.g., "48 65 6C 6C 6F")
-- [ ] **Step 5.8** Click "发送" (Send) button
-- [ ] **Step 5.9** Verify status shows success message
-- [ ] **Step 5.10** Try invalid HEX (e.g., "XX YY")
-- [ ] **Step 5.11** Verify validation error shows
+- [ ] **Step 5.15** Select "HEX" send mode
+- [ ] **Step 5.16** Enter valid HEX (e.g., "41 42 43")
+- [ ] **Step 5.17** Click "发送" (Send) button
+- [ ] **Step 5.18** Verify status shows success message
+- [ ] **Step 5.19** Verify TX record shows HEX bytes (not text)
+- [ ] **Step 5.20** Set line ending to "CRLF" while in HEX mode
+- [ ] **Step 5.21** Send "41 42 43"
+- [ ] **Step 5.22** Verify TX record does NOT include 0x0D 0x0A (HEX mode ignores line ending)
+- [ ] **Step 5.23** Try invalid HEX (e.g., "XX YY")
+- [ ] **Step 5.24** Verify validation error shows
 
 ### 6. Serial Port Receive (Hardware Required)
 
@@ -71,60 +86,111 @@ This document provides a step-by-step manual testing guide for SerialAssistant.W
 - [ ] **Step 6.1** Open serial port
 - [ ] **Step 6.2** Set receive mode to "文本"
 - [ ] **Step 6.3** Have remote end send text
-- [ ] **Step 6.4** Verify text appears in receive area
+- [ ] **Step 6.4** Verify RX record appears in receive area with "RX" prefix
 - [ ] **Step 6.5** Verify receive count increases
 
 #### HEX Mode Receive
 - [ ] **Step 6.6** Set receive mode to "HEX"
 - [ ] **Step 6.7** Have remote end send data
-- [ ] **Step 6.8** Verify HEX appears in receive area
+- [ ] **Step 6.8** Verify HEX appears in receive area with "RX" prefix
 - [ ] **Step 6.9** Verify receive count increases
 
-### 7. Clear Receive Buffer
+### 7. TX/RX Direction and Timestamp Display (Feature B)
 
-- [ ] **Step 7.1** Receive some data first
-- [ ] **Step 7.2** Click "清空接收区" button
-- [ ] **Step 7.3** Verify receive text area is cleared
-- [ ] **Step 7.4** Verify receive count is reset to 0
+#### Verify UI Controls Exist
+- [ ] **Step 7.1** Verify "显示时间戳" (Show Timestamp) checkbox exists
+- [ ] **Step 7.2** Verify "显示方向" (Show Direction) checkbox exists
+- [ ] **Step 7.3** Verify both checkboxes are checked by default
 
-### 8. Configuration Persistence
+#### Direction Marking
+- [ ] **Step 7.4** Send some data
+- [ ] **Step 7.5** Verify TX record shows "TX" prefix
+- [ ] **Step 7.6** Receive some data
+- [ ] **Step 7.7** Verify RX record shows "RX" prefix
+
+#### Timestamp Display
+- [ ] **Step 7.8** Verify timestamp format is [HH:mm:ss.fff]
+- [ ] **Step 7.9** Uncheck "显示时间戳"
+- [ ] **Step 7.10** Verify TX/RX records no longer show timestamps
+- [ ] **Step 7.11** Check "显示时间戳" again
+- [ ] **Step 7.12** Verify timestamps reappear
+
+#### Hide Direction Marking
+- [ ] **Step 7.13** Uncheck "显示方向"
+- [ ] **Step 7.14** Verify TX/RX records show only data, no "TX" or "RX" prefix
+- [ ] **Step 7.15** Send data, verify no "TX" prefix
+- [ ] **Step 7.16** Receive data, verify no "RX" prefix
+
+#### Display Format Examples
+- [ ] **Step 7.17** Enable both "显示时间戳" and "显示方向"
+- [ ] **Step 7.18** Send "ABC", verify display shows: `[HH:mm:ss.fff] TX ABC`
+- [ ] **Step 7.19** Receive "OK", verify display shows: `[HH:mm:ss.fff] RX OK`
+
+#### HEX Mode Display
+- [ ] **Step 7.20** Switch to HEX display mode
+- [ ] **Step 7.21** Verify TX/RX records reformatted to show HEX bytes
+- [ ] **Step 7.22** Verify TX "ABC" shows as "TX 41 42 43"
+- [ ] **Step 7.23** Verify RX "OK" shows as "RX 4F 4B"
+
+### 8. Clear Receive Buffer
+
+- [ ] **Step 8.1** Send and receive some data first
+- [ ] **Step 8.2** Verify TX and RX records exist in receive area
+- [ ] **Step 8.3** Click "清空接收区" button
+- [ ] **Step 8.4** Verify TX/RX records are cleared
+- [ ] **Step 8.5** Verify receive count is reset to 0
+
+### 9. Configuration Persistence (Feature A & B)
 
 #### Save Configuration
-- [ ] **Step 8.1** Change serial parameters (baud rate, etc.)
-- [ ] **Step 8.2** Change send mode
-- [ ] **Step 8.3** Change receive mode
-- [ ] **Step 8.4** Close application normally
-- [ ] **Step 8.5** Verify %AppData%\SerialAssistant.Win\settings.json created
-- [ ] **Step 8.6** Verify file contains valid JSON
+- [ ] **Step 9.1** Change serial parameters (baud rate, etc.)
+- [ ] **Step 9.2** Change send mode
+- [ ] **Step 9.3** Change receive mode
+- [ ] **Step 9.4** Change send line ending (None/CR/LF/CRLF)
+- [ ] **Step 9.5** Modify ShowTimestamp setting
+- [ ] **Step 9.6** Modify ShowDirection setting
+- [ ] **Step 9.7** Close application normally
+- [ ] **Step 9.8** Verify %AppData%\SerialAssistant.Win\settings.json created
+- [ ] **Step 9.9** Verify file contains valid JSON
+- [ ] **Step 9.10** Verify JSON includes SendLineEnding, ShowTimestamp, ShowDirection
 
 #### Load Configuration
-- [ ] **Step 8.7** Re-open application
-- [ ] **Step 8.8** Verify parameters loaded correctly
-- [ ] **Step 8.9** Verify send mode restored
-- [ ] **Step 8.10** Verify receive mode restored
-- [ ] **Step 8.11** If port exists, verify it's selected
+- [ ] **Step 9.11** Re-open application
+- [ ] **Step 9.12** Verify serial parameters loaded correctly
+- [ ] **Step 9.13** Verify send mode restored
+- [ ] **Step 9.14** Verify receive mode restored
+- [ ] **Step 9.15** Verify SendLineEnding restored
+- [ ] **Step 9.16** Verify ShowTimestamp setting restored
+- [ ] **Step 9.17** Verify ShowDirection setting restored
+- [ ] **Step 9.18** If port exists, verify it's selected
+
+#### Old Config Missing Fields
+- [ ] **Step 9.19** Close application
+- [ ] **Step 9.20** Edit settings.json to remove SendLineEnding, ShowTimestamp, ShowDirection
+- [ ] **Step 9.21** Re-open application
+- [ ] **Step 9.22** Verify defaults used: SendLineEnding=None, ShowTimestamp=true, ShowDirection=true
 
 #### Corrupted Config Fallback
-- [ ] **Step 8.12** Close application
-- [ ] **Step 8.13** Manually corrupt settings.json (e.g., just "{")
-- [ ] **Step 8.14** Re-open application
-- [ ] **Step 8.15** Verify application doesn't crash
-- [ ] **Step 8.16** Verify default settings loaded
+- [ ] **Step 9.23** Close application
+- [ ] **Step 9.24** Manually corrupt settings.json (e.g., just "{")
+- [ ] **Step 9.25** Re-open application
+- [ ] **Step 9.26** Verify application doesn't crash
+- [ ] **Step 9.27** Verify default settings loaded
 
-### 9. Edge Cases
+### 10. Edge Cases
 
-- [ ] **Step 9.1** Open non-existent port (should show error)
-- [ ] **Step 9.2** Open already-open port (should show error)
-- [ ] **Step 9.3** Close already-closed port (should show error)
-- [ ] **Step 9.4** Send without opening port (should show error)
-- [ ] **Step 9.5** Empty text send (should show error)
-- [ ] **Step 9.6** Empty HEX send (should show error)
+- [ ] **Step 10.1** Open non-existent port (should show error)
+- [ ] **Step 10.2** Open already-open port (should show error)
+- [ ] **Step 10.3** Close already-closed port (should show error)
+- [ ] **Step 10.4** Send without opening port (should show error)
+- [ ] **Step 10.5** Empty text send (should show error)
+- [ ] **Step 10.6** Empty HEX send (should show error)
 
-### 10. Cleanup
+### 11. Cleanup
 
-- [ ] **Step 10.1** Close any open serial ports
-- [ ] **Step 10.2** Exit application
-- [ ] **Step 10.3** (Optional) Delete test config file at %AppData%\SerialAssistant.Win\settings.json
+- [ ] **Step 11.1** Close any open serial ports
+- [ ] **Step 11.2** Exit application
+- [ ] **Step 11.3** (Optional) Delete test config file at %AppData%\SerialAssistant.Win\settings.json
 
 ## Test Results Summary
 
@@ -132,6 +198,8 @@ This document provides a step-by-step manual testing guide for SerialAssistant.W
 |----------|--------|-------|
 | Application Startup | ☐ Pass / ☐ Fail | |
 | Serial Port Scanning | ☐ Pass / ☐ Fail | |
+| TX/RX Direction Display | ☐ Pass / ☐ Fail | |
+| Timestamp Display | ☐ Pass / ☐ Fail | |
 | Configuration | ☐ Pass / ☐ Fail | |
 | Open/Close | ☐ Pass / ☐ N/A (No HW) | |
 | Text Send | ☐ Pass / ☐ N/A (No HW) | |

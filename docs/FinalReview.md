@@ -16,7 +16,9 @@ This document summarizes the final quality review of SerialAssistant.Win, coveri
 - Phase 5: Data Transmission
 - Phase 6: Data Reception and Display
 - Phase 7: Basic Configuration Persistence
-- Phase 8: Full Quality Check and Final Review (Current)
+- Phase 8: Full Quality Check and Final Review
+- Feature A: Send Line Ending Options
+- Feature B1-B4: TX/RX Direction Marking and Timestamp Display
 
 ### Architecture Review
 
@@ -59,9 +61,16 @@ This document summarizes the final quality review of SerialAssistant.Win, coveri
 | Text mode receive | ✅ Pass | Displays received text |
 | HEX mode receive | ✅ Pass | Displays bytes as HEX |
 | Clear receive buffer | ✅ Pass | Clears text and resets count |
-| Configuration persistence | ✅ Pass | Saves/loads LastPortName, BaudRate, etc. |
+| Configuration persistence | ✅ Pass | Saves/loads serial parameters, display modes |
 | Config damage fallback | ✅ Pass | Falls back to defaults on invalid JSON |
 | Status messages | ✅ Pass | Shows clear status and error messages |
+| Send Line Ending (Feature A) | ✅ Pass | None/CR/LF/CRLF for text mode |
+| TX Direction Marking (Feature B) | ✅ Pass | TX records on successful send |
+| RX Direction Marking (Feature B) | ✅ Pass | RX records on data receive |
+| Timestamp Display (Feature B) | ✅ Pass | Optional [HH:mm:ss.fff] format |
+| Direction Toggle (Feature B) | ✅ Pass | Show/hide TX/RX markers |
+| Text/HEX Historical Redraw (Feature B) | ✅ Pass | Records reformat on mode switch |
+| Display Settings Persistence (Feature B) | ✅ Pass | ShowTimestamp/ShowDirection saved |
 
 ### Test Review
 
@@ -79,7 +88,7 @@ This document summarizes the final quality review of SerialAssistant.Win, coveri
 | JsonAppSettingsService | ✅ Full coverage | Load/Save, missing/damaged config |
 | No real serial port dependency | ✅ Pass | Tests use fakes |
 | No real AppData pollution | ✅ Pass | Tests use temporary directories |
-| Total tests passing | ✅ Pass | 168 tests all passing |
+| Total tests passing | ✅ Pass | 214+ tests all passing |
 
 ### Documentation Review
 
@@ -117,7 +126,31 @@ This document summarizes the final quality review of SerialAssistant.Win, coveri
 | No complex settings page | ✅ Pass |
 | No database | ✅ Pass |
 | No Registry | ✅ Pass |
-| All layers respected | ✅ Pass |
+| All layers respected | ✅ Pass | |
+
+## Feature B Summary (TX/RX Direction Marking)
+
+| Phase | Status | Description |
+|-------|--------|-------------|
+| B1 | ✅ Complete | CommunicationDirection/CommunicationRecord models, ReceiveDisplayViewModel communication record support |
+| B2 | ✅ Complete | MainWindowViewModel TX/RX record integration |
+| B3 | ✅ Complete | UI checkboxes for ShowTimestamp/ShowDirection, configuration persistence |
+| B4 | ✅ Complete | Documentation update and full verification |
+
+### Feature B Key Behaviors
+
+- **TX Records**: Appended on successful send, include line ending bytes
+- **RX Records**: Appended on data receive via IUiThreadInvoker
+- **Timestamp**: Format [HH:mm:ss.fff], toggleable via UI checkbox
+- **Direction**: TX/RX markers toggleable via UI checkbox
+- **Historical Redraw**: All records reformat when ShowTimestamp/ShowDirection/IsHexDisplay changes
+- **Persistence**: ShowTimestamp and ShowDirection saved to settings.json
+
+### Feature B Current Limitations
+
+- Communication records (TX/RX history) not persisted across sessions
+- No send history buffer
+- No logging persistence
 
 ## Known Issues
 
