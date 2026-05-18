@@ -73,6 +73,18 @@ namespace SerialAssistant.Core.Models
             set;
         } = 262144;
 
+        public int MaxSendHistoryCount
+        {
+            get;
+            set;
+        } = 20;
+
+        public List<SendHistoryItem> SendHistory
+        {
+            get;
+            set;
+        } = new List<SendHistoryItem>();
+
         public static AppSettings CreateDefault()
         {
             return new AppSettings
@@ -87,7 +99,9 @@ namespace SerialAssistant.Core.Models
                 SendLineEnding = SendLineEnding.None,
                 ShowTimestamp = true,
                 ShowDirection = true,
-                MaxDisplayBytes = 262144
+                MaxDisplayBytes = 262144,
+                MaxSendHistoryCount = 20,
+                SendHistory = new List<SendHistoryItem>()
             };
         }
     }

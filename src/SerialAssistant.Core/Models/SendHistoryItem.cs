@@ -10,11 +10,19 @@ namespace SerialAssistant.Core.Models
         public string Content
         {
             get;
+            set;
         }
 
         public SendMode SendMode
         {
             get;
+            set;
+        }
+
+        public SendHistoryItem()
+        {
+            Content = string.Empty;
+            SendMode = SendMode.Text;
         }
 
         public SendHistoryItem(string content, SendMode sendMode)

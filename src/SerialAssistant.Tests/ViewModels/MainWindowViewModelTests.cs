@@ -2649,5 +2649,372 @@ namespace SerialAssistant.Tests.ViewModels
             /* Assert */
             Assert.Equal(SendMode.Hex, viewModel.SelectedSendMode);
         }
+
+        /*
+         * Test 加载配置时恢复 MaxSendHistoryCount
+         */
+        [Fact]
+        public void LoadSettings_RestoresMaxSendHistoryCount()
+        {
+            /* Arrange */
+            var fakeScanner = new FakeSerialPortScanner();
+            var fakeService = new FakeSerialPortService();
+            var fakeSettingsService = new FakeAppSettingsService();
+            fakeSettingsService.SetSavedSettings(new AppSettings
+            {
+                MaxSendHistoryCount = 50
+            });
+
+            /* Act */
+            var viewModel = new MainWindowViewModel(fakeScanner, fakeService, null, fakeSettingsService);
+
+            /* Assert */
+            Assert.Equal(50, viewModel.MaxSendHistoryCount);
+        }
+
+        /*
+         * Test 加载配置时恢复 SendHistory
+         */
+        [Fact]
+        public void LoadSettings_RestoresSendHistory()
+        {
+            /* Arrange */
+            var fakeScanner = new FakeSerialPortScanner();
+            var fakeService = new FakeSerialPortService();
+            var fakeSettingsService = new FakeAppSettingsService();
+            var settingsHistory = new List<SendHistoryItem>
+            {
+                new SendHistoryItem("Hello", SendMode.Text),
+                new SendHistoryItem("41 42", SendMode.Hex)
+            };
+            fakeSettingsService.SetSavedSettings(new AppSettings
+            {
+                SendHistory = settingsHistory
+            });
+
+            /* Act */
+            var viewModel = new MainWindowViewModel(fakeScanner, fakeService, null, fakeSettingsService);
+
+            /* Assert */
+            Assert.Equal(2, viewModel.SendHistory.Count);
+            Assert.Equal("Hello", viewModel.SendHistory[0].Content);
+            Assert.Equal(SendMode.Text, viewModel.SendHistory[0].SendMode);
+            Assert.Equal("41 42", viewModel.SendHistory[1].Content);
+            Assert.Equal(SendMode.Hex, viewModel.SendHistory[1].SendMode);
+        }
+
+        /*
+         * Test 加载配置时保持历史顺序
+         */
+        [Fact]
+        public void LoadSettings_PreservesHistoryOrder()
+        {
+            /* Arrange */
+            var fakeScanner = new FakeSerialPortScanner();
+            var fakeService = new FakeSerialPortService();
+            var fakeSettingsService = new FakeAppSettingsService();
+            var settingsHistory = new List<SendHistoryItem>
+            {
+                new SendHistoryItem("First", SendMode.Text),
+                new SendHistoryItem("Second", SendMode.Text),
+                new SendHistoryItem("Third", SendMode.Text)
+            };
+            fakeSettingsService.SetSavedSettings(new AppSettings
+            {
+                SendHistory = settingsHistory
+            });
+
+            /* Act */
+            var viewModel = new MainWindowViewModel(fakeScanner, fakeService, null, fakeSettingsService);
+
+            /* Assert */
+            Assert.Equal("First", viewModel.SendHistory[0].Content);
+            Assert.Equal("Second", viewModel.SendHistory[1].Content);
+            Assert.Equal("Third", viewModel.SendHistory[2].Content);
+        }
+
+        /*
+         * Test 加载配置时 SelectedSendHistoryItem 为 null
+         */
+        [Fact]
+        public void LoadSettings_SelectedSendHistoryItem_IsNull()
+        {
+            /* Arrange */
+            var fakeScanner = new FakeSerialPortScanner();
+            var fakeService = new FakeSerialPortService();
+            var fakeSettingsService = new FakeAppSettingsService();
+            fakeSettingsService.SetSavedSettings(new AppSettings
+            {
+                SendHistory = new List<SendHistoryItem>
+                {
+                    new SendHistoryItem("Test", SendMode.Text)
+                }
+            });
+
+            /* Act */
+            var viewModel = new MainWindowViewModel(fakeScanner, fakeService, null, fakeSettingsService);
+
+            /* Assert */
+            Assert.Null(viewModel.SelectedSendHistoryItem);
+        }
+
+        /*
+         * Test 加载配置时不修改 SendText
+         */
+        [Fact]
+        public void LoadSettings_DoesNotModifySendText()
+        {
+            /* Arrange */
+            var fakeScanner = new FakeSerialPortScanner();
+            var fakeService = new FakeSerialPortService();
+            var fakeSettingsService = new FakeAppSettingsService();
+            fakeSettingsService.SetSavedSettings(new AppSettings
+            {
+                SendHistory = new List<SendHistoryItem>
+                {
+                    new SendHistoryItem("FromHistory", SendMode.Text)
+                }
+            });
+
+            /* Act */
+            var viewModel = new MainWindowViewModel(fakeScanner, fakeService, null, fakeSettingsService);
+
+            /* Assert */
+            Assert.Equal(string.Empty, viewModel.SendText);
+        }
+
+        /*
+         * Test 加载配置时 SendHistory 超过 MaxSendHistoryCount 会裁剪最旧项
+         */
+        [Fact]
+        public void LoadSettings_ExceedsMaxCount_TrimsOldest()
+        {
+            /* Arrange */
+            var fakeScanner = new FakeSerialPortScanner();
+            var fakeService = new FakeSerialPortService();
+            var fakeSettingsService = new FakeAppSettingsService();
+            var settingsHistory = new List<SendHistoryItem>();
+            for (int i = 0; i < 25; i++)
+            {
+                settingsHistory.Add(new SendHistoryItem($"Item{i}", SendMode.Text));
+            }
+            fakeSettingsService.SetSavedSettings(new AppSettings
+            {
+                SendHistory = settingsHistory,
+                MaxSendHistoryCount = 20
+            });
+
+            /* Act */
+            var viewModel = new MainWindowViewModel(fakeScanner, fakeService, null, fakeSettingsService);
+
+            /* Assert */
+            Assert.Equal(20, viewModel.SendHistory.Count);
+            Assert.Equal("Item0", viewModel.SendHistory[0].Content);
+            Assert.Equal("Item19", viewModel.SendHistory[19].Content);
+            Assert.DoesNotContain(viewModel.SendHistory, h => h.Content == "Item20");
+        }
+
+        /*
+         * Test 加载配置时重复历史会去重
+         */
+        [Fact]
+        public void LoadSettings_DuplicateHistory_Deduplicates()
+        {
+            /* Arrange */
+            var fakeScanner = new FakeSerialPortScanner();
+            var fakeService = new FakeSerialPortService();
+            var fakeSettingsService = new FakeAppSettingsService();
+            var settingsHistory = new List<SendHistoryItem>
+            {
+                new SendHistoryItem("Hello", SendMode.Text),
+                new SendHistoryItem("World", SendMode.Text),
+                new SendHistoryItem("Hello", SendMode.Text)
+            };
+            fakeSettingsService.SetSavedSettings(new AppSettings
+            {
+                SendHistory = settingsHistory
+            });
+
+            /* Act */
+            var viewModel = new MainWindowViewModel(fakeScanner, fakeService, null, fakeSettingsService);
+
+            /* Assert */
+            Assert.Equal(2, viewModel.SendHistory.Count);
+            Assert.Equal("Hello", viewModel.SendHistory[0].Content);
+            Assert.Equal("World", viewModel.SendHistory[1].Content);
+        }
+
+        /*
+         * Test 加载配置时空 Content 被跳过
+         */
+        [Fact]
+        public void LoadSettings_EmptyContent_IsSkipped()
+        {
+            /* Arrange */
+            var fakeScanner = new FakeSerialPortScanner();
+            var fakeService = new FakeSerialPortService();
+            var fakeSettingsService = new FakeAppSettingsService();
+            var settingsHistory = new List<SendHistoryItem>
+            {
+                new SendHistoryItem("Valid", SendMode.Text),
+                new SendHistoryItem("", SendMode.Text),
+                new SendHistoryItem("   ", SendMode.Text),
+                new SendHistoryItem("AlsoValid", SendMode.Text)
+            };
+            fakeSettingsService.SetSavedSettings(new AppSettings
+            {
+                SendHistory = settingsHistory
+            });
+
+            /* Act */
+            var viewModel = new MainWindowViewModel(fakeScanner, fakeService, null, fakeSettingsService);
+
+            /* Assert */
+            Assert.Equal(2, viewModel.SendHistory.Count);
+            Assert.Equal("Valid", viewModel.SendHistory[0].Content);
+            Assert.Equal("AlsoValid", viewModel.SendHistory[1].Content);
+        }
+
+        /*
+         * Test 保存配置时保存 MaxSendHistoryCount
+         */
+        [Fact]
+        public void SaveSettings_SavesMaxSendHistoryCount()
+        {
+            /* Arrange */
+            var fakeScanner = new FakeSerialPortScanner();
+            var fakeService = new FakeSerialPortService();
+            var fakeSettingsService = new FakeAppSettingsService();
+            var viewModel = new MainWindowViewModel(fakeScanner, fakeService, null, fakeSettingsService);
+
+            viewModel.MaxSendHistoryCount = 30;
+            viewModel.SerialSettings.SelectedPortName = "COM1";
+            viewModel.ToggleConnectionCommand.Execute(null);
+            viewModel.SendText = "Test";
+            viewModel.SendCommand.Execute(null);
+
+            /* Act */
+            viewModel.SaveSettings();
+
+            /* Assert */
+            Assert.Equal(30, fakeSettingsService.LastSavedSettings!.MaxSendHistoryCount);
+        }
+
+        /*
+         * Test 保存配置时保存 SendHistory
+         */
+        [Fact]
+        public void SaveSettings_SavesSendHistory()
+        {
+            /* Arrange */
+            var fakeScanner = new FakeSerialPortScanner();
+            var fakeService = new FakeSerialPortService();
+            var fakeSettingsService = new FakeAppSettingsService();
+            var viewModel = new MainWindowViewModel(fakeScanner, fakeService, null, fakeSettingsService);
+
+            viewModel.SerialSettings.SelectedPortName = "COM1";
+            viewModel.ToggleConnectionCommand.Execute(null);
+            viewModel.SendText = "Hello";
+            viewModel.SendCommand.Execute(null);
+
+            viewModel.SendText = "41 42";
+            viewModel.SelectedSendMode = SendMode.Hex;
+            viewModel.SendCommand.Execute(null);
+
+            /* Act */
+            viewModel.SaveSettings();
+
+            /* Assert */
+            Assert.NotNull(fakeSettingsService.LastSavedSettings!.SendHistory);
+            Assert.Equal(2, fakeSettingsService.LastSavedSettings.SendHistory.Count);
+            Assert.Equal("41 42", fakeSettingsService.LastSavedSettings.SendHistory[0].Content);
+            Assert.Equal(SendMode.Hex, fakeSettingsService.LastSavedSettings.SendHistory[0].SendMode);
+        }
+
+        /*
+         * Test 保存配置时不保存 SelectedSendHistoryItem
+         */
+        [Fact]
+        public void SaveSettings_DoesNotSaveSelectedSendHistoryItem()
+        {
+            /* Arrange */
+            var fakeScanner = new FakeSerialPortScanner();
+            var fakeService = new FakeSerialPortService();
+            var fakeSettingsService = new FakeAppSettingsService();
+            var viewModel = new MainWindowViewModel(fakeScanner, fakeService, null, fakeSettingsService);
+
+            viewModel.SerialSettings.SelectedPortName = "COM1";
+            viewModel.ToggleConnectionCommand.Execute(null);
+            viewModel.SendText = "Hello";
+            viewModel.SendCommand.Execute(null);
+
+            viewModel.SelectedSendHistoryItem = viewModel.SendHistory[0];
+
+            /* Act */
+            viewModel.SaveSettings();
+
+            /* Assert */
+            Assert.Single(fakeSettingsService.LastSavedSettings!.SendHistory);
+        }
+
+        /*
+         * Test 保存配置时保持 SendHistory 顺序
+         */
+        [Fact]
+        public void SaveSettings_PreservesHistoryOrder()
+        {
+            /* Arrange */
+            var fakeScanner = new FakeSerialPortScanner();
+            var fakeService = new FakeSerialPortService();
+            var fakeSettingsService = new FakeAppSettingsService();
+            var viewModel = new MainWindowViewModel(fakeScanner, fakeService, null, fakeSettingsService);
+
+            viewModel.SerialSettings.SelectedPortName = "COM1";
+            viewModel.ToggleConnectionCommand.Execute(null);
+
+            viewModel.SendText = "First";
+            viewModel.SendCommand.Execute(null);
+
+            viewModel.SendText = "Second";
+            viewModel.SendCommand.Execute(null);
+
+            viewModel.SendText = "Third";
+            viewModel.SendCommand.Execute(null);
+
+            /* Act */
+            viewModel.SaveSettings();
+
+            /* Assert */
+            Assert.Equal("Third", fakeSettingsService.LastSavedSettings!.SendHistory[0].Content);
+            Assert.Equal("Second", fakeSettingsService.LastSavedSettings.SendHistory[1].Content);
+            Assert.Equal("First", fakeSettingsService.LastSavedSettings.SendHistory[2].Content);
+        }
+
+        /*
+         * Test 清空历史后保存配置 SendHistory 为空集合
+         */
+        [Fact]
+        public void SaveSettings_AfterClearHistory_IsEmpty()
+        {
+            /* Arrange */
+            var fakeScanner = new FakeSerialPortScanner();
+            var fakeService = new FakeSerialPortService();
+            var fakeSettingsService = new FakeAppSettingsService();
+            var viewModel = new MainWindowViewModel(fakeScanner, fakeService, null, fakeSettingsService);
+
+            viewModel.SerialSettings.SelectedPortName = "COM1";
+            viewModel.ToggleConnectionCommand.Execute(null);
+            viewModel.SendText = "Hello";
+            viewModel.SendCommand.Execute(null);
+
+            viewModel.ClearSendHistoryCommand.Execute(null);
+
+            /* Act */
+            viewModel.SaveSettings();
+
+            /* Assert */
+            Assert.NotNull(fakeSettingsService.LastSavedSettings!.SendHistory);
+            Assert.Empty(fakeSettingsService.LastSavedSettings.SendHistory);
+        }
     }
 }

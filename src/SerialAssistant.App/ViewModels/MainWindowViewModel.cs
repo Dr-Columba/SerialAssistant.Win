@@ -578,6 +578,8 @@ namespace SerialAssistant.App.ViewModels
             ReceiveDisplay.ShowTimestamp = settings.ShowTimestamp;
             ReceiveDisplay.ShowDirection = settings.ShowDirection;
             ReceiveDisplay.MaxDisplayBytes = settings.MaxDisplayBytes;
+            MaxSendHistoryCount = settings.MaxSendHistoryCount;
+            RestoreSendHistory(settings.SendHistory);
             _lastLoadedSettings = settings;
         }
 
@@ -600,7 +602,9 @@ namespace SerialAssistant.App.ViewModels
                 SendLineEnding = SelectedSendLineEnding,
                 ShowTimestamp = ReceiveDisplay.ShowTimestamp,
                 ShowDirection = ReceiveDisplay.ShowDirection,
-                MaxDisplayBytes = ReceiveDisplay.MaxDisplayBytes
+                MaxDisplayBytes = ReceiveDisplay.MaxDisplayBytes,
+                MaxSendHistoryCount = MaxSendHistoryCount,
+                SendHistory = _sendHistory.ToList()
             };
 
             return _appSettingsService.Save(settings);
@@ -643,6 +647,52 @@ namespace SerialAssistant.App.ViewModels
         private void ClearSendHistory(object? parameter)
         {
             _sendHistory.Clear();
+            SelectedSendHistoryItem = null;
+        }
+
+        private void RestoreSendHistory(List<SendHistoryItem>? settingsHistory)
+        {
+            _sendHistory.Clear();
+
+            if (settingsHistory == null)
+            {
+                return;
+            }
+
+            foreach (var item in settingsHistory)
+            {
+                if (item == null)
+                {
+                    continue;
+                }
+
+                if (string.IsNullOrWhiteSpace(item.Content))
+                {
+                    continue;
+                }
+
+                if (!Enum.IsDefined(typeof(SendMode), item.SendMode))
+                {
+                    continue;
+                }
+
+                bool isDuplicate = false;
+                for (int i = 0; i < _sendHistory.Count; i++)
+                {
+                    if (_sendHistory[i].Content == item.Content && _sendHistory[i].SendMode == item.SendMode)
+                    {
+                        isDuplicate = true;
+                        break;
+                    }
+                }
+
+                if (!isDuplicate)
+                {
+                    _sendHistory.Add(new SendHistoryItem(item.Content, item.SendMode));
+                }
+            }
+
+            TrimSendHistory();
             SelectedSendHistoryItem = null;
         }
     }

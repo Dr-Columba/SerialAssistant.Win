@@ -439,5 +439,234 @@ namespace SerialAssistant.Tests.Infrastructure
             /* Cleanup */
             File.Delete(testPath);
         }
+
+        /*
+         * Test 默认配置 MaxSendHistoryCount 为 20
+         */
+        [Fact]
+        public void Load_DefaultConfig_MaxSendHistoryCount_Is20()
+        {
+            /* Arrange */
+            string testPath = CreateTestFilePath();
+            if (File.Exists(testPath))
+            {
+                File.Delete(testPath);
+            }
+            var service = new JsonAppSettingsService(testPath);
+
+            /* Act */
+            var result = service.Load();
+
+            /* Assert */
+            Assert.True(result.IsSuccess);
+            Assert.NotNull(result.Value);
+            Assert.Equal(20, result.Value.MaxSendHistoryCount);
+
+            /* Cleanup */
+            File.Delete(testPath);
+        }
+
+        /*
+         * Test 默认配置 SendHistory 为空集合
+         */
+        [Fact]
+        public void Load_DefaultConfig_SendHistory_IsEmptyList()
+        {
+            /* Arrange */
+            string testPath = CreateTestFilePath();
+            if (File.Exists(testPath))
+            {
+                File.Delete(testPath);
+            }
+            var service = new JsonAppSettingsService(testPath);
+
+            /* Act */
+            var result = service.Load();
+
+            /* Assert */
+            Assert.True(result.IsSuccess);
+            Assert.NotNull(result.Value);
+            Assert.NotNull(result.Value.SendHistory);
+            Assert.Empty(result.Value.SendHistory);
+
+            /* Cleanup */
+            File.Delete(testPath);
+        }
+
+        /*
+         * Test 保存后加载能恢复 MaxSendHistoryCount
+         */
+        [Fact]
+        public void Load_AfterSave_RestoresMaxSendHistoryCount()
+        {
+            /* Arrange */
+            string testPath = CreateTestFilePath();
+            if (File.Exists(testPath))
+            {
+                File.Delete(testPath);
+            }
+            var service = new JsonAppSettingsService(testPath);
+            var originalSettings = new AppSettings
+            {
+                MaxSendHistoryCount = 50
+            };
+
+            /* Act */
+            service.Save(originalSettings);
+            var result = service.Load();
+
+            /* Assert */
+            Assert.True(result.IsSuccess);
+            Assert.NotNull(result.Value);
+            Assert.Equal(50, result.Value.MaxSendHistoryCount);
+
+            /* Cleanup */
+            File.Delete(testPath);
+        }
+
+        /*
+         * Test 保存后加载能恢复 SendHistory
+         */
+        [Fact]
+        public void Load_AfterSave_RestoresSendHistory()
+        {
+            /* Arrange */
+            string testPath = CreateTestFilePath();
+            if (File.Exists(testPath))
+            {
+                File.Delete(testPath);
+            }
+            var service = new JsonAppSettingsService(testPath);
+            var originalSettings = new AppSettings
+            {
+                SendHistory = new List<SendHistoryItem>
+                {
+                    new SendHistoryItem("Hello", Core.Enums.SendMode.Text),
+                    new SendHistoryItem("41 42", Core.Enums.SendMode.Hex)
+                }
+            };
+
+            /* Act */
+            service.Save(originalSettings);
+            var result = service.Load();
+
+            /* Assert */
+            Assert.True(result.IsSuccess);
+            Assert.NotNull(result.Value);
+            Assert.NotNull(result.Value.SendHistory);
+            Assert.Equal(2, result.Value.SendHistory.Count);
+            Assert.Equal("Hello", result.Value.SendHistory[0].Content);
+            Assert.Equal(Core.Enums.SendMode.Text, result.Value.SendHistory[0].SendMode);
+            Assert.Equal("41 42", result.Value.SendHistory[1].Content);
+            Assert.Equal(Core.Enums.SendMode.Hex, result.Value.SendHistory[1].SendMode);
+
+            /* Cleanup */
+            File.Delete(testPath);
+        }
+
+        /*
+         * Test 保存后加载能恢复 SendHistory 顺序
+         */
+        [Fact]
+        public void Load_AfterSave_RestoresSendHistoryOrder()
+        {
+            /* Arrange */
+            string testPath = CreateTestFilePath();
+            if (File.Exists(testPath))
+            {
+                File.Delete(testPath);
+            }
+            var service = new JsonAppSettingsService(testPath);
+            var originalSettings = new AppSettings
+            {
+                SendHistory = new List<SendHistoryItem>
+                {
+                    new SendHistoryItem("First", Core.Enums.SendMode.Text),
+                    new SendHistoryItem("Second", Core.Enums.SendMode.Text),
+                    new SendHistoryItem("Third", Core.Enums.SendMode.Text)
+                }
+            };
+
+            /* Act */
+            service.Save(originalSettings);
+            var result = service.Load();
+
+            /* Assert */
+            Assert.True(result.IsSuccess);
+            Assert.NotNull(result.Value);
+            Assert.Equal("First", result.Value.SendHistory[0].Content);
+            Assert.Equal("Second", result.Value.SendHistory[1].Content);
+            Assert.Equal("Third", result.Value.SendHistory[2].Content);
+
+            /* Cleanup */
+            File.Delete(testPath);
+        }
+
+        /*
+         * Test 旧配置缺失 MaxSendHistoryCount 时默认 20
+         */
+        [Fact]
+        public void Load_OldConfigWithoutMaxSendHistoryCount_UsesDefault20()
+        {
+            /* Arrange */
+            string testPath = CreateTestFilePath();
+            string oldJson = @"{
+                ""LastPortName"": ""COM3"",
+                ""BaudRate"": 9600,
+                ""DataBits"": 8,
+                ""Parity"": ""None"",
+                ""StopBits"": ""One"",
+                ""SendMode"": 0,
+                ""DisplayMode"": 0,
+                ""SendLineEnding"": 0
+            }";
+            File.WriteAllText(testPath, oldJson, Encoding.UTF8);
+            var service = new JsonAppSettingsService(testPath);
+
+            /* Act */
+            var result = service.Load();
+
+            /* Assert */
+            Assert.True(result.IsSuccess);
+            Assert.NotNull(result.Value);
+            Assert.Equal(20, result.Value.MaxSendHistoryCount);
+
+            /* Cleanup */
+            File.Delete(testPath);
+        }
+
+        /*
+         * Test 旧配置缺失 SendHistory 时默认空集合
+         */
+        [Fact]
+        public void Load_OldConfigWithoutSendHistory_UsesEmptyList()
+        {
+            /* Arrange */
+            string testPath = CreateTestFilePath();
+            string oldJson = @"{
+                ""LastPortName"": ""COM3"",
+                ""BaudRate"": 9600,
+                ""DataBits"": 8,
+                ""Parity"": ""None"",
+                ""StopBits"": ""One"",
+                ""SendMode"": 0,
+                ""DisplayMode"": 0,
+                ""SendLineEnding"": 0
+            }";
+            File.WriteAllText(testPath, oldJson, Encoding.UTF8);
+            var service = new JsonAppSettingsService(testPath);
+
+            /* Act */
+            var result = service.Load();
+
+            /* Assert */
+            Assert.True(result.IsSuccess);
+            Assert.NotNull(result.Value);
+            Assert.NotNull(result.Value.SendHistory);
+            Assert.Empty(result.Value.SendHistory);
+
+            /* Cleanup */
+            File.Delete(testPath);
+        }
     }
 }
