@@ -12,7 +12,7 @@
 
 **Current Branch**: feature/receive-buffer-limit-c3 (Expected: feature/receive-buffer-limit-c3)
 
-**Git Status**: 
+**Git Status**:
 - Modified files: README.md, docs/Architecture.md, docs/ManualTestChecklist.md, docs/FinalReview.md
 - Added files: docs/FeatureReports/FeatureC-ReceiveBufferLimit.md, docs/FeatureReports/FeatureC3-ReceiveBufferLimitDocumentation.md
 
