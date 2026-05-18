@@ -181,6 +181,70 @@ namespace SerialAssistant.Tests.Infrastructure
             Assert.Equal("One", result.Value.StopBits);
             Assert.Equal(Core.Enums.SendMode.Text, result.Value.SendMode);
             Assert.Equal(Core.Enums.DisplayMode.Text, result.Value.DisplayMode);
+            Assert.Equal(Core.Enums.SendLineEnding.None, result.Value.SendLineEnding);
+
+            /* Cleanup */
+            File.Delete(testPath);
+        }
+
+        /*
+         * Test 保存后加载能恢复 SendLineEnding
+         */
+        [Fact]
+        public void Load_AfterSave_RestoresSendLineEnding()
+        {
+            /* Arrange */
+            string testPath = CreateTestFilePath();
+            if (File.Exists(testPath))
+            {
+                File.Delete(testPath);
+            }
+            var service = new JsonAppSettingsService(testPath);
+            var originalSettings = new AppSettings
+            {
+                SendLineEnding = Core.Enums.SendLineEnding.CRLF
+            };
+
+            /* Act */
+            service.Save(originalSettings);
+            var result = service.Load();
+
+            /* Assert */
+            Assert.True(result.IsSuccess);
+            Assert.NotNull(result.Value);
+            Assert.Equal(Core.Enums.SendLineEnding.CRLF, result.Value.SendLineEnding);
+
+            /* Cleanup */
+            File.Delete(testPath);
+        }
+
+        /*
+         * Test 旧配置文件缺少 SendLineEnding 字段时使用默认值 None
+         */
+        [Fact]
+        public void Load_OldConfigWithoutSendLineEnding_UsesNone()
+        {
+            /* Arrange */
+            string testPath = CreateTestFilePath();
+            string oldJson = @"{
+                ""LastPortName"": ""COM3"",
+                ""BaudRate"": 9600,
+                ""DataBits"": 8,
+                ""Parity"": ""None"",
+                ""StopBits"": ""One"",
+                ""SendMode"": 0,
+                ""DisplayMode"": 0
+            }";
+            File.WriteAllText(testPath, oldJson, Encoding.UTF8);
+            var service = new JsonAppSettingsService(testPath);
+
+            /* Act */
+            var result = service.Load();
+
+            /* Assert */
+            Assert.True(result.IsSuccess);
+            Assert.NotNull(result.Value);
+            Assert.Equal(Core.Enums.SendLineEnding.None, result.Value.SendLineEnding);
 
             /* Cleanup */
             File.Delete(testPath);

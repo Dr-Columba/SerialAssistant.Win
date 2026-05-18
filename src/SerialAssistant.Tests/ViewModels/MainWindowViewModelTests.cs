@@ -1207,5 +1207,210 @@ namespace SerialAssistant.Tests.ViewModels
             /* Assert */
             Assert.Equal("COM1", viewModel.SerialSettings.SelectedPortName);
         }
+
+        /*
+         * Test SendLineEndings 包含预期的选项
+         */
+        [Fact]
+        public void SendLineEndings_ContainsExpectedOptions()
+        {
+            /* Arrange */
+            var viewModel = new MainWindowViewModel();
+
+            /* Act & Assert */
+            Assert.Contains(SendLineEnding.None, viewModel.SendLineEndings);
+            Assert.Contains(SendLineEnding.CR, viewModel.SendLineEndings);
+            Assert.Contains(SendLineEnding.LF, viewModel.SendLineEndings);
+            Assert.Contains(SendLineEnding.CRLF, viewModel.SendLineEndings);
+        }
+
+        /*
+         * Test 默认 SelectedSendLineEnding 是 None
+         */
+        [Fact]
+        public void DefaultSelectedSendLineEnding_IsNone()
+        {
+            /* Arrange */
+            var viewModel = new MainWindowViewModel();
+
+            /* Act & Assert */
+            Assert.Equal(SendLineEnding.None, viewModel.SelectedSendLineEnding);
+        }
+
+        /*
+         * Test 文本模式 + None 发送正确数据
+         */
+        [Fact]
+        public void SendCommand_TextMode_None_SendsCorrectData()
+        {
+            /* Arrange */
+            var fakeScanner = new FakeSerialPortScanner();
+            var fakeService = new FakeSerialPortService();
+            var viewModel = new MainWindowViewModel(fakeScanner, fakeService);
+
+            viewModel.SerialSettings.SelectedPortName = "COM1";
+            viewModel.ToggleConnectionCommand.Execute(null);
+            viewModel.SelectedSendMode = SendMode.Text;
+            viewModel.SelectedSendLineEnding = SendLineEnding.None;
+            viewModel.SendText = "ABC";
+
+            /* Act */
+            viewModel.SendCommand.Execute(null);
+
+            /* Assert */
+            Assert.Single(fakeService.SentData);
+            Assert.Equal(Encoding.UTF8.GetBytes("ABC"), fakeService.SentData[0]);
+            Assert.Equal(3, viewModel.SentBytesCount);
+        }
+
+        /*
+         * Test 文本模式 + CR 发送正确数据
+         */
+        [Fact]
+        public void SendCommand_TextMode_CR_SendsCorrectData()
+        {
+            /* Arrange */
+            var fakeScanner = new FakeSerialPortScanner();
+            var fakeService = new FakeSerialPortService();
+            var viewModel = new MainWindowViewModel(fakeScanner, fakeService);
+
+            viewModel.SerialSettings.SelectedPortName = "COM1";
+            viewModel.ToggleConnectionCommand.Execute(null);
+            viewModel.SelectedSendMode = SendMode.Text;
+            viewModel.SelectedSendLineEnding = SendLineEnding.CR;
+            viewModel.SendText = "ABC";
+
+            /* Act */
+            viewModel.SendCommand.Execute(null);
+
+            /* Assert */
+            Assert.Single(fakeService.SentData);
+            Assert.Equal(Encoding.UTF8.GetBytes("ABC\r"), fakeService.SentData[0]);
+            Assert.Equal(4, viewModel.SentBytesCount);
+        }
+
+        /*
+         * Test 文本模式 + LF 发送正确数据
+         */
+        [Fact]
+        public void SendCommand_TextMode_LF_SendsCorrectData()
+        {
+            /* Arrange */
+            var fakeScanner = new FakeSerialPortScanner();
+            var fakeService = new FakeSerialPortService();
+            var viewModel = new MainWindowViewModel(fakeScanner, fakeService);
+
+            viewModel.SerialSettings.SelectedPortName = "COM1";
+            viewModel.ToggleConnectionCommand.Execute(null);
+            viewModel.SelectedSendMode = SendMode.Text;
+            viewModel.SelectedSendLineEnding = SendLineEnding.LF;
+            viewModel.SendText = "ABC";
+
+            /* Act */
+            viewModel.SendCommand.Execute(null);
+
+            /* Assert */
+            Assert.Single(fakeService.SentData);
+            Assert.Equal(Encoding.UTF8.GetBytes("ABC\n"), fakeService.SentData[0]);
+            Assert.Equal(4, viewModel.SentBytesCount);
+        }
+
+        /*
+         * Test 文本模式 + CRLF 发送正确数据
+         */
+        [Fact]
+        public void SendCommand_TextMode_CRLF_SendsCorrectData()
+        {
+            /* Arrange */
+            var fakeScanner = new FakeSerialPortScanner();
+            var fakeService = new FakeSerialPortService();
+            var viewModel = new MainWindowViewModel(fakeScanner, fakeService);
+
+            viewModel.SerialSettings.SelectedPortName = "COM1";
+            viewModel.ToggleConnectionCommand.Execute(null);
+            viewModel.SelectedSendMode = SendMode.Text;
+            viewModel.SelectedSendLineEnding = SendLineEnding.CRLF;
+            viewModel.SendText = "ABC";
+
+            /* Act */
+            viewModel.SendCommand.Execute(null);
+
+            /* Assert */
+            Assert.Single(fakeService.SentData);
+            Assert.Equal(Encoding.UTF8.GetBytes("ABC\r\n"), fakeService.SentData[0]);
+            Assert.Equal(5, viewModel.SentBytesCount);
+        }
+
+        /*
+         * Test HEX 模式即使选中 CRLF 也不追加结尾
+         */
+        [Fact]
+        public void SendCommand_HexMode_DoesNotAppendLineEnding()
+        {
+            /* Arrange */
+            var fakeScanner = new FakeSerialPortScanner();
+            var fakeService = new FakeSerialPortService();
+            var viewModel = new MainWindowViewModel(fakeScanner, fakeService);
+
+            viewModel.SerialSettings.SelectedPortName = "COM1";
+            viewModel.ToggleConnectionCommand.Execute(null);
+            viewModel.SelectedSendMode = SendMode.Hex;
+            viewModel.SelectedSendLineEnding = SendLineEnding.CRLF;
+            viewModel.SendText = "41 42 43";
+
+            /* Act */
+            viewModel.SendCommand.Execute(null);
+
+            /* Assert */
+            Assert.Single(fakeService.SentData);
+            Assert.Equal(new byte[] { 0x41, 0x42, 0x43 }, fakeService.SentData[0]);
+            Assert.Equal(3, viewModel.SentBytesCount);
+        }
+
+        /*
+         * Test 加载配置时恢复 SendLineEnding
+         */
+        [Fact]
+        public void LoadSettings_RestoresSendLineEnding()
+        {
+            /* Arrange */
+            var fakeScanner = new FakeSerialPortScanner();
+            var fakeService = new FakeSerialPortService();
+            var fakeUiInvoker = new FakeUiThreadInvoker();
+            var fakeSettingsService = new FakeAppSettingsService();
+            var customSettings = new AppSettings
+            {
+                SendLineEnding = SendLineEnding.CRLF
+            };
+            fakeSettingsService.Save(customSettings);
+
+            /* Act */
+            var viewModel = new MainWindowViewModel(fakeScanner, fakeService, fakeUiInvoker, fakeSettingsService);
+
+            /* Assert */
+            Assert.Equal(SendLineEnding.CRLF, viewModel.SelectedSendLineEnding);
+        }
+
+        /*
+         * Test 保存配置时保存 SendLineEnding
+         */
+        [Fact]
+        public void SaveSettings_SavesSendLineEnding()
+        {
+            /* Arrange */
+            var fakeScanner = new FakeSerialPortScanner();
+            var fakeService = new FakeSerialPortService();
+            var fakeUiInvoker = new FakeUiThreadInvoker();
+            var fakeSettingsService = new FakeAppSettingsService();
+            var viewModel = new MainWindowViewModel(fakeScanner, fakeService, fakeUiInvoker, fakeSettingsService);
+            viewModel.SelectedSendLineEnding = SendLineEnding.CRLF;
+
+            /* Act */
+            var result = viewModel.SaveSettings();
+
+            /* Assert */
+            Assert.True(result.IsSuccess);
+            Assert.Equal(SendLineEnding.CRLF, fakeSettingsService.GetSavedSettings().SendLineEnding);
+        }
     }
 }

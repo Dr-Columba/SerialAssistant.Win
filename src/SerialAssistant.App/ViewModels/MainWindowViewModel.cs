@@ -22,6 +22,7 @@ namespace SerialAssistant.App.ViewModels
         private SerialConnectionState _connectionState;
         private string _sendText;
         private SendMode _selectedSendMode;
+        private SendLineEnding _selectedSendLineEnding;
         private string _statusMessage;
         private int _sentBytesCount;
         private bool _isHexDisplay;
@@ -52,16 +53,23 @@ namespace SerialAssistant.App.ViewModels
             SerialSettings = new SerialSettingsViewModel();
             ReceiveDisplay = new ReceiveDisplayViewModel();
             SendModes = new ObservableCollection<SendMode>();
+            SendLineEndings = new ObservableCollection<SendLineEnding>();
 
             _sendText = string.Empty;
             _statusMessage = "就绪。请点击刷新按钮获取可用串口。";
             _sentBytesCount = 0;
             _selectedSendMode = SendMode.Text;
+            _selectedSendLineEnding = SendLineEnding.None;
             _connectionButtonText = "打开串口";
 
             foreach (SendMode mode in Enum.GetValues<SendMode>())
             {
                 SendModes.Add(mode);
+            }
+
+            foreach (SendLineEnding ending in Enum.GetValues<SendLineEnding>())
+            {
+                SendLineEndings.Add(ending);
             }
 
             if (_serialPortService != null)
@@ -125,6 +133,18 @@ namespace SerialAssistant.App.ViewModels
                     (SendCommand as RelayCommand)?.RaiseCanExecuteChanged();
                 }
             }
+        }
+
+        public ObservableCollection<SendLineEnding> SendLineEndings
+        {
+            get;
+            private set;
+        }
+
+        public SendLineEnding SelectedSendLineEnding
+        {
+            get => _selectedSendLineEnding;
+            set => SetProperty(ref _selectedSendLineEnding, value);
         }
 
         public SerialConnectionState ConnectionState
@@ -372,7 +392,23 @@ namespace SerialAssistant.App.ViewModels
 
             if (SelectedSendMode == SendMode.Text)
             {
-                data = Encoding.UTF8.GetBytes(SendText);
+                string textToSend = SendText;
+                switch (SelectedSendLineEnding)
+                {
+                    case SendLineEnding.CR:
+                        textToSend += "\r";
+                        break;
+                    case SendLineEnding.LF:
+                        textToSend += "\n";
+                        break;
+                    case SendLineEnding.CRLF:
+                        textToSend += "\r\n";
+                        break;
+                    case SendLineEnding.None:
+                    default:
+                        break;
+                }
+                data = Encoding.UTF8.GetBytes(textToSend);
             }
             else
             {
@@ -473,6 +509,7 @@ namespace SerialAssistant.App.ViewModels
             SerialSettings.SelectedParity = settings.Parity;
             SerialSettings.SelectedStopBits = settings.StopBits;
             SelectedSendMode = settings.SendMode;
+            SelectedSendLineEnding = settings.SendLineEnding;
             ReceiveDisplay.IsHexDisplay = (settings.DisplayMode == DisplayMode.Hex);
             _lastLoadedSettings = settings;
         }
@@ -492,7 +529,8 @@ namespace SerialAssistant.App.ViewModels
                 Parity = SerialSettings.SelectedParity ?? "None",
                 StopBits = SerialSettings.SelectedStopBits ?? "One",
                 SendMode = SelectedSendMode,
-                DisplayMode = ReceiveDisplay.IsHexDisplay ? DisplayMode.Hex : DisplayMode.Text
+                DisplayMode = ReceiveDisplay.IsHexDisplay ? DisplayMode.Hex : DisplayMode.Text,
+                SendLineEnding = SelectedSendLineEnding
             };
 
             return _appSettingsService.Save(settings);

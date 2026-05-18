@@ -49,6 +49,12 @@ namespace SerialAssistant.Core.Models
             set;
         } = DisplayMode.Text;
 
+        public SendLineEnding SendLineEnding
+        {
+            get;
+            set;
+        } = SendLineEnding.None;
+
         public static AppSettings CreateDefault()
         {
             return new AppSettings
@@ -59,7 +65,8 @@ namespace SerialAssistant.Core.Models
                 Parity = "None",
                 StopBits = "One",
                 SendMode = SendMode.Text,
-                DisplayMode = DisplayMode.Text
+                DisplayMode = DisplayMode.Text,
+                SendLineEnding = SendLineEnding.None
             };
         }
     }
