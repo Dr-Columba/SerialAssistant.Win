@@ -9,8 +9,20 @@ namespace SerialAssistant.Tests.UI
     {
         public bool InvokeRequired => false;
 
+        public int InvokeCount
+        {
+            get;
+            private set;
+        }
+
+        public FakeUiThreadInvoker()
+        {
+            InvokeCount = 0;
+        }
+
         public void Invoke(Action action)
         {
+            InvokeCount++;
             action?.Invoke();
         }
     }

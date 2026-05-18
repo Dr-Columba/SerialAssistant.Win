@@ -22,10 +22,14 @@ namespace SerialAssistant.App.ViewModels
         private SerialConnectionState _connectionState;
         private string _sendText;
         private SendMode _selectedSendMode;
+        private SendLineEnding _selectedSendLineEnding;
         private string _statusMessage;
         private int _sentBytesCount;
         private bool _isHexDisplay;
         private string _connectionButtonText;
+        private int _maxSendHistoryCount;
+        private ObservableCollection<SendHistoryItem> _sendHistory;
+        private SendHistoryItem? _selectedSendHistoryItem;
 
         public MainWindowViewModel()
             : this(null, null, null, null)
@@ -52,17 +56,34 @@ namespace SerialAssistant.App.ViewModels
             SerialSettings = new SerialSettingsViewModel();
             ReceiveDisplay = new ReceiveDisplayViewModel();
             SendModes = new ObservableCollection<SendMode>();
+            SendLineEndings = new ObservableCollection<SendLineEnding>();
+            ReceiveBufferSizeOptions = new ObservableCollection<int>();
 
             _sendText = string.Empty;
             _statusMessage = "就绪。请点击刷新按钮获取可用串口。";
             _sentBytesCount = 0;
             _selectedSendMode = SendMode.Text;
+            _selectedSendLineEnding = SendLineEnding.None;
             _connectionButtonText = "打开串口";
 
             foreach (SendMode mode in Enum.GetValues<SendMode>())
             {
                 SendModes.Add(mode);
             }
+
+            foreach (SendLineEnding ending in Enum.GetValues<SendLineEnding>())
+            {
+                SendLineEndings.Add(ending);
+            }
+
+            ReceiveBufferSizeOptions.Add(65536);
+            ReceiveBufferSizeOptions.Add(262144);
+            ReceiveBufferSizeOptions.Add(1048576);
+            ReceiveBufferSizeOptions.Add(4194304);
+
+            _maxSendHistoryCount = 20;
+            _sendHistory = new ObservableCollection<SendHistoryItem>();
+            SendHistory = _sendHistory;
 
             if (_serialPortService != null)
             {
@@ -81,6 +102,7 @@ namespace SerialAssistant.App.ViewModels
             ToggleConnectionCommand = new RelayCommand(ToggleConnection, CanToggleConnection);
             SendCommand = new RelayCommand(Send, CanSend);
             ClearReceiveCommand = new RelayCommand(ClearReceive);
+            ClearSendHistoryCommand = new RelayCommand(ClearSendHistory);
 
             LoadSettings();
         }
@@ -125,6 +147,24 @@ namespace SerialAssistant.App.ViewModels
                     (SendCommand as RelayCommand)?.RaiseCanExecuteChanged();
                 }
             }
+        }
+
+        public ObservableCollection<SendLineEnding> SendLineEndings
+        {
+            get;
+            private set;
+        }
+
+        public ObservableCollection<int> ReceiveBufferSizeOptions
+        {
+            get;
+            private set;
+        }
+
+        public SendLineEnding SelectedSendLineEnding
+        {
+            get => _selectedSendLineEnding;
+            set => SetProperty(ref _selectedSendLineEnding, value);
         }
 
         public SerialConnectionState ConnectionState
@@ -191,6 +231,48 @@ namespace SerialAssistant.App.ViewModels
         {
             get;
             private set;
+        }
+
+        public ICommand ClearSendHistoryCommand
+        {
+            get;
+            private set;
+        }
+
+        public ObservableCollection<SendHistoryItem> SendHistory
+        {
+            get;
+            private set;
+        }
+
+        public int MaxSendHistoryCount
+        {
+            get => _maxSendHistoryCount;
+            set
+            {
+                if (value <= 0)
+                {
+                    value = 20;
+                }
+                SetProperty(ref _maxSendHistoryCount, value);
+                TrimSendHistory();
+            }
+        }
+
+        public SendHistoryItem? SelectedSendHistoryItem
+        {
+            get => _selectedSendHistoryItem;
+            set
+            {
+                if (SetProperty(ref _selectedSendHistoryItem, value))
+                {
+                    if (value != null)
+                    {
+                        SendText = value.Content;
+                        SelectedSendMode = value.SendMode;
+                    }
+                }
+            }
         }
 
         private void UpdateConnectionButtonText(SerialConnectionState state)
@@ -372,7 +454,23 @@ namespace SerialAssistant.App.ViewModels
 
             if (SelectedSendMode == SendMode.Text)
             {
-                data = Encoding.UTF8.GetBytes(SendText);
+                string textToSend = SendText;
+                switch (SelectedSendLineEnding)
+                {
+                    case SendLineEnding.CR:
+                        textToSend += "\r";
+                        break;
+                    case SendLineEnding.LF:
+                        textToSend += "\n";
+                        break;
+                    case SendLineEnding.CRLF:
+                        textToSend += "\r\n";
+                        break;
+                    case SendLineEnding.None:
+                    default:
+                        break;
+                }
+                data = Encoding.UTF8.GetBytes(textToSend);
             }
             else
             {
@@ -397,6 +495,8 @@ namespace SerialAssistant.App.ViewModels
             if (sendResult.IsSuccess)
             {
                 SentBytesCount += data.Length;
+                ReceiveDisplay.AddTxData(data);
+                AddToSendHistory(SendText, SelectedSendMode);
                 StatusMessage = $"已发送 {data.Length} 字节。";
             }
             else
@@ -473,7 +573,13 @@ namespace SerialAssistant.App.ViewModels
             SerialSettings.SelectedParity = settings.Parity;
             SerialSettings.SelectedStopBits = settings.StopBits;
             SelectedSendMode = settings.SendMode;
+            SelectedSendLineEnding = settings.SendLineEnding;
             ReceiveDisplay.IsHexDisplay = (settings.DisplayMode == DisplayMode.Hex);
+            ReceiveDisplay.ShowTimestamp = settings.ShowTimestamp;
+            ReceiveDisplay.ShowDirection = settings.ShowDirection;
+            ReceiveDisplay.MaxDisplayBytes = settings.MaxDisplayBytes;
+            MaxSendHistoryCount = settings.MaxSendHistoryCount;
+            RestoreSendHistory(settings.SendHistory);
             _lastLoadedSettings = settings;
         }
 
@@ -492,10 +598,102 @@ namespace SerialAssistant.App.ViewModels
                 Parity = SerialSettings.SelectedParity ?? "None",
                 StopBits = SerialSettings.SelectedStopBits ?? "One",
                 SendMode = SelectedSendMode,
-                DisplayMode = ReceiveDisplay.IsHexDisplay ? DisplayMode.Hex : DisplayMode.Text
+                DisplayMode = ReceiveDisplay.IsHexDisplay ? DisplayMode.Hex : DisplayMode.Text,
+                SendLineEnding = SelectedSendLineEnding,
+                ShowTimestamp = ReceiveDisplay.ShowTimestamp,
+                ShowDirection = ReceiveDisplay.ShowDirection,
+                MaxDisplayBytes = ReceiveDisplay.MaxDisplayBytes,
+                MaxSendHistoryCount = MaxSendHistoryCount,
+                SendHistory = _sendHistory.ToList()
             };
 
             return _appSettingsService.Save(settings);
+        }
+
+        private void AddToSendHistory(string content, SendMode sendMode)
+        {
+            if (string.IsNullOrEmpty(content))
+            {
+                return;
+            }
+
+            var existingIndex = -1;
+            for (int i = 0; i < _sendHistory.Count; i++)
+            {
+                if (_sendHistory[i].Content == content && _sendHistory[i].SendMode == sendMode)
+                {
+                    existingIndex = i;
+                    break;
+                }
+            }
+
+            if (existingIndex >= 0)
+            {
+                _sendHistory.RemoveAt(existingIndex);
+            }
+
+            _sendHistory.Insert(0, new SendHistoryItem(content, sendMode));
+            TrimSendHistory();
+        }
+
+        private void TrimSendHistory()
+        {
+            while (_sendHistory.Count > _maxSendHistoryCount)
+            {
+                _sendHistory.RemoveAt(_sendHistory.Count - 1);
+            }
+        }
+
+        private void ClearSendHistory(object? parameter)
+        {
+            _sendHistory.Clear();
+            SelectedSendHistoryItem = null;
+        }
+
+        private void RestoreSendHistory(List<SendHistoryItem>? settingsHistory)
+        {
+            _sendHistory.Clear();
+
+            if (settingsHistory == null)
+            {
+                return;
+            }
+
+            foreach (var item in settingsHistory)
+            {
+                if (item == null)
+                {
+                    continue;
+                }
+
+                if (string.IsNullOrWhiteSpace(item.Content))
+                {
+                    continue;
+                }
+
+                if (!Enum.IsDefined(typeof(SendMode), item.SendMode))
+                {
+                    continue;
+                }
+
+                bool isDuplicate = false;
+                for (int i = 0; i < _sendHistory.Count; i++)
+                {
+                    if (_sendHistory[i].Content == item.Content && _sendHistory[i].SendMode == item.SendMode)
+                    {
+                        isDuplicate = true;
+                        break;
+                    }
+                }
+
+                if (!isDuplicate)
+                {
+                    _sendHistory.Add(new SendHistoryItem(item.Content, item.SendMode));
+                }
+            }
+
+            TrimSendHistory();
+            SelectedSendHistoryItem = null;
         }
     }
 }

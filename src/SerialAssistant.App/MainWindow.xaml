@@ -85,10 +85,22 @@
                 </Grid.RowDefinitions>
 
                 <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="5">
-                    <CheckBox Content="HEX 显示"
-                              IsChecked="{Binding IsHexDisplay}"
+                    <CheckBox Content="HEX显示"
+                              IsChecked="{Binding ReceiveDisplay.IsHexDisplay}"
                               VerticalAlignment="Center"
                               Margin="0,0,20,0" />
+                    <CheckBox Content="显示时间戳"
+                              IsChecked="{Binding ReceiveDisplay.ShowTimestamp}"
+                              VerticalAlignment="Center"
+                              Margin="0,0,20,0" />
+                    <CheckBox Content="显示方向"
+                              IsChecked="{Binding ReceiveDisplay.ShowDirection}"
+                              VerticalAlignment="Center"
+                              Margin="0,0,20,0" />
+                    <TextBlock Text="接收缓存:" VerticalAlignment="Center" Margin="0,0,10,0" />
+                    <ComboBox ItemsSource="{Binding ReceiveBufferSizeOptions}"
+                              SelectedItem="{Binding ReceiveDisplay.MaxDisplayBytes}"
+                              Width="120" Margin="0,0,20,0" />
                     <TextBlock Text="接收计数:" VerticalAlignment="Center" Margin="0,0,5,0" />
                     <TextBlock Text="{Binding ReceiveDisplay.ReceivedBytesCount}" VerticalAlignment="Center" FontWeight="Bold" />
                     <Button Content="清空接收区"
@@ -121,7 +133,19 @@
                     <ComboBox ItemsSource="{Binding SendModes}"
                               SelectedItem="{Binding SelectedSendMode}"
                               Width="100" Margin="0,0,20,0" />
-                    <TextBlock Text="发送计数:" VerticalAlignment="Center" Margin="0,0,5,0" />
+                    <TextBlock Text="发送结尾:" VerticalAlignment="Center" Margin="0,0,10,0" />
+                    <ComboBox ItemsSource="{Binding SendLineEndings}"
+                              SelectedItem="{Binding SelectedSendLineEnding}"
+                              Width="100" Margin="0,0,20,0" />
+                    <TextBlock Text="发送历史:" VerticalAlignment="Center" Margin="0,0,10,0" />
+                    <ComboBox ItemsSource="{Binding SendHistory}"
+                              SelectedItem="{Binding SelectedSendHistoryItem, Mode=TwoWay}"
+                              DisplayMemberPath="Content"
+                              Width="150" Margin="0,0,10,0" />
+                    <Button Content="清空历史"
+                            Command="{Binding ClearSendHistoryCommand}"
+                            Padding="10,3" />
+                    <TextBlock Text="发送计数:" VerticalAlignment="Center" Margin="20,0,5,0" />
                     <TextBlock Text="{Binding SentBytesCount}" VerticalAlignment="Center" FontWeight="Bold" />
                 </StackPanel>
 

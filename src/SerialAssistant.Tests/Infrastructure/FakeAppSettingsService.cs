@@ -43,12 +43,20 @@ namespace SerialAssistant.Tests.Infrastructure
                 return OperationResult.Failure("Save failed.");
             }
             _savedSettings = settings;
+            LastSavedSettings = settings;
             return OperationResult.Success();
         }
 
         public AppSettings GetSavedSettings()
         {
             return _savedSettings;
+        }
+
+        public AppSettings? LastSavedSettings { get; private set; }
+
+        public void SetSavedSettings(AppSettings settings)
+        {
+            _savedSettings = settings;
         }
     }
 }

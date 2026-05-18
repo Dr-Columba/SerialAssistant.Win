@@ -49,6 +49,42 @@ namespace SerialAssistant.Core.Models
             set;
         } = DisplayMode.Text;
 
+        public SendLineEnding SendLineEnding
+        {
+            get;
+            set;
+        } = SendLineEnding.None;
+
+        public bool ShowTimestamp
+        {
+            get;
+            set;
+        } = true;
+
+        public bool ShowDirection
+        {
+            get;
+            set;
+        } = true;
+
+        public int MaxDisplayBytes
+        {
+            get;
+            set;
+        } = 262144;
+
+        public int MaxSendHistoryCount
+        {
+            get;
+            set;
+        } = 20;
+
+        public List<SendHistoryItem> SendHistory
+        {
+            get;
+            set;
+        } = new List<SendHistoryItem>();
+
         public static AppSettings CreateDefault()
         {
             return new AppSettings
@@ -59,7 +95,13 @@ namespace SerialAssistant.Core.Models
                 Parity = "None",
                 StopBits = "One",
                 SendMode = SendMode.Text,
-                DisplayMode = DisplayMode.Text
+                DisplayMode = DisplayMode.Text,
+                SendLineEnding = SendLineEnding.None,
+                ShowTimestamp = true,
+                ShowDirection = true,
+                MaxDisplayBytes = 262144,
+                MaxSendHistoryCount = 20,
+                SendHistory = new List<SendHistoryItem>()
             };
         }
     }
