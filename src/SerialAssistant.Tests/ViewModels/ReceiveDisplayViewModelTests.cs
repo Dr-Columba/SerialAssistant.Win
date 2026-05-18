@@ -503,5 +503,266 @@ namespace SerialAssistant.Tests.ViewModels
             Assert.Equal(string.Empty, viewModel.ReceivedText);
             Assert.Equal(0, viewModel.ReceivedBytesCount);
         }
+
+        /*
+         * Test default MaxDisplayBytes is 262144
+         */
+        [Fact]
+        public void DefaultMaxDisplayBytes_Is262144()
+        {
+            /* Arrange */
+            var viewModel = new ReceiveDisplayViewModel();
+
+            /* Act & Assert */
+            Assert.Equal(262144, viewModel.MaxDisplayBytes);
+        }
+
+        /*
+         * Test default CurrentDisplayBytes is 0
+         */
+        [Fact]
+        public void DefaultCurrentDisplayBytes_Is0()
+        {
+            /* Arrange */
+            var viewModel = new ReceiveDisplayViewModel();
+
+            /* Act & Assert */
+            Assert.Equal(0, viewModel.CurrentDisplayBytes);
+        }
+
+        /*
+         * Test AddRxData increases CurrentDisplayBytes
+         */
+        [Fact]
+        public void AddRxData_IncreasesCurrentDisplayBytes()
+        {
+            /* Arrange */
+            var viewModel = new ReceiveDisplayViewModel();
+            byte[] data = new byte[] { 0x41, 0x42, 0x43 };
+
+            /* Act */
+            viewModel.AddRxData(data);
+
+            /* Assert */
+            Assert.Equal(3, viewModel.CurrentDisplayBytes);
+        }
+
+        /*
+         * Test AddTxData increases CurrentDisplayBytes
+         */
+        [Fact]
+        public void AddTxData_IncreasesCurrentDisplayBytes()
+        {
+            /* Arrange */
+            var viewModel = new ReceiveDisplayViewModel();
+            byte[] data = new byte[] { 0x41, 0x42, 0x43 };
+
+            /* Act */
+            viewModel.AddTxData(data);
+
+            /* Assert */
+            Assert.Equal(3, viewModel.CurrentDisplayBytes);
+        }
+
+        /*
+         * Test trimming removes oldest records when exceeding MaxDisplayBytes
+         */
+        [Fact]
+        public void AddRxData_ExceedsMax_TrimsOldest()
+        {
+            /* Arrange */
+            var viewModel = new ReceiveDisplayViewModel();
+            viewModel.MaxDisplayBytes = 10;
+            viewModel.ShowTimestamp = false;
+            viewModel.ShowDirection = false;
+
+            viewModel.AddRxData(new byte[] { 0x41, 0x42, 0x43 });
+            Assert.Equal(3, viewModel.CurrentDisplayBytes);
+
+            viewModel.AddRxData(new byte[] { 0x44, 0x45, 0x46 });
+            Assert.Equal(6, viewModel.CurrentDisplayBytes);
+
+            /* Act */
+            viewModel.AddRxData(new byte[] { 0x47, 0x48, 0x49 });
+
+            /* Assert */
+            Assert.True(viewModel.CurrentDisplayBytes <= 10);
+        }
+
+        /*
+         * Test single large record exceeding MaxDisplayBytes is kept
+         */
+        [Fact]
+        public void AddRxData_SingleLargeRecord_IsKept()
+        {
+            /* Arrange */
+            var viewModel = new ReceiveDisplayViewModel();
+            viewModel.MaxDisplayBytes = 5;
+            byte[] largeData = new byte[] { 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47 };
+
+            /* Act */
+            viewModel.AddRxData(largeData);
+
+            /* Assert */
+            Assert.Equal(7, viewModel.CurrentDisplayBytes);
+        }
+
+        /*
+         * Test trimming old RX records does not reduce ReceivedBytesCount
+         */
+        [Fact]
+        public void AddRxData_TrimOldRx_DoesNotReduceReceivedBytesCount()
+        {
+            /* Arrange */
+            var viewModel = new ReceiveDisplayViewModel();
+            viewModel.MaxDisplayBytes = 5;
+            viewModel.ShowTimestamp = false;
+            viewModel.ShowDirection = false;
+
+            viewModel.AddRxData(new byte[] { 0x41, 0x42, 0x43 });
+            Assert.Equal(3, viewModel.ReceivedBytesCount);
+
+            viewModel.AddRxData(new byte[] { 0x44, 0x45, 0x46 });
+            Assert.Equal(6, viewModel.ReceivedBytesCount);
+
+            /* Act */
+            viewModel.AddRxData(new byte[] { 0x47, 0x48, 0x49 });
+
+            /* Assert */
+            Assert.Equal(9, viewModel.ReceivedBytesCount);
+        }
+
+        /*
+         * Test Clear resets CurrentDisplayBytes to 0
+         */
+        [Fact]
+        public void Clear_ResetsCurrentDisplayBytes()
+        {
+            /* Arrange */
+            var viewModel = new ReceiveDisplayViewModel();
+            viewModel.AddRxData(new byte[] { 0x41, 0x42, 0x43 });
+            Assert.Equal(3, viewModel.CurrentDisplayBytes);
+
+            /* Act */
+            viewModel.ClearCommand.Execute(null);
+
+            /* Assert */
+            Assert.Equal(0, viewModel.CurrentDisplayBytes);
+        }
+
+        /*
+         * Test Clear resets ReceivedBytesCount to 0
+         */
+        [Fact]
+        public void Clear_ResetsReceivedBytesCount()
+        {
+            /* Arrange */
+            var viewModel = new ReceiveDisplayViewModel();
+            viewModel.AddRxData(new byte[] { 0x41, 0x42, 0x43 });
+            Assert.Equal(3, viewModel.ReceivedBytesCount);
+
+            /* Act */
+            viewModel.ClearCommand.Execute(null);
+
+            /* Assert */
+            Assert.Equal(0, viewModel.ReceivedBytesCount);
+        }
+
+        /*
+         * Test Clear resets TrimmedRecordCount to 0
+         */
+        [Fact]
+        public void Clear_ResetsTrimmedRecordCount()
+        {
+            /* Arrange */
+            var viewModel = new ReceiveDisplayViewModel();
+            viewModel.MaxDisplayBytes = 5;
+            viewModel.AddRxData(new byte[] { 0x41, 0x42, 0x43 });
+            viewModel.AddRxData(new byte[] { 0x44, 0x45, 0x46 });
+            viewModel.AddRxData(new byte[] { 0x47, 0x48, 0x49 });
+            Assert.True(viewModel.TrimmedRecordCount > 0);
+
+            /* Act */
+            viewModel.ClearCommand.Execute(null);
+
+            /* Assert */
+            Assert.Equal(0, viewModel.TrimmedRecordCount);
+        }
+
+        /*
+         * Test text to HEX switch shows only kept records
+         */
+        [Fact]
+        public void IsHexDisplay_True_ShowsOnlyKeptRecords()
+        {
+            /* Arrange */
+            var viewModel = new ReceiveDisplayViewModel();
+            viewModel.MaxDisplayBytes = 10;
+            viewModel.IsHexDisplay = false;
+            viewModel.ShowTimestamp = false;
+            viewModel.ShowDirection = false;
+
+            viewModel.AddRxData(new byte[] { 0x41, 0x42, 0x43 });
+            viewModel.AddRxData(new byte[] { 0x44, 0x45, 0x46 });
+            viewModel.AddRxData(new byte[] { 0x47, 0x48, 0x49 });
+
+            /* Act */
+            viewModel.IsHexDisplay = true;
+
+            /* Assert */
+            Assert.Contains("47 48 49", viewModel.ReceivedText);
+            Assert.Contains("44 45 46", viewModel.ReceivedText);
+        }
+
+        /*
+         * Test null data does not affect CurrentDisplayBytes
+         */
+        [Fact]
+        public void AddRxData_NullData_DoesNotAffectCurrentDisplayBytes()
+        {
+            /* Arrange */
+            var viewModel = new ReceiveDisplayViewModel();
+
+            /* Act */
+            viewModel.AddRxData(null!);
+
+            /* Assert */
+            Assert.Equal(0, viewModel.CurrentDisplayBytes);
+        }
+
+        /*
+         * Test empty array does not affect CurrentDisplayBytes
+         */
+        [Fact]
+        public void AddRxData_EmptyData_DoesNotAffectCurrentDisplayBytes()
+        {
+            /* Arrange */
+            var viewModel = new ReceiveDisplayViewModel();
+
+            /* Act */
+            viewModel.AddRxData(Array.Empty<byte>());
+
+            /* Assert */
+            Assert.Equal(0, viewModel.CurrentDisplayBytes);
+        }
+
+        /*
+         * Test TrimmedRecordCount increases on trim
+         */
+        [Fact]
+        public void AddRxData_Trim_IncreasesTrimmedRecordCount()
+        {
+            /* Arrange */
+            var viewModel = new ReceiveDisplayViewModel();
+            viewModel.MaxDisplayBytes = 5;
+
+            /* Act */
+            viewModel.AddRxData(new byte[] { 0x41, 0x42, 0x43 });
+            viewModel.AddRxData(new byte[] { 0x44, 0x45, 0x46 });
+            viewModel.AddRxData(new byte[] { 0x47, 0x48, 0x49 });
+
+            /* Assert */
+            Assert.True(viewModel.TrimmedRecordCount >= 1);
+        }
     }
 }

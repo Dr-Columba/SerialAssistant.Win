@@ -18,6 +18,8 @@ namespace SerialAssistant.App.ViewModels
         private bool _showTimestamp;
         private bool _showDirection;
         private int _receivedBytesCount;
+        private int _maxDisplayBytes;
+        private int _trimmedRecordCount;
 
         public ReceiveDisplayViewModel()
         {
@@ -26,6 +28,8 @@ namespace SerialAssistant.App.ViewModels
             _showTimestamp = true;
             _showDirection = true;
             _receivedBytesCount = 0;
+            _maxDisplayBytes = 262144;
+            _trimmedRecordCount = 0;
 
             ClearCommand = new RelayCommand(Clear);
         }
@@ -78,6 +82,31 @@ namespace SerialAssistant.App.ViewModels
             private set => SetProperty(ref _receivedBytesCount, value);
         }
 
+        public int MaxDisplayBytes
+        {
+            get => _maxDisplayBytes;
+            set => SetProperty(ref _maxDisplayBytes, value);
+        }
+
+        public int CurrentDisplayBytes
+        {
+            get
+            {
+                int total = 0;
+                foreach (CommunicationRecord record in _records)
+                {
+                    total += record.Data.Length;
+                }
+                return total;
+            }
+        }
+
+        public int TrimmedRecordCount
+        {
+            get => _trimmedRecordCount;
+            private set => SetProperty(ref _trimmedRecordCount, value);
+        }
+
         public ICommand ClearCommand
         {
             get;
@@ -102,6 +131,7 @@ namespace SerialAssistant.App.ViewModels
                 DateTime.Now);
 
             _records.Add(record);
+            TrimExcessRecords();
             UpdateDisplayText();
         }
 
@@ -119,7 +149,18 @@ namespace SerialAssistant.App.ViewModels
 
             _records.Add(record);
             ReceivedBytesCount += data.Length;
+            TrimExcessRecords();
             UpdateDisplayText();
+        }
+
+        private void TrimExcessRecords()
+        {
+            while (_records.Count > 1 && CurrentDisplayBytes > _maxDisplayBytes)
+            {
+                CommunicationRecord oldest = _records[0];
+                _records.RemoveAt(0);
+                TrimmedRecordCount++;
+            }
         }
 
         private void UpdateDisplayText()
@@ -166,6 +207,7 @@ namespace SerialAssistant.App.ViewModels
             _records.Clear();
             ReceivedText = string.Empty;
             ReceivedBytesCount = 0;
+            TrimmedRecordCount = 0;
         }
     }
 }
