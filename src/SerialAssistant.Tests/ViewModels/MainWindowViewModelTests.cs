@@ -2425,5 +2425,229 @@ namespace SerialAssistant.Tests.ViewModels
             /* Assert */
             Assert.Equal(originalState, viewModel.ConnectionState);
         }
+
+        /*
+         * Test 默认 SelectedSendHistoryItem 为 null
+         */
+        [Fact]
+        public void DefaultSelectedSendHistoryItem_IsNull()
+        {
+            /* Arrange */
+            var viewModel = new MainWindowViewModel();
+
+            /* Act & Assert */
+            Assert.Null(viewModel.SelectedSendHistoryItem);
+        }
+
+        /*
+         * Test 设置 SelectedSendHistoryItem 后回填 SendText
+         */
+        [Fact]
+        public void SelectedSendHistoryItem_Set_UpdatesSendText()
+        {
+            /* Arrange */
+            var viewModel = new MainWindowViewModel();
+            var historyItem = new SendHistoryItem("Hello World", SendMode.Text);
+
+            /* Act */
+            viewModel.SelectedSendHistoryItem = historyItem;
+
+            /* Assert */
+            Assert.Equal("Hello World", viewModel.SendText);
+        }
+
+        /*
+         * Test 设置 SelectedSendHistoryItem 后恢复 SelectedSendMode
+         */
+        [Fact]
+        public void SelectedSendHistoryItem_Set_UpdatesSendMode()
+        {
+            /* Arrange */
+            var viewModel = new MainWindowViewModel();
+            viewModel.SelectedSendMode = SendMode.Text;
+
+            var historyItem = new SendHistoryItem("41 42 43", SendMode.Hex);
+
+            /* Act */
+            viewModel.SelectedSendHistoryItem = historyItem;
+
+            /* Assert */
+            Assert.Equal(SendMode.Hex, viewModel.SelectedSendMode);
+        }
+
+        /*
+         * Test 选择文本历史后 SelectedSendMode 为 Text
+         */
+        [Fact]
+        public void SelectedSendHistoryItem_TextMode_SetsTextMode()
+        {
+            /* Arrange */
+            var viewModel = new MainWindowViewModel();
+            viewModel.SelectedSendMode = SendMode.Hex;
+
+            var historyItem = new SendHistoryItem("Test", SendMode.Text);
+
+            /* Act */
+            viewModel.SelectedSendHistoryItem = historyItem;
+
+            /* Assert */
+            Assert.Equal(SendMode.Text, viewModel.SelectedSendMode);
+        }
+
+        /*
+         * Test 选择 HEX 历史后 SelectedSendMode 为 Hex
+         */
+        [Fact]
+        public void SelectedSendHistoryItem_HexMode_SetsHexMode()
+        {
+            /* Arrange */
+            var viewModel = new MainWindowViewModel();
+            viewModel.SelectedSendMode = SendMode.Text;
+
+            var historyItem = new SendHistoryItem("41 42", SendMode.Hex);
+
+            /* Act */
+            viewModel.SelectedSendHistoryItem = historyItem;
+
+            /* Assert */
+            Assert.Equal(SendMode.Hex, viewModel.SelectedSendMode);
+        }
+
+        /*
+         * Test 设置 SelectedSendHistoryItem 不新增历史
+         */
+        [Fact]
+        public void SelectedSendHistoryItem_Set_DoesNotAddHistory()
+        {
+            /* Arrange */
+            var fakeScanner = new FakeSerialPortScanner();
+            var fakeService = new FakeSerialPortService();
+            var viewModel = new MainWindowViewModel(fakeScanner, fakeService);
+            viewModel.SerialSettings.SelectedPortName = "COM1";
+            viewModel.ToggleConnectionCommand.Execute(null);
+
+            viewModel.SendText = "ABC";
+            viewModel.SendCommand.Execute(null);
+
+            int initialCount = viewModel.SendHistory.Count;
+
+            /* Act */
+            viewModel.SelectedSendHistoryItem = viewModel.SendHistory[0];
+
+            /* Assert */
+            Assert.Equal(initialCount, viewModel.SendHistory.Count);
+        }
+
+        /*
+         * Test 设置 SelectedSendHistoryItem 不发送数据
+         */
+        [Fact]
+        public void SelectedSendHistoryItem_Set_DoesNotSend()
+        {
+            /* Arrange */
+            var fakeScanner = new FakeSerialPortScanner();
+            var fakeService = new FakeSerialPortService();
+            var viewModel = new MainWindowViewModel(fakeScanner, fakeService);
+            viewModel.SerialSettings.SelectedPortName = "COM1";
+            viewModel.ToggleConnectionCommand.Execute(null);
+
+            int initialCount = fakeService.SentData.Count;
+
+            var historyItem = new SendHistoryItem("Test", SendMode.Text);
+
+            /* Act */
+            viewModel.SelectedSendHistoryItem = historyItem;
+
+            /* Assert */
+            Assert.Equal(initialCount, fakeService.SentData.Count);
+        }
+
+        /*
+         * Test 设置 SelectedSendHistoryItem 不改变 SentBytesCount
+         */
+        [Fact]
+        public void SelectedSendHistoryItem_Set_DoesNotChangeSentBytesCount()
+        {
+            /* Arrange */
+            var viewModel = new MainWindowViewModel();
+            int initialCount = viewModel.SentBytesCount;
+
+            var historyItem = new SendHistoryItem("Test", SendMode.Text);
+
+            /* Act */
+            viewModel.SelectedSendHistoryItem = historyItem;
+
+            /* Assert */
+            Assert.Equal(initialCount, viewModel.SentBytesCount);
+        }
+
+        /*
+         * Test 设置 SelectedSendHistoryItem 不清空 ReceiveDisplay
+         */
+        [Fact]
+        public void SelectedSendHistoryItem_Set_DoesNotClearReceiveDisplay()
+        {
+            /* Arrange */
+            var fakeScanner = new FakeSerialPortScanner();
+            var fakeService = new FakeSerialPortService();
+            var fakeUiInvoker = new FakeUiThreadInvoker();
+            var viewModel = new MainWindowViewModel(fakeScanner, fakeService, fakeUiInvoker);
+            viewModel.SerialSettings.SelectedPortName = "COM1";
+            viewModel.ToggleConnectionCommand.Execute(null);
+            byte[] data = System.Text.Encoding.UTF8.GetBytes("RXDATA");
+            fakeService.SimulateDataReceived(data);
+
+            string originalText = viewModel.ReceiveDisplay.ReceivedText;
+
+            var historyItem = new SendHistoryItem("Test", SendMode.Text);
+
+            /* Act */
+            viewModel.SelectedSendHistoryItem = historyItem;
+
+            /* Assert */
+            Assert.Equal(originalText, viewModel.ReceiveDisplay.ReceivedText);
+        }
+
+        /*
+         * Test ClearSendHistoryCommand 将 SelectedSendHistoryItem 置为 null
+         */
+        [Fact]
+        public void ClearSendHistoryCommand_SetsSelectedSendHistoryItemToNull()
+        {
+            /* Arrange */
+            var fakeScanner = new FakeSerialPortScanner();
+            var fakeService = new FakeSerialPortService();
+            var viewModel = new MainWindowViewModel(fakeScanner, fakeService);
+            viewModel.SerialSettings.SelectedPortName = "COM1";
+            viewModel.ToggleConnectionCommand.Execute(null);
+            viewModel.SendText = "ABC";
+            viewModel.SendCommand.Execute(null);
+
+            viewModel.SelectedSendHistoryItem = viewModel.SendHistory[0];
+            Assert.NotNull(viewModel.SelectedSendHistoryItem);
+
+            /* Act */
+            viewModel.ClearSendHistoryCommand.Execute(null);
+
+            /* Assert */
+            Assert.Null(viewModel.SelectedSendHistoryItem);
+        }
+
+        /*
+         * Test ClearSendHistoryCommand 不改变 SelectedSendMode
+         */
+        [Fact]
+        public void ClearSendHistoryCommand_DoesNotChangeSendMode()
+        {
+            /* Arrange */
+            var viewModel = new MainWindowViewModel();
+            viewModel.SelectedSendMode = SendMode.Hex;
+
+            /* Act */
+            viewModel.ClearSendHistoryCommand.Execute(null);
+
+            /* Assert */
+            Assert.Equal(SendMode.Hex, viewModel.SelectedSendMode);
+        }
     }
 }

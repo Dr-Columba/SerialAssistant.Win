@@ -29,6 +29,7 @@ namespace SerialAssistant.App.ViewModels
         private string _connectionButtonText;
         private int _maxSendHistoryCount;
         private ObservableCollection<SendHistoryItem> _sendHistory;
+        private SendHistoryItem? _selectedSendHistoryItem;
 
         public MainWindowViewModel()
             : this(null, null, null, null)
@@ -255,6 +256,22 @@ namespace SerialAssistant.App.ViewModels
                 }
                 SetProperty(ref _maxSendHistoryCount, value);
                 TrimSendHistory();
+            }
+        }
+
+        public SendHistoryItem? SelectedSendHistoryItem
+        {
+            get => _selectedSendHistoryItem;
+            set
+            {
+                if (SetProperty(ref _selectedSendHistoryItem, value))
+                {
+                    if (value != null)
+                    {
+                        SendText = value.Content;
+                        SelectedSendMode = value.SendMode;
+                    }
+                }
             }
         }
 
@@ -626,6 +643,7 @@ namespace SerialAssistant.App.ViewModels
         private void ClearSendHistory(object? parameter)
         {
             _sendHistory.Clear();
+            SelectedSendHistoryItem = null;
         }
     }
 }

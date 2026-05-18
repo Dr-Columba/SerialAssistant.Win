@@ -137,7 +137,15 @@
                     <ComboBox ItemsSource="{Binding SendLineEndings}"
                               SelectedItem="{Binding SelectedSendLineEnding}"
                               Width="100" Margin="0,0,20,0" />
-                    <TextBlock Text="发送计数:" VerticalAlignment="Center" Margin="0,0,5,0" />
+                    <TextBlock Text="发送历史:" VerticalAlignment="Center" Margin="0,0,10,0" />
+                    <ComboBox ItemsSource="{Binding SendHistory}"
+                              SelectedItem="{Binding SelectedSendHistoryItem, Mode=TwoWay}"
+                              DisplayMemberPath="Content"
+                              Width="150" Margin="0,0,10,0" />
+                    <Button Content="清空历史"
+                            Command="{Binding ClearSendHistoryCommand}"
+                            Padding="10,3" />
+                    <TextBlock Text="发送计数:" VerticalAlignment="Center" Margin="20,0,5,0" />
                     <TextBlock Text="{Binding SentBytesCount}" VerticalAlignment="Center" FontWeight="Bold" />
                 </StackPanel>
 
