@@ -605,3 +605,129 @@ No line ending appended regardless of SendLineEnding setting
     ↓
 ISerialPortService.Send([0x41, 0x42, 0x43])
 ```
+
+## Send History (Feature D)
+
+### SendHistoryItem Model
+
+Located in `SerialAssistant.Core.Models.SendHistoryItem`:
+
+```csharp
+public class SendHistoryItem
+{
+    public string Content { get; set; }
+    public SendMode SendMode { get; set; }
+
+    public SendHistoryItem() { }
+    public SendHistoryItem(string content, SendMode sendMode) { }
+}
+```
+
+- **Content**: User input text before sending (not including line ending)
+- **SendMode**: Text or Hex mode used for this history entry
+
+### Key Properties in MainWindowViewModel
+
+```csharp
+public ObservableCollection<SendHistoryItem> SendHistory { get; }
+public SendHistoryItem? SelectedSendHistoryItem { get; set; }
+public int MaxSendHistoryCount { get; set; } = 20;
+public ICommand ClearSendHistoryCommand { get; }
+```
+
+- **SendHistory**: ObservableCollection of send history items, index 0 = most recent
+- **SelectedSendHistoryItem**: Currently selected history item (for backfill)
+- **MaxSendHistoryCount**: Maximum number of history items (default: 20)
+- **ClearSendHistoryCommand**: Command to clear all history
+
+### AddToSendHistory Recording Strategy
+
+After successful send:
+
+1. Get original SendText input (not including line ending)
+2. Get current SendMode (Text or Hex)
+3. Check for duplicate: same Content AND same SendMode
+4. If duplicate found, remove old entry
+5. Insert new entry at index 0
+6. Trim to MaxSendHistoryCount if exceeded
+
+### Duplicate Removal Rules
+
+- Duplicate condition: Content same AND SendMode same
+- Same Content but different SendMode: NOT duplicate (kept separately)
+- On duplicate send: old entry removed, new entry inserted at index 0
+
+### Sort Order
+
+- Index 0 = Most recent item
+- Index N = N-th most recent item
+- When MaxSendHistoryCount exceeded: oldest item (last index) is removed
+
+### ClearSendHistoryCommand Behavior
+
+When executed:
+1. SendHistory.Clear()
+2. SelectedSendHistoryItem = null
+3. SendText remains unchanged
+4. ReceiveDisplay remains unchanged
+5. Connection state unchanged
+
+### SelectedSendHistoryItem Backfill
+
+When user selects a history item from dropdown:
+
+1. SendText = SelectedSendHistoryItem.Content
+2. SelectedSendMode = SelectedSendHistoryItem.SendMode
+3. NO send triggered
+4. NO new history entry added
+5. NO ReceiveDisplay modification
+
+### Configuration Persistence
+
+**AppSettings fields:**
+```csharp
+public int MaxSendHistoryCount { get; set; } = 20;
+public List<SendHistoryItem> SendHistory { get; set; }
+```
+
+**Load flow:**
+```
+Application starts
+    ↓
+JsonAppSettingsService.Load returns AppSettings
+    ↓
+MainWindowViewModel.ApplySettings
+    ↓
+MaxSendHistoryCount = settings.MaxSendHistoryCount
+    ↓
+RestoreSendHistory(settings.SendHistory)
+    ↓
+SelectedSendHistoryItem = null
+```
+
+**RestoreSendHistory safety rules:**
+1. If settings.SendHistory is null, use empty list
+2. Skip null history items
+3. Skip empty/whitespace Content
+4. Skip invalid SendMode values
+5. Remove duplicates (same Content + SendMode)
+6. Trim to MaxSendHistoryCount
+7. SelectedSendHistoryItem set to null
+
+**Save flow:**
+```
+Application closing
+    ↓
+MainWindowViewModel.SaveSettings creates AppSettings
+    ↓
+AppSettings.MaxSendHistoryCount = MaxSendHistoryCount
+    ↓
+AppSettings.SendHistory = SendHistory.ToList()
+    ↓
+JsonAppSettingsService.Save writes to settings.json
+```
+
+**NOT saved to configuration:**
+- SelectedSendHistoryItem (always null after restore)
+- SendText (current input)
+- TX/RX communication records

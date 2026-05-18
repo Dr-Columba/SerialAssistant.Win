@@ -224,20 +224,82 @@ This document provides a step-by-step manual testing guide for SerialAssistant.W
 - [ ] **Step 10.30** Re-open application
 - [ ] **Step 10.31** Verify default 256 KiB is used
 
-### 11. Edge Cases
+### 11. Send History (Feature D)
 
-- [ ] **Step 11.1** Open non-existent port (should show error)
-- [ ] **Step 11.2** Open already-open port (should show error)
-- [ ] **Step 11.3** Close already-closed port (should show error)
-- [ ] **Step 11.4** Send without opening port (should show error)
-- [ ] **Step 11.5** Empty text send (should show error)
-- [ ] **Step 11.6** Empty HEX send (should show error)
+#### Verify UI Controls Exist
+- [ ] **Step 11.1** Verify "发送历史" (Send History) dropdown exists
+- [ ] **Step 11.2** Verify "清空历史" button exists
+- [ ] **Step 11.3** Verify history dropdown is empty by default
 
-### 12. Cleanup
+#### Send History Recording
+- [ ] **Step 11.4** Open serial port
+- [ ] **Step 11.5** Send text "Hello" in Text mode
+- [ ] **Step 11.6** Send "41 42 43" in HEX mode
+- [ ] **Step 11.7** Verify history dropdown shows both records
+- [ ] **Step 11.8** Verify latest record ("41 42 43") is at top (index 0)
 
-- [ ] **Step 11.1** Close any open serial ports
-- [ ] **Step 11.2** Exit application
-- [ ] **Step 11.3** (Optional) Delete test config file at %AppData%\SerialAssistant.Win\settings.json
+#### Duplicate Detection
+- [ ] **Step 11.9** Send "Hello" again in Text mode
+- [ ] **Step 11.10** Verify only one "Hello" in history
+- [ ] **Step 11.11** Verify "Hello" moved to top (most recent)
+- [ ] **Step 11.12** Send "41 42 43" in Text mode
+- [ ] **Step 11.13** Verify both "41 42 43" entries exist (different modes)
+
+#### History Selection Backfill
+- [ ] **Step 11.14** Select "Hello" from history dropdown
+- [ ] **Step 11.15** Verify SendText is filled with "Hello"
+- [ ] **Step 11.16** Verify send mode is restored to Text
+- [ ] **Step 11.17** Select "41 42 43" HEX entry from dropdown
+- [ ] **Step 11.18** Verify SendText is filled with "41 42 43"
+- [ ] **Step 11.19** Verify send mode is restored to HEX
+
+#### Selection Does Not Auto-Send
+- [ ] **Step 11.20** Select any history item
+- [ ] **Step 11.21** Verify no data is sent automatically
+- [ ] **Step 11.22** Verify SelectedSendHistoryItem dropdown shows selection
+
+#### Clear History
+- [ ] **Step 11.23** Click "清空历史" button
+- [ ] **Step 11.24** Verify history dropdown is empty
+- [ ] **Step 11.25** Verify SendText is NOT cleared
+- [ ] **Step 11.26** Verify receive area is NOT cleared
+
+#### Configuration Persistence
+- [ ] **Step 11.27** Send several history items
+- [ ] **Step 11.28** Close application normally
+- [ ] **Step 11.29** Re-open application
+- [ ] **Step 11.30** Verify send history is restored
+- [ ] **Step 11.31** Verify latest item is at top
+- [ ] **Step 11.32** Click "清空历史"
+- [ ] **Step 11.33** Close and re-open application
+- [ ] **Step 11.34** Verify history is empty
+
+#### Old Config Missing SendHistory
+- [ ] **Step 11.35** Close application
+- [ ] **Step 11.36** Edit settings.json to remove SendHistory and MaxSendHistoryCount
+- [ ] **Step 11.37** Re-open application
+- [ ] **Step 11.38** Verify default MaxSendHistoryCount (20) is used
+- [ ] **Step 11.39** Verify empty history
+
+#### Feature A/B/C Compatibility
+- [ ] **Step 11.40** Verify Feature A (Send Line Ending) still works
+- [ ] **Step 11.41** Verify Feature B (TX/RX Direction) still works
+- [ ] **Step 11.42** Verify Feature C (Receive Buffer Limit) still works
+
+### 12. Edge Cases
+
+- [ ] **Step 12.1** Open non-existent port (should show error)
+- [ ] **Step 12.2** Open already-open port (should show error)
+- [ ] **Step 12.3** Close already-closed port (should show error)
+- [ ] **Step 12.4** Send without opening port (should show error)
+- [ ] **Step 12.5** Empty text send (should show error)
+- [ ] **Step 12.6** Empty HEX send (should show error)
+
+### 13. Cleanup
+
+- [ ] **Step 13.1** Close any open serial ports
+- [ ] **Step 13.2** Exit application
+- [ ] **Step 13.3** (Optional) Delete test config file at %AppData%\SerialAssistant.Win\settings.json
 
 ## Test Results Summary
 
@@ -256,6 +318,7 @@ This document provides a step-by-step manual testing guide for SerialAssistant.W
 | Clear Buffer | ☐ Pass / ☐ Fail | |
 | Config Persistence | ☐ Pass / ☐ Fail | |
 | Config Corruption | ☐ Pass / ☐ Fail | |
+| Send History | ☐ Pass / ☐ Fail | |
 | Edge Cases | ☐ Pass / ☐ Fail | |
 
 ## Tester Information

@@ -27,6 +27,7 @@ SerialAssistant.Win is a desktop application for serial port communication on Wi
 9. **Configuration Persistence**: Save and load serial port settings, display preferences, and line ending options
 10. **Receive Buffer Limit**: Configurable receive buffer size (64 KiB, 256 KiB, 1 MiB, 4 MiB) with automatic trimming of old records when limit is exceeded
 11. **Single Large Record Preservation**: Single record larger than buffer limit is preserved
+12. **Send History**: Automatic recording of sent messages with duplicate removal, dropdown selection for quick resend, and configuration persistence
 
 ## Project Structure
 
@@ -153,6 +154,7 @@ The project follows a phased development approach:
 10. **Feature A**: Send Line Ending Options (None/CR/LF/CRLF)
 11. **Feature B**: TX/RX Direction Marking and Timestamp Display
 12. **Feature C**: Receive Buffer Limit and Configuration
+13. **Feature D**: Send History (recording, UI dropdown, persistence)
 
 ## Code Style
 

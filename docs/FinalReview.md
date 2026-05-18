@@ -20,6 +20,7 @@ This document summarizes the final quality review of SerialAssistant.Win, coveri
 - Feature A: Send Line Ending Options
 - Feature B1-B4: TX/RX Direction Marking and Timestamp Display
 - Feature C1-C3: Receive Buffer Limit and Configuration
+- Feature D1-D4: Send History (recording, UI dropdown, persistence)
 
 ### Architecture Review
 
@@ -77,6 +78,10 @@ This document summarizes the final quality review of SerialAssistant.Win, coveri
 | Single Large Record Preservation (Feature C) | ✅ Pass | Single record larger than limit preserved |
 | MaxDisplayBytes Persistence (Feature C) | ✅ Pass | Buffer size saved to settings.json |
 | Old Config Fallback (Feature C) | ✅ Pass | Default 256 KiB when field missing |
+| Send History Recording (Feature D) | ✅ Pass | Records sent messages with duplicate removal |
+| Send History UI Dropdown (Feature D) | ✅ Pass | Select and restore SendText/SendMode |
+| Send History Persistence (Feature D) | ✅ Pass | History saved to settings.json |
+| Clear Send History (Feature D) | ✅ Pass | ClearSendHistoryCommand works correctly |
 
 ### Test Review
 
@@ -94,7 +99,7 @@ This document summarizes the final quality review of SerialAssistant.Win, coveri
 | JsonAppSettingsService | ✅ Full coverage | Load/Save, missing/damaged config |
 | No real serial port dependency | ✅ Pass | Tests use fakes |
 | No real AppData pollution | ✅ Pass | Tests use temporary directories |
-| Total tests passing | ✅ Pass | 239+ tests all passing |
+| Total tests passing | ✅ Pass | 291+ tests all passing |
 
 ### Documentation Review
 
@@ -182,6 +187,34 @@ This document summarizes the final quality review of SerialAssistant.Win, coveri
 
 - Communication records (TX/RX history) not persisted across sessions
 - No send history buffer
+- No logging persistence
+
+## Feature D Summary (Send History)
+
+| Phase | Status | Description |
+|-------|--------|-------------|
+| D1 | ✅ Complete | SendHistoryItem model, SendHistory ObservableCollection, MaxSendHistoryCount, AddToSendHistory, ClearSendHistoryCommand |
+| D2 | ✅ Complete | UI dropdown for send history selection, SelectedSendHistoryItem binding, backfill SendText/SendMode |
+| D3 | ✅ Complete | AppSettings integration for SendHistory and MaxSendHistoryCount, configuration persistence |
+| D4 | ✅ Complete | Documentation update and final verification |
+
+### Feature D Key Behaviors
+
+- **SendHistoryItem**: Contains Content (user input) and SendMode (Text/Hex)
+- **Recording Strategy**: Records after successful send, stores original input (without line ending)
+- **Duplicate Removal**: Same Content AND Same SendMode = duplicate, moved to top
+- **Sort Order**: Index 0 = most recent item
+- **MaxSendHistoryCount**: Default 20, oldest items trimmed when exceeded
+- **Selection Backfill**: Selecting history restores SendText and SelectedSendMode, no auto-send
+- **Clear Behavior**: Clears SendHistory, sets SelectedSendHistoryItem to null, does not clear SendText
+- **Persistence**: SendHistory and MaxSendHistoryCount saved to settings.json
+- **Not Saved**: SelectedSendHistoryItem, SendText, TX/RX communication records
+
+### Feature D Current Limitations
+
+- No send history search/filter
+- No history item editing
+- No send history export
 - No logging persistence
 
 ## Known Issues
