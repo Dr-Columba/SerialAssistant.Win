@@ -19,6 +19,7 @@ This document summarizes the final quality review of SerialAssistant.Win, coveri
 - Phase 8: Full Quality Check and Final Review
 - Feature A: Send Line Ending Options
 - Feature B1-B4: TX/RX Direction Marking and Timestamp Display
+- Feature C1-C3: Receive Buffer Limit and Configuration
 
 ### Architecture Review
 
@@ -71,6 +72,11 @@ This document summarizes the final quality review of SerialAssistant.Win, coveri
 | Direction Toggle (Feature B) | ✅ Pass | Show/hide TX/RX markers |
 | Text/HEX Historical Redraw (Feature B) | ✅ Pass | Records reformat on mode switch |
 | Display Settings Persistence (Feature B) | ✅ Pass | ShowTimestamp/ShowDirection saved |
+| Receive Buffer Limit (Feature C) | ✅ Pass | Configurable 64 KiB/256 KiB/1 MiB/4 MiB |
+| Buffer Trimming (Feature C) | ✅ Pass | Old records trimmed when limit exceeded |
+| Single Large Record Preservation (Feature C) | ✅ Pass | Single record larger than limit preserved |
+| MaxDisplayBytes Persistence (Feature C) | ✅ Pass | Buffer size saved to settings.json |
+| Old Config Fallback (Feature C) | ✅ Pass | Default 256 KiB when field missing |
 
 ### Test Review
 
@@ -88,7 +94,7 @@ This document summarizes the final quality review of SerialAssistant.Win, coveri
 | JsonAppSettingsService | ✅ Full coverage | Load/Save, missing/damaged config |
 | No real serial port dependency | ✅ Pass | Tests use fakes |
 | No real AppData pollution | ✅ Pass | Tests use temporary directories |
-| Total tests passing | ✅ Pass | 214+ tests all passing |
+| Total tests passing | ✅ Pass | 239+ tests all passing |
 
 ### Documentation Review
 
@@ -152,6 +158,32 @@ This document summarizes the final quality review of SerialAssistant.Win, coveri
 - No send history buffer
 - No logging persistence
 
+## Feature C Summary (Receive Buffer Limit)
+
+| Phase | Status | Description |
+|-------|--------|-------------|
+| C1 | ✅ Complete | ReceiveDisplayViewModel internal buffer limit with MaxDisplayBytes, CurrentDisplayBytes, TrimmedRecordCount |
+| C2 | ✅ Complete | UI dropdown for receive buffer size, AppSettings integration, configuration persistence |
+| C3 | ✅ Complete | Documentation update and final verification |
+
+### Feature C Key Behaviors
+
+- **MaxDisplayBytes**: Configurable buffer size (64 KiB, 256 KiB, 1 MiB, 4 MiB), default 256 KiB
+- **CurrentDisplayBytes**: Tracks total size of records currently in display
+- **TrimmedRecordCount**: Counts number of records trimmed due to buffer limit
+- **Trimming Strategy**: Oldest records trimmed first when limit exceeded
+- **Single Large Record**: Single record larger than buffer limit is preserved
+- **ReceivedBytesCount**: Never decreases due to trimming
+- **Clear Behavior**: Resets CurrentDisplayBytes, ReceivedBytesCount, and TrimmedRecordCount to 0
+- **Persistence**: MaxDisplayBytes saved to settings.json
+- **Old Config Fallback**: Default 256 KiB used when MaxDisplayBytes missing from config
+
+### Feature C Current Limitations
+
+- Communication records (TX/RX history) not persisted across sessions
+- No send history buffer
+- No logging persistence
+
 ## Known Issues
 
 None identified.
@@ -169,6 +201,6 @@ None identified.
 
 ## Final Conclusion
 
-SerialAssistant.Win has been completed in full compliance with all phase requirements. The codebase is clean, well-architected, thoroughly tested, and ready for use.
+SerialAssistant.Win has been completed in full compliance with all phase requirements, including Features A, B, and C. The codebase is clean, well-architected, thoroughly tested, and ready for use.
 
 **Recommendation**: Approve for final submission.

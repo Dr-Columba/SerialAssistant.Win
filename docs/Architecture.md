@@ -322,9 +322,96 @@ This ensures thread safety for WPF data binding.
   "Parity": "None",
   "StopBits": "One",
   "SendMode": 0,
-  "DisplayMode": 0
+  "DisplayMode": 0,
+  "MaxDisplayBytes": 262144
 }
 ```
+
+## Receive Buffer Limit (Feature C)
+
+### Overview
+
+The receive buffer limit feature prevents memory issues with large communication records. It includes configurable buffer size, automatic trimming of old records, and preservation of single large records.
+
+### Key Properties in ReceiveDisplayViewModel
+
+Located in `SerialAssistant.App.ViewModels.ReceiveDisplayViewModel`:
+
+```csharp
+public int MaxDisplayBytes { get; set; } = 262144;
+public int CurrentDisplayBytes { get; }
+public int TrimmedRecordCount { get; }
+```
+
+- **MaxDisplayBytes**: Configurable maximum display buffer size in bytes (default: 262144 = 256 KiB)
+- **CurrentDisplayBytes**: Current total size of all records in display buffer (read-only)
+- **TrimmedRecordCount**: Number of records trimmed due to buffer limit (read-only)
+
+### Buffer Trimming Strategy
+
+When adding records via `AddTxData` or `AddRxData`:
+
+1. New record added to internal list
+2. Total size checked against `MaxDisplayBytes`
+3. If exceeded, oldest records trimmed from beginning of list
+4. Single record larger than `MaxDisplayBytes` is preserved
+5. `TrimmedRecordCount` incremented for each trimmed record
+6. `CurrentDisplayBytes` updated
+7. Display text updated
+
+### Trimming on MaxDisplayBytes Change
+
+When `MaxDisplayBytes` setter is called:
+
+1. New value validated (if ≤ 0, defaults to 262144)
+2. If value decreases, old records trimmed immediately
+3. If value increases, no trimmed records restored
+4. Display text updated
+
+### ReceivedBytesCount Behavior
+
+`ReceivedBytesCount` never decreases due to trimming. It counts total bytes received since last clear.
+
+### Clear Behavior
+
+When `Clear()` is called:
+
+1. All communication records cleared
+2. `CurrentDisplayBytes` reset to 0
+3. `TrimmedRecordCount` reset to 0
+4. `ReceivedBytesCount` reset to 0
+5. Display text cleared
+
+### Configuration Persistence
+
+**AppSettings fields:**
+```csharp
+public int MaxDisplayBytes { get; set; } = 262144;
+```
+
+**Load flow:**
+```
+Application starts
+    ↓
+JsonAppSettingsService.Load returns AppSettings
+    ↓
+MainWindowViewModel.ApplySettings
+    ↓
+ReceiveDisplay.MaxDisplayBytes = settings.MaxDisplayBytes
+```
+
+**Save flow:**
+```
+Application closing
+    ↓
+MainWindowViewModel.SaveSettings creates AppSettings
+    ↓
+AppSettings.MaxDisplayBytes = ReceiveDisplay.MaxDisplayBytes
+    ↓
+JsonAppSettingsService.Save writes to settings.json
+```
+
+Note: Communication records (TX/RX history) are NOT saved to configuration. Only buffer size preference is persisted.
 
 ## Current Status
 

@@ -177,16 +177,63 @@ This document provides a step-by-step manual testing guide for SerialAssistant.W
 - [ ] **Step 9.26** Verify application doesn't crash
 - [ ] **Step 9.27** Verify default settings loaded
 
-### 10. Edge Cases
+### 10. Receive Buffer Limit (Feature C)
 
-- [ ] **Step 10.1** Open non-existent port (should show error)
-- [ ] **Step 10.2** Open already-open port (should show error)
-- [ ] **Step 10.3** Close already-closed port (should show error)
-- [ ] **Step 10.4** Send without opening port (should show error)
-- [ ] **Step 10.5** Empty text send (should show error)
-- [ ] **Step 10.6** Empty HEX send (should show error)
+#### Verify UI Control Exists
+- [ ] **Step 10.1** Verify "接收缓存" (Receive Buffer) dropdown exists
+- [ ] **Step 10.2** Verify options include 64 KiB, 256 KiB, 1 MiB, 4 MiB
+- [ ] **Step 10.3** Verify default is 256 KiB
 
-### 11. Cleanup
+#### Buffer Trimming on Data Add
+- [ ] **Step 10.4** Set buffer to 64 KiB
+- [ ] **Step 10.5** Send/receive data until buffer exceeds 64 KiB
+- [ ] **Step 10.6** Verify oldest records are trimmed
+- [ ] **Step 10.7** Verify TX/RX direction and timestamps still work on remaining records
+- [ ] **Step 10.8** Switch between text/HEX modes, verify only remaining records are redrawn
+
+#### Single Large Record Preservation
+- [ ] **Step 10.9** Clear receive buffer
+- [ ] **Step 10.10** Set buffer to 64 KiB
+- [ ] **Step 10.11** Send/receive single record larger than 64 KiB
+- [ ] **Step 10.12** Verify record is preserved (not trimmed)
+
+#### MaxDisplayBytes Change Behavior
+- [ ] **Step 10.13** Fill buffer with multiple records at 256 KiB setting
+- [ ] **Step 10.14** Change buffer to 64 KiB
+- [ ] **Step 10.15** Verify old records are trimmed immediately
+- [ ] **Step 10.16** Change buffer back to 256 KiB
+- [ ] **Step 10.17** Verify trimmed records are NOT restored
+
+#### Configuration Persistence
+- [ ] **Step 10.18** Set buffer to 64 KiB
+- [ ] **Step 10.19** Close application normally
+- [ ] **Step 10.20** Re-open application
+- [ ] **Step 10.21** Verify buffer size is restored to 64 KiB
+- [ ] **Step 10.22** Set buffer to 1 MiB
+- [ ] **Step 10.23** Close and re-open, verify restored to 1 MiB
+
+#### Clear Behavior
+- [ ] **Step 10.24** Send/receive data to fill buffer with some trimmed records
+- [ ] **Step 10.25** Click "清空接收区" button
+- [ ] **Step 10.26** Verify display is cleared
+- [ ] **Step 10.27** Verify receive count is reset to 0
+
+#### Old Config Missing MaxDisplayBytes
+- [ ] **Step 10.28** Close application
+- [ ] **Step 10.29** Edit settings.json to remove MaxDisplayBytes
+- [ ] **Step 10.30** Re-open application
+- [ ] **Step 10.31** Verify default 256 KiB is used
+
+### 11. Edge Cases
+
+- [ ] **Step 11.1** Open non-existent port (should show error)
+- [ ] **Step 11.2** Open already-open port (should show error)
+- [ ] **Step 11.3** Close already-closed port (should show error)
+- [ ] **Step 11.4** Send without opening port (should show error)
+- [ ] **Step 11.5** Empty text send (should show error)
+- [ ] **Step 11.6** Empty HEX send (should show error)
+
+### 12. Cleanup
 
 - [ ] **Step 11.1** Close any open serial ports
 - [ ] **Step 11.2** Exit application
