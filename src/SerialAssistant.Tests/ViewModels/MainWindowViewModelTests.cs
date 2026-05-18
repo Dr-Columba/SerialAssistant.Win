@@ -1416,5 +1416,353 @@ namespace SerialAssistant.Tests.ViewModels
             Assert.True(result.IsSuccess);
             Assert.Equal(SendLineEnding.CRLF, fakeSettingsService.GetSavedSettings().SendLineEnding);
         }
+
+        /*
+         * Test 文本发送成功后追加 TX 记录
+         */
+        [Fact]
+        public void SendCommand_TextMode_Success_AppendsTxRecord()
+        {
+            /* Arrange */
+            var fakeScanner = new FakeSerialPortScanner();
+            var fakeService = new FakeSerialPortService();
+            var viewModel = new MainWindowViewModel(fakeScanner, fakeService);
+            viewModel.SerialSettings.SelectedPortName = "COM1";
+            viewModel.ToggleConnectionCommand.Execute(null);
+            viewModel.SelectedSendMode = SendMode.Text;
+            viewModel.SendText = "ABC";
+            viewModel.ReceiveDisplay.ShowTimestamp = false;
+
+            /* Act */
+            viewModel.SendCommand.Execute(null);
+
+            /* Assert */
+            Assert.Contains("TX ", viewModel.ReceiveDisplay.ReceivedText);
+            Assert.Contains("ABC", viewModel.ReceiveDisplay.ReceivedText);
+        }
+
+        /*
+         * Test HEX 发送成功后追加 TX 记录
+         */
+        [Fact]
+        public void SendCommand_HexMode_Success_AppendsTxRecord()
+        {
+            /* Arrange */
+            var fakeScanner = new FakeSerialPortScanner();
+            var fakeService = new FakeSerialPortService();
+            var viewModel = new MainWindowViewModel(fakeScanner, fakeService);
+            viewModel.SerialSettings.SelectedPortName = "COM1";
+            viewModel.ToggleConnectionCommand.Execute(null);
+            viewModel.SelectedSendMode = SendMode.Hex;
+            viewModel.SendText = "41 42 43";
+            viewModel.ReceiveDisplay.ShowTimestamp = false;
+
+            /* Act */
+            viewModel.SendCommand.Execute(null);
+
+            /* Assert */
+            Assert.Contains("TX ", viewModel.ReceiveDisplay.ReceivedText);
+            Assert.Contains("ABC", viewModel.ReceiveDisplay.ReceivedText);
+        }
+
+        /*
+         * Test 发送失败不追加 TX 记录
+         */
+        [Fact]
+        public void SendCommand_Failure_DoesNotAppendTxRecord()
+        {
+            /* Arrange */
+            var fakeScanner = new FakeSerialPortScanner();
+            var fakeService = new FakeSerialPortService(shouldFailSend: true, sendErrorMessage: "Fake send failure");
+            var viewModel = new MainWindowViewModel(fakeScanner, fakeService);
+            viewModel.SerialSettings.SelectedPortName = "COM1";
+            viewModel.ToggleConnectionCommand.Execute(null);
+            viewModel.SelectedSendMode = SendMode.Text;
+            viewModel.SendText = "ABC";
+            viewModel.ReceiveDisplay.ShowTimestamp = false;
+
+            /* Act */
+            viewModel.SendCommand.Execute(null);
+
+            /* Assert */
+            Assert.DoesNotContain("TX ", viewModel.ReceiveDisplay.ReceivedText);
+            Assert.Equal(string.Empty, viewModel.ReceiveDisplay.ReceivedText);
+        }
+
+        /*
+         * Test 未连接发送不追加 TX 记录
+         */
+        [Fact]
+        public void SendCommand_NotConnected_DoesNotAppendTxRecord()
+        {
+            /* Arrange */
+            var fakeScanner = new FakeSerialPortScanner();
+            var fakeService = new FakeSerialPortService();
+            var viewModel = new MainWindowViewModel(fakeScanner, fakeService);
+            viewModel.SelectedSendMode = SendMode.Text;
+            viewModel.SendText = "ABC";
+            viewModel.ReceiveDisplay.ShowTimestamp = false;
+
+            /* Act */
+            viewModel.SendCommand.Execute(null);
+
+            /* Assert */
+            Assert.DoesNotContain("TX ", viewModel.ReceiveDisplay.ReceivedText);
+            Assert.Equal(string.Empty, viewModel.ReceiveDisplay.ReceivedText);
+        }
+
+        /*
+         * Test 非法 HEX 不追加 TX 记录
+         */
+        [Fact]
+        public void SendCommand_InvalidHex_DoesNotAppendTxRecord()
+        {
+            /* Arrange */
+            var fakeScanner = new FakeSerialPortScanner();
+            var fakeService = new FakeSerialPortService();
+            var viewModel = new MainWindowViewModel(fakeScanner, fakeService);
+            viewModel.SerialSettings.SelectedPortName = "COM1";
+            viewModel.ToggleConnectionCommand.Execute(null);
+            viewModel.SelectedSendMode = SendMode.Hex;
+            viewModel.SendText = "41 4G";
+            viewModel.ReceiveDisplay.ShowTimestamp = false;
+
+            /* Act */
+            viewModel.SendCommand.Execute(null);
+
+            /* Assert */
+            Assert.DoesNotContain("TX ", viewModel.ReceiveDisplay.ReceivedText);
+            Assert.Equal(string.Empty, viewModel.ReceiveDisplay.ReceivedText);
+        }
+
+        /*
+         * Test 文本发送加 CRLF 后 TX 记录包含 0D 0A
+         */
+        [Fact]
+        public void SendCommand_TextMode_CRLF_Contains0D0A()
+        {
+            /* Arrange */
+            var fakeScanner = new FakeSerialPortScanner();
+            var fakeService = new FakeSerialPortService();
+            var viewModel = new MainWindowViewModel(fakeScanner, fakeService);
+            viewModel.SerialSettings.SelectedPortName = "COM1";
+            viewModel.ToggleConnectionCommand.Execute(null);
+            viewModel.SelectedSendMode = SendMode.Text;
+            viewModel.SelectedSendLineEnding = SendLineEnding.CRLF;
+            viewModel.SendText = "ABC";
+            viewModel.ReceiveDisplay.ShowTimestamp = false;
+
+            /* Act */
+            viewModel.SendCommand.Execute(null);
+
+            /* Assert */
+            Assert.Single(fakeService.SentData);
+            Assert.Equal(new byte[] { 0x41, 0x42, 0x43, 0x0D, 0x0A }, fakeService.SentData[0]);
+            Assert.Equal(5, viewModel.SentBytesCount);
+        }
+
+        /*
+         * Test 文本发送加 CR 后 TX 记录包含 0D
+         */
+        [Fact]
+        public void SendCommand_TextMode_CR_Contains0D()
+        {
+            /* Arrange */
+            var fakeScanner = new FakeSerialPortScanner();
+            var fakeService = new FakeSerialPortService();
+            var viewModel = new MainWindowViewModel(fakeScanner, fakeService);
+            viewModel.SerialSettings.SelectedPortName = "COM1";
+            viewModel.ToggleConnectionCommand.Execute(null);
+            viewModel.SelectedSendMode = SendMode.Text;
+            viewModel.SelectedSendLineEnding = SendLineEnding.CR;
+            viewModel.SendText = "ABC";
+            viewModel.ReceiveDisplay.ShowTimestamp = false;
+
+            /* Act */
+            viewModel.SendCommand.Execute(null);
+
+            /* Assert */
+            Assert.Single(fakeService.SentData);
+            Assert.Equal(new byte[] { 0x41, 0x42, 0x43, 0x0D }, fakeService.SentData[0]);
+            Assert.Equal(4, viewModel.SentBytesCount);
+        }
+
+        /*
+         * Test 文本发送加 LF 后 TX 记录包含 0A
+         */
+        [Fact]
+        public void SendCommand_TextMode_LF_Contains0A()
+        {
+            /* Arrange */
+            var fakeScanner = new FakeSerialPortScanner();
+            var fakeService = new FakeSerialPortService();
+            var viewModel = new MainWindowViewModel(fakeScanner, fakeService);
+            viewModel.SerialSettings.SelectedPortName = "COM1";
+            viewModel.ToggleConnectionCommand.Execute(null);
+            viewModel.SelectedSendMode = SendMode.Text;
+            viewModel.SelectedSendLineEnding = SendLineEnding.LF;
+            viewModel.SendText = "ABC";
+            viewModel.ReceiveDisplay.ShowTimestamp = false;
+
+            /* Act */
+            viewModel.SendCommand.Execute(null);
+
+            /* Assert */
+            Assert.Single(fakeService.SentData);
+            Assert.Equal(new byte[] { 0x41, 0x42, 0x43, 0x0A }, fakeService.SentData[0]);
+            Assert.Equal(4, viewModel.SentBytesCount);
+        }
+
+        /*
+         * Test 文本发送加 None 后 TX 记录不包含额外结尾
+         */
+        [Fact]
+        public void SendCommand_TextMode_None_NoExtraEnding()
+        {
+            /* Arrange */
+            var fakeScanner = new FakeSerialPortScanner();
+            var fakeService = new FakeSerialPortService();
+            var viewModel = new MainWindowViewModel(fakeScanner, fakeService);
+            viewModel.SerialSettings.SelectedPortName = "COM1";
+            viewModel.ToggleConnectionCommand.Execute(null);
+            viewModel.SelectedSendMode = SendMode.Text;
+            viewModel.SelectedSendLineEnding = SendLineEnding.None;
+            viewModel.SendText = "ABC";
+            viewModel.ReceiveDisplay.ShowTimestamp = false;
+
+            /* Act */
+            viewModel.SendCommand.Execute(null);
+
+            /* Assert */
+            Assert.Single(fakeService.SentData);
+            Assert.Equal(new byte[] { 0x41, 0x42, 0x43 }, fakeService.SentData[0]);
+            Assert.Equal(3, viewModel.SentBytesCount);
+        }
+
+        /*
+         * Test HEX 发送加 CRLF 选项后 TX 记录不包含 0D 0A
+         */
+        [Fact]
+        public void SendCommand_HexMode_CRLF_DoesNotAppendEnding()
+        {
+            /* Arrange */
+            var fakeScanner = new FakeSerialPortScanner();
+            var fakeService = new FakeSerialPortService();
+            var viewModel = new MainWindowViewModel(fakeScanner, fakeService);
+            viewModel.SerialSettings.SelectedPortName = "COM1";
+            viewModel.ToggleConnectionCommand.Execute(null);
+            viewModel.SelectedSendMode = SendMode.Hex;
+            viewModel.SelectedSendLineEnding = SendLineEnding.CRLF;
+            viewModel.SendText = "41 42 43";
+            viewModel.ReceiveDisplay.ShowTimestamp = false;
+
+            /* Act */
+            viewModel.SendCommand.Execute(null);
+
+            /* Assert */
+            Assert.Single(fakeService.SentData);
+            Assert.Equal(new byte[] { 0x41, 0x42, 0x43 }, fakeService.SentData[0]);
+            Assert.Equal(3, viewModel.SentBytesCount);
+        }
+
+        /*
+         * Test TX 记录不增加 ReceivedBytesCount
+         */
+        [Fact]
+        public void SendCommand_TxRecord_DoesNotIncreaseReceivedBytesCount()
+        {
+            /* Arrange */
+            var fakeScanner = new FakeSerialPortScanner();
+            var fakeService = new FakeSerialPortService();
+            var viewModel = new MainWindowViewModel(fakeScanner, fakeService);
+            viewModel.SerialSettings.SelectedPortName = "COM1";
+            viewModel.ToggleConnectionCommand.Execute(null);
+            viewModel.SelectedSendMode = SendMode.Text;
+            viewModel.SendText = "ABC";
+
+            /* Act */
+            viewModel.SendCommand.Execute(null);
+
+            /* Assert */
+            Assert.Equal(0, viewModel.ReceiveDisplay.ReceivedBytesCount);
+        }
+
+        /*
+         * Test 接收事件后追加 RX 记录
+         */
+        [Fact]
+        public void DataReceived_AppendsRxRecord()
+        {
+            /* Arrange */
+            var fakeScanner = new FakeSerialPortScanner();
+            var fakeService = new FakeSerialPortService();
+            var fakeUiInvoker = new FakeUiThreadInvoker();
+            var viewModel = new MainWindowViewModel(fakeScanner, fakeService, fakeUiInvoker);
+            viewModel.SerialSettings.SelectedPortName = "COM1";
+            viewModel.ToggleConnectionCommand.Execute(null);
+            viewModel.ReceiveDisplay.ShowTimestamp = false;
+            byte[] data = new byte[] { 0x4F, 0x4B };
+
+            /* Act */
+            fakeService.SimulateDataReceived(data);
+
+            /* Assert */
+            Assert.Contains("RX ", viewModel.ReceiveDisplay.ReceivedText);
+            Assert.Contains("OK", viewModel.ReceiveDisplay.ReceivedText);
+        }
+
+        /*
+         * Test 接收事件通过 IUiThreadInvoker 执行
+         */
+        [Fact]
+        public void DataReceived_ViaUiThreadInvoker()
+        {
+            /* Arrange */
+            var fakeScanner = new FakeSerialPortScanner();
+            var fakeService = new FakeSerialPortService();
+            var fakeUiInvoker = new FakeUiThreadInvoker();
+            var viewModel = new MainWindowViewModel(fakeScanner, fakeService, fakeUiInvoker);
+            viewModel.SerialSettings.SelectedPortName = "COM1";
+            viewModel.ToggleConnectionCommand.Execute(null);
+            byte[] data = new byte[] { 0x41 };
+
+            /* Act */
+            fakeService.SimulateDataReceived(data);
+
+            /* Assert */
+            Assert.Equal(1, fakeUiInvoker.InvokeCount);
+        }
+
+        /*
+         * Test ClearReceiveCommand 清空 TX 和 RX 历史记录
+         */
+        [Fact]
+        public void ClearReceiveCommand_ClearsTxAndRxRecords()
+        {
+            /* Arrange */
+            var fakeScanner = new FakeSerialPortScanner();
+            var fakeService = new FakeSerialPortService();
+            var fakeUiInvoker = new FakeUiThreadInvoker();
+            var viewModel = new MainWindowViewModel(fakeScanner, fakeService, fakeUiInvoker);
+            viewModel.SerialSettings.SelectedPortName = "COM1";
+            viewModel.ToggleConnectionCommand.Execute(null);
+            viewModel.ReceiveDisplay.ShowTimestamp = false;
+
+            viewModel.SelectedSendMode = SendMode.Text;
+            viewModel.SendText = "TXDATA";
+            viewModel.SendCommand.Execute(null);
+
+            byte[] rxData = new byte[] { 0x52, 0x58, 0x44, 0x41, 0x54, 0x41 };
+            fakeService.SimulateDataReceived(rxData);
+
+            Assert.False(string.IsNullOrEmpty(viewModel.ReceiveDisplay.ReceivedText));
+
+            /* Act */
+            viewModel.ClearReceiveCommand.Execute(null);
+
+            /* Assert */
+            Assert.Equal(string.Empty, viewModel.ReceiveDisplay.ReceivedText);
+            Assert.Equal(0, viewModel.ReceiveDisplay.ReceivedBytesCount);
+        }
     }
 }

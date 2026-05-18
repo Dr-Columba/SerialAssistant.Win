@@ -433,6 +433,7 @@ namespace SerialAssistant.App.ViewModels
             if (sendResult.IsSuccess)
             {
                 SentBytesCount += data.Length;
+                ReceiveDisplay.AddTxData(data);
                 StatusMessage = $"已发送 {data.Length} 字节。";
             }
             else
