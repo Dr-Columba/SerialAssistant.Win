@@ -1932,5 +1932,498 @@ namespace SerialAssistant.Tests.ViewModels
             /* Act & Assert */
             Assert.Equal(262144, viewModel.ReceiveDisplay.MaxDisplayBytes);
         }
+
+        /*
+         * Test 默认 SendHistory 为空
+         */
+        [Fact]
+        public void DefaultSendHistory_IsEmpty()
+        {
+            /* Arrange */
+            var viewModel = new MainWindowViewModel();
+
+            /* Act & Assert */
+            Assert.Empty(viewModel.SendHistory);
+        }
+
+        /*
+         * Test 默认 MaxSendHistoryCount 为 20
+         */
+        [Fact]
+        public void DefaultMaxSendHistoryCount_Is20()
+        {
+            /* Arrange */
+            var viewModel = new MainWindowViewModel();
+
+            /* Act & Assert */
+            Assert.Equal(20, viewModel.MaxSendHistoryCount);
+        }
+
+        /*
+         * Test 文本发送成功后新增一条历史
+         */
+        [Fact]
+        public void SendCommand_TextMode_Success_AddsHistory()
+        {
+            /* Arrange */
+            var fakeScanner = new FakeSerialPortScanner();
+            var fakeService = new FakeSerialPortService();
+            var viewModel = new MainWindowViewModel(fakeScanner, fakeService);
+            viewModel.SerialSettings.SelectedPortName = "COM1";
+            viewModel.ToggleConnectionCommand.Execute(null);
+            viewModel.SelectedSendMode = SendMode.Text;
+            viewModel.SendText = "ABC";
+
+            /* Act */
+            viewModel.SendCommand.Execute(null);
+
+            /* Assert */
+            Assert.Single(viewModel.SendHistory);
+            Assert.Equal("ABC", viewModel.SendHistory[0].Content);
+            Assert.Equal(SendMode.Text, viewModel.SendHistory[0].SendMode);
+        }
+
+        /*
+         * Test HEX 发送成功后新增一条历史
+         */
+        [Fact]
+        public void SendCommand_HexMode_Success_AddsHistory()
+        {
+            /* Arrange */
+            var fakeScanner = new FakeSerialPortScanner();
+            var fakeService = new FakeSerialPortService();
+            var viewModel = new MainWindowViewModel(fakeScanner, fakeService);
+            viewModel.SerialSettings.SelectedPortName = "COM1";
+            viewModel.ToggleConnectionCommand.Execute(null);
+            viewModel.SelectedSendMode = SendMode.Hex;
+            viewModel.SendText = "41 42 43";
+
+            /* Act */
+            viewModel.SendCommand.Execute(null);
+
+            /* Assert */
+            Assert.Single(viewModel.SendHistory);
+            Assert.Equal("41 42 43", viewModel.SendHistory[0].Content);
+            Assert.Equal(SendMode.Hex, viewModel.SendHistory[0].SendMode);
+        }
+
+        /*
+         * Test 发送历史记录 Content 为 SendText 原始输入
+         */
+        [Fact]
+        public void SendCommand_RecordsOriginalSendText()
+        {
+            /* Arrange */
+            var fakeScanner = new FakeSerialPortScanner();
+            var fakeService = new FakeSerialPortService();
+            var viewModel = new MainWindowViewModel(fakeScanner, fakeService);
+            viewModel.SerialSettings.SelectedPortName = "COM1";
+            viewModel.ToggleConnectionCommand.Execute(null);
+            viewModel.SelectedSendMode = SendMode.Text;
+            viewModel.SelectedSendLineEnding = SendLineEnding.CRLF;
+            viewModel.SendText = "Hello";
+
+            /* Act */
+            viewModel.SendCommand.Execute(null);
+
+            /* Assert */
+            Assert.Single(viewModel.SendHistory);
+            Assert.Equal("Hello", viewModel.SendHistory[0].Content);
+            Assert.DoesNotContain("\r\n", viewModel.SendHistory[0].Content);
+        }
+
+        /*
+         * Test 文本发送 CRLF 后历史 Content 不包含 CRLF
+         */
+        [Fact]
+        public void SendCommand_TextMode_CRLF_HistoryDoesNotContainCRLF()
+        {
+            /* Arrange */
+            var fakeScanner = new FakeSerialPortScanner();
+            var fakeService = new FakeSerialPortService();
+            var viewModel = new MainWindowViewModel(fakeScanner, fakeService);
+            viewModel.SerialSettings.SelectedPortName = "COM1";
+            viewModel.ToggleConnectionCommand.Execute(null);
+            viewModel.SelectedSendMode = SendMode.Text;
+            viewModel.SelectedSendLineEnding = SendLineEnding.CRLF;
+            viewModel.SendText = "ABC";
+
+            /* Act */
+            viewModel.SendCommand.Execute(null);
+
+            /* Assert */
+            Assert.Single(viewModel.SendHistory);
+            Assert.Equal("ABC", viewModel.SendHistory[0].Content);
+            Assert.DoesNotContain("\r", viewModel.SendHistory[0].Content);
+            Assert.DoesNotContain("\n", viewModel.SendHistory[0].Content);
+        }
+
+        /*
+         * Test 发送失败不新增历史
+         */
+        [Fact]
+        public void SendCommand_Failure_DoesNotAddHistory()
+        {
+            /* Arrange */
+            var fakeScanner = new FakeSerialPortScanner();
+            var fakeService = new FakeSerialPortService(shouldFailSend: true, sendErrorMessage: "Fake failure");
+            var viewModel = new MainWindowViewModel(fakeScanner, fakeService);
+            viewModel.SerialSettings.SelectedPortName = "COM1";
+            viewModel.ToggleConnectionCommand.Execute(null);
+            viewModel.SelectedSendMode = SendMode.Text;
+            viewModel.SendText = "ABC";
+
+            /* Act */
+            viewModel.SendCommand.Execute(null);
+
+            /* Assert */
+            Assert.Empty(viewModel.SendHistory);
+        }
+
+        /*
+         * Test 未连接发送不新增历史
+         */
+        [Fact]
+        public void SendCommand_NotConnected_DoesNotAddHistory()
+        {
+            /* Arrange */
+            var fakeScanner = new FakeSerialPortScanner();
+            var fakeService = new FakeSerialPortService();
+            var viewModel = new MainWindowViewModel(fakeScanner, fakeService);
+            viewModel.SelectedSendMode = SendMode.Text;
+            viewModel.SendText = "ABC";
+
+            /* Act */
+            viewModel.SendCommand.Execute(null);
+
+            /* Assert */
+            Assert.Empty(viewModel.SendHistory);
+        }
+
+        /*
+         * Test 非法 HEX 不新增历史
+         */
+        [Fact]
+        public void SendCommand_InvalidHex_DoesNotAddHistory()
+        {
+            /* Arrange */
+            var fakeScanner = new FakeSerialPortScanner();
+            var fakeService = new FakeSerialPortService();
+            var viewModel = new MainWindowViewModel(fakeScanner, fakeService);
+            viewModel.SerialSettings.SelectedPortName = "COM1";
+            viewModel.ToggleConnectionCommand.Execute(null);
+            viewModel.SelectedSendMode = SendMode.Hex;
+            viewModel.SendText = "41 4G";
+
+            /* Act */
+            viewModel.SendCommand.Execute(null);
+
+            /* Assert */
+            Assert.Empty(viewModel.SendHistory);
+        }
+
+        /*
+         * Test 空内容发送不新增历史
+         */
+        [Fact]
+        public void SendCommand_EmptyText_DoesNotAddHistory()
+        {
+            /* Arrange */
+            var fakeScanner = new FakeSerialPortScanner();
+            var fakeService = new FakeSerialPortService();
+            var viewModel = new MainWindowViewModel(fakeScanner, fakeService);
+            viewModel.SerialSettings.SelectedPortName = "COM1";
+            viewModel.ToggleConnectionCommand.Execute(null);
+            viewModel.SelectedSendMode = SendMode.Text;
+            viewModel.SendText = string.Empty;
+
+            /* Act */
+            viewModel.SendCommand.Execute(null);
+
+            /* Assert */
+            Assert.Empty(viewModel.SendHistory);
+        }
+
+        /*
+         * Test 重复文本发送去重
+         */
+        [Fact]
+        public void SendCommand_DuplicateText_RemovesDuplicates()
+        {
+            /* Arrange */
+            var fakeScanner = new FakeSerialPortScanner();
+            var fakeService = new FakeSerialPortService();
+            var viewModel = new MainWindowViewModel(fakeScanner, fakeService);
+            viewModel.SerialSettings.SelectedPortName = "COM1";
+            viewModel.ToggleConnectionCommand.Execute(null);
+            viewModel.SelectedSendMode = SendMode.Text;
+            viewModel.SendText = "ABC";
+            viewModel.SendCommand.Execute(null);
+
+            viewModel.SendText = "DEF";
+            viewModel.SendCommand.Execute(null);
+
+            viewModel.SendText = "ABC";
+            viewModel.SendCommand.Execute(null);
+
+            /* Act & Assert */
+            Assert.Equal(2, viewModel.SendHistory.Count);
+            Assert.Equal("ABC", viewModel.SendHistory[0].Content);
+            Assert.Equal("DEF", viewModel.SendHistory[1].Content);
+        }
+
+        /*
+         * Test 重复 HEX 发送去重
+         */
+        [Fact]
+        public void SendCommand_DuplicateHex_RemovesDuplicates()
+        {
+            /* Arrange */
+            var fakeScanner = new FakeSerialPortScanner();
+            var fakeService = new FakeSerialPortService();
+            var viewModel = new MainWindowViewModel(fakeScanner, fakeService);
+            viewModel.SerialSettings.SelectedPortName = "COM1";
+            viewModel.ToggleConnectionCommand.Execute(null);
+            viewModel.SelectedSendMode = SendMode.Hex;
+            viewModel.SendText = "41 42 43";
+            viewModel.SendCommand.Execute(null);
+
+            viewModel.SendText = "44 45 46";
+            viewModel.SendCommand.Execute(null);
+
+            viewModel.SendText = "41 42 43";
+            viewModel.SendCommand.Execute(null);
+
+            /* Act & Assert */
+            Assert.Equal(2, viewModel.SendHistory.Count);
+            Assert.Equal("41 42 43", viewModel.SendHistory[0].Content);
+            Assert.Equal("44 45 46", viewModel.SendHistory[1].Content);
+        }
+
+        /*
+         * Test Content 相同但 SendMode 不同应作为不同历史
+         */
+        [Fact]
+        public void SendCommand_SameContent_DifferentMode_KeepsBoth()
+        {
+            /* Arrange */
+            var fakeScanner = new FakeSerialPortScanner();
+            var fakeService = new FakeSerialPortService();
+            var viewModel = new MainWindowViewModel(fakeScanner, fakeService);
+            viewModel.SerialSettings.SelectedPortName = "COM1";
+            viewModel.ToggleConnectionCommand.Execute(null);
+
+            viewModel.SelectedSendMode = SendMode.Text;
+            viewModel.SendText = "41 42 43";
+            viewModel.SendCommand.Execute(null);
+
+            viewModel.SelectedSendMode = SendMode.Hex;
+            viewModel.SendCommand.Execute(null);
+
+            /* Act & Assert */
+            Assert.Equal(2, viewModel.SendHistory.Count);
+        }
+
+        /*
+         * Test 重复发送后历史项移动到最新位置
+         */
+        [Fact]
+        public void SendCommand_Duplicate_MovesToLatest()
+        {
+            /* Arrange */
+            var fakeScanner = new FakeSerialPortScanner();
+            var fakeService = new FakeSerialPortService();
+            var viewModel = new MainWindowViewModel(fakeScanner, fakeService);
+            viewModel.SerialSettings.SelectedPortName = "COM1";
+            viewModel.ToggleConnectionCommand.Execute(null);
+            viewModel.SelectedSendMode = SendMode.Text;
+
+            viewModel.SendText = "A";
+            viewModel.SendCommand.Execute(null);
+
+            viewModel.SendText = "B";
+            viewModel.SendCommand.Execute(null);
+
+            viewModel.SendText = "C";
+            viewModel.SendCommand.Execute(null);
+
+            viewModel.SendText = "A";
+            viewModel.SendCommand.Execute(null);
+
+            /* Act & Assert */
+            Assert.Equal("A", viewModel.SendHistory[0].Content);
+            Assert.Equal("C", viewModel.SendHistory[1].Content);
+            Assert.Equal("B", viewModel.SendHistory[2].Content);
+        }
+
+        /*
+         * Test 超过 MaxSendHistoryCount 后删除最旧项
+         */
+        [Fact]
+        public void SendCommand_ExceedsMaxCount_DeletesOldest()
+        {
+            /* Arrange */
+            var fakeScanner = new FakeSerialPortScanner();
+            var fakeService = new FakeSerialPortService();
+            var viewModel = new MainWindowViewModel(fakeScanner, fakeService);
+            viewModel.SerialSettings.SelectedPortName = "COM1";
+            viewModel.ToggleConnectionCommand.Execute(null);
+            viewModel.SelectedSendMode = SendMode.Text;
+
+            for (int i = 0; i < 25; i++)
+            {
+                viewModel.SendText = $"Item{i}";
+                viewModel.SendCommand.Execute(null);
+            }
+
+            /* Act & Assert */
+            Assert.Equal(20, viewModel.SendHistory.Count);
+            Assert.Equal("Item24", viewModel.SendHistory[0].Content);
+            Assert.Equal("Item5", viewModel.SendHistory[19].Content);
+            Assert.DoesNotContain(viewModel.SendHistory, h => h.Content == "Item0");
+        }
+
+        /*
+         * Test MaxSendHistoryCount 设置为 0 时使用默认值
+         */
+        [Fact]
+        public void MaxSendHistoryCount_SetTo0_UsesDefault()
+        {
+            /* Arrange */
+            var fakeScanner = new FakeSerialPortScanner();
+            var fakeService = new FakeSerialPortService();
+            var viewModel = new MainWindowViewModel(fakeScanner, fakeService);
+            viewModel.SerialSettings.SelectedPortName = "COM1";
+            viewModel.ToggleConnectionCommand.Execute(null);
+            viewModel.SelectedSendMode = SendMode.Text;
+
+            viewModel.SendText = "A";
+            viewModel.SendCommand.Execute(null);
+
+            /* Act */
+            viewModel.MaxSendHistoryCount = 0;
+
+            /* Assert */
+            Assert.Equal(20, viewModel.MaxSendHistoryCount);
+            Assert.Single(viewModel.SendHistory);
+        }
+
+        /*
+         * Test MaxSendHistoryCount 设置为负数时不崩溃
+         */
+        [Fact]
+        public void MaxSendHistoryCount_SetToNegative_NoCrash()
+        {
+            /* Arrange */
+            var fakeScanner = new FakeSerialPortScanner();
+            var fakeService = new FakeSerialPortService();
+            var viewModel = new MainWindowViewModel(fakeScanner, fakeService);
+            viewModel.SerialSettings.SelectedPortName = "COM1";
+            viewModel.ToggleConnectionCommand.Execute(null);
+            viewModel.SelectedSendMode = SendMode.Text;
+
+            viewModel.SendText = "A";
+            viewModel.SendCommand.Execute(null);
+
+            /* Act */
+            viewModel.MaxSendHistoryCount = -5;
+
+            /* Assert */
+            Assert.Equal(20, viewModel.MaxSendHistoryCount);
+            Assert.Single(viewModel.SendHistory);
+        }
+
+        /*
+         * Test ClearSendHistoryCommand 清空历史
+         */
+        [Fact]
+        public void ClearSendHistoryCommand_ClearsHistory()
+        {
+            /* Arrange */
+            var fakeScanner = new FakeSerialPortScanner();
+            var fakeService = new FakeSerialPortService();
+            var viewModel = new MainWindowViewModel(fakeScanner, fakeService);
+            viewModel.SerialSettings.SelectedPortName = "COM1";
+            viewModel.ToggleConnectionCommand.Execute(null);
+            viewModel.SelectedSendMode = SendMode.Text;
+
+            viewModel.SendText = "ABC";
+            viewModel.SendCommand.Execute(null);
+
+            Assert.NotEmpty(viewModel.SendHistory);
+
+            /* Act */
+            viewModel.ClearSendHistoryCommand.Execute(null);
+
+            /* Assert */
+            Assert.Empty(viewModel.SendHistory);
+        }
+
+        /*
+         * Test ClearSendHistoryCommand 不清空 SendText
+         */
+        [Fact]
+        public void ClearSendHistoryCommand_DoesNotClearSendText()
+        {
+            /* Arrange */
+            var fakeScanner = new FakeSerialPortScanner();
+            var fakeService = new FakeSerialPortService();
+            var viewModel = new MainWindowViewModel(fakeScanner, fakeService);
+            viewModel.SendText = "ABC";
+
+            /* Act */
+            viewModel.ClearSendHistoryCommand.Execute(null);
+
+            /* Assert */
+            Assert.Equal("ABC", viewModel.SendText);
+        }
+
+        /*
+         * Test ClearSendHistoryCommand 不清空 ReceiveDisplay
+         */
+        [Fact]
+        public void ClearSendHistoryCommand_DoesNotClearReceiveDisplay()
+        {
+            /* Arrange */
+            var fakeScanner = new FakeSerialPortScanner();
+            var fakeService = new FakeSerialPortService();
+            var fakeUiInvoker = new FakeUiThreadInvoker();
+            var viewModel = new MainWindowViewModel(fakeScanner, fakeService, fakeUiInvoker);
+            viewModel.SerialSettings.SelectedPortName = "COM1";
+            viewModel.ToggleConnectionCommand.Execute(null);
+            byte[] data = System.Text.Encoding.UTF8.GetBytes("RXDATA");
+            fakeService.SimulateDataReceived(data);
+
+            viewModel.SendText = "TXDATA";
+            viewModel.SendCommand.Execute(null);
+
+            /* Act */
+            viewModel.ClearSendHistoryCommand.Execute(null);
+
+            /* Assert */
+            Assert.False(string.IsNullOrEmpty(viewModel.ReceiveDisplay.ReceivedText));
+        }
+
+        /*
+         * Test ClearSendHistoryCommand 不改变 IsConnected
+         */
+        [Fact]
+        public void ClearSendHistoryCommand_DoesNotChangeConnectionState()
+        {
+            /* Arrange */
+            var fakeScanner = new FakeSerialPortScanner();
+            var fakeService = new FakeSerialPortService();
+            var viewModel = new MainWindowViewModel(fakeScanner, fakeService);
+            viewModel.SerialSettings.SelectedPortName = "COM1";
+            viewModel.ToggleConnectionCommand.Execute(null);
+
+            var originalState = viewModel.ConnectionState;
+
+            /* Act */
+            viewModel.ClearSendHistoryCommand.Execute(null);
+
+            /* Assert */
+            Assert.Equal(originalState, viewModel.ConnectionState);
+        }
     }
 }

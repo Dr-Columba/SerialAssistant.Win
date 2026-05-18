@@ -27,6 +27,8 @@ namespace SerialAssistant.App.ViewModels
         private int _sentBytesCount;
         private bool _isHexDisplay;
         private string _connectionButtonText;
+        private int _maxSendHistoryCount;
+        private ObservableCollection<SendHistoryItem> _sendHistory;
 
         public MainWindowViewModel()
             : this(null, null, null, null)
@@ -78,6 +80,10 @@ namespace SerialAssistant.App.ViewModels
             ReceiveBufferSizeOptions.Add(1048576);
             ReceiveBufferSizeOptions.Add(4194304);
 
+            _maxSendHistoryCount = 20;
+            _sendHistory = new ObservableCollection<SendHistoryItem>();
+            SendHistory = _sendHistory;
+
             if (_serialPortService != null)
             {
                 _serialPortService.ConnectionStateChanged += OnConnectionStateChanged;
@@ -95,6 +101,7 @@ namespace SerialAssistant.App.ViewModels
             ToggleConnectionCommand = new RelayCommand(ToggleConnection, CanToggleConnection);
             SendCommand = new RelayCommand(Send, CanSend);
             ClearReceiveCommand = new RelayCommand(ClearReceive);
+            ClearSendHistoryCommand = new RelayCommand(ClearSendHistory);
 
             LoadSettings();
         }
@@ -223,6 +230,32 @@ namespace SerialAssistant.App.ViewModels
         {
             get;
             private set;
+        }
+
+        public ICommand ClearSendHistoryCommand
+        {
+            get;
+            private set;
+        }
+
+        public ObservableCollection<SendHistoryItem> SendHistory
+        {
+            get;
+            private set;
+        }
+
+        public int MaxSendHistoryCount
+        {
+            get => _maxSendHistoryCount;
+            set
+            {
+                if (value <= 0)
+                {
+                    value = 20;
+                }
+                SetProperty(ref _maxSendHistoryCount, value);
+                TrimSendHistory();
+            }
         }
 
         private void UpdateConnectionButtonText(SerialConnectionState state)
@@ -446,6 +479,7 @@ namespace SerialAssistant.App.ViewModels
             {
                 SentBytesCount += data.Length;
                 ReceiveDisplay.AddTxData(data);
+                AddToSendHistory(SendText, SelectedSendMode);
                 StatusMessage = $"已发送 {data.Length} 字节。";
             }
             else
@@ -553,6 +587,45 @@ namespace SerialAssistant.App.ViewModels
             };
 
             return _appSettingsService.Save(settings);
+        }
+
+        private void AddToSendHistory(string content, SendMode sendMode)
+        {
+            if (string.IsNullOrEmpty(content))
+            {
+                return;
+            }
+
+            var existingIndex = -1;
+            for (int i = 0; i < _sendHistory.Count; i++)
+            {
+                if (_sendHistory[i].Content == content && _sendHistory[i].SendMode == sendMode)
+                {
+                    existingIndex = i;
+                    break;
+                }
+            }
+
+            if (existingIndex >= 0)
+            {
+                _sendHistory.RemoveAt(existingIndex);
+            }
+
+            _sendHistory.Insert(0, new SendHistoryItem(content, sendMode));
+            TrimSendHistory();
+        }
+
+        private void TrimSendHistory()
+        {
+            while (_sendHistory.Count > _maxSendHistoryCount)
+            {
+                _sendHistory.RemoveAt(_sendHistory.Count - 1);
+            }
+        }
+
+        private void ClearSendHistory(object? parameter)
+        {
+            _sendHistory.Clear();
         }
     }
 }
