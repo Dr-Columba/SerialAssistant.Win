@@ -16,7 +16,16 @@ This document outlines the phased development plan for SerialAssistant.Win, orga
 - Feature E1: Product Vision and Phase Roadmap Realignment
 
 **Current Phase:**
-- Feature E2: UI Information Architecture Detailed Design (in progress)
+- Feature F1: Application Shell Skeleton (Completed)
+
+**Completed Features:**
+- Feature A: Send Line Ending Options
+- Feature B: TX/RX Direction Marking and Timestamp Display
+- Feature C: Receive Buffer Limit and Configuration
+- Feature D: Send History with UI and Persistence
+- Feature E1: Product Vision and Phase Roadmap Realignment
+- Feature E2: UI Information Architecture Detailed Design
+- Feature F1: Application Shell Skeleton
 
 ## Phase Roadmap
 
@@ -88,60 +97,56 @@ This document outlines the phased development plan for SerialAssistant.Win, orga
 
 ### Feature F1: Application Shell Skeleton
 
+**Status:** ✅ Completed
+
 **Goal:** Build the main application shell with navigation, placeholder pages, and basic navigation logic
 
 **Scope:**
 - Create MainWindow.xaml as Shell container with navigation structure
-- Create MainWindowViewModel with navigation logic
-- Create placeholder pages:
-  - TerminalPage.xaml / TerminalViewModel
-  - ModbusPage.xaml / ModbusViewModel
-  - TemplatesPage.xaml / TemplatesViewModel
-  - LogsPage.xaml / LogsViewModel
-  - SettingsPage.xaml / SettingsViewModel
-- Implement left navigation panel
-- Implement main content frame
-- Verify navigation between pages works
+- Add left navigation panel (Terminal, Modbus, Templates, Logs, Settings)
+- Add top status bar (app name, connection status, version)
+- Add bottom status bar (ready status, phase indicator)
+- Wrap existing terminal functionality in main workspace (non-intrusive)
+- Keep existing terminal functionality in MainWindow (not migrated yet)
 
 **Allowed Modifications:**
-- src/SerialAssistant.App/MainWindow.xaml (shell structure)
-- src/SerialAssistant.App/MainWindow.xaml.cs (minimal changes if needed)
-- src/SerialAssistant.App/ViewModels/ (new ViewModels)
-- src/SerialAssistant.App/Views/ (new page XAML files)
-- Tests for navigation logic
+- src/SerialAssistant.App/MainWindow.xaml (shell structure only)
+- src/SerialAssistant.App/MainWindow.xaml.cs (no changes allowed, must remain minimal)
+- docs/UIInformationArchitecture.md (F1 implementation notes)
+- docs/PhasePlan.md (status update)
+- docs/ManualTestChecklist.md (F1 verification steps)
+- docs/FeatureReports/FeatureF1-ApplicationShellSkeleton.md (new report)
 
 **Forbidden:**
-- Migrating existing serial terminal functionality
+- Migrating existing serial terminal functionality to separate pages
+- Creating separate page UserControls in this phase
 - Implementing Modbus protocol
 - Changing existing Feature A-D behavior
 - Final visual styling
 - Introducing third-party UI libraries
 - Adding complex animations
 - Creating theme systems
+- Adding business logic to MainWindow.xaml.cs
 
-**Expected New Files:**
-- src/SerialAssistant.App/Views/TerminalPage.xaml
-- src/SerialAssistant.App/Views/ModbusPage.xaml
-- src/SerialAssistant.App/Views/TemplatesPage.xaml
-- src/SerialAssistant.App/Views/LogsPage.xaml
-- src/SerialAssistant.App/Views/SettingsPage.xaml
-- src/SerialAssistant.App/ViewModels/TerminalViewModel.cs
-- src/SerialAssistant.App/ViewModels/ModbusViewModel.cs
-- src/SerialAssistant.App/ViewModels/TemplatesViewModel.cs
-- src/SerialAssistant.App/ViewModels/LogsViewModel.cs
-- src/SerialAssistant.App/ViewModels/SettingsViewModel.cs
+**Implementation Notes:**
+- F1 uses non-intrusive shell wrapping approach
+- Existing terminal UI remains in MainWindow.xaml main workspace
+- Navigation buttons are static (no command binding) to minimize risk
+- Placeholder pages will be created in F2 when migrating terminal functionality
+- MainWindow.xaml.cs remains unchanged (only InitializeComponent)
 
 **Acceptance Criteria:**
-- Shell UI renders correctly with navigation
-- Navigation between all placeholder pages works
+- Shell UI renders correctly with navigation panel
+- Top status bar visible with app name and version
+- Bottom status bar visible with status text
+- Existing terminal functionality fully preserved and visible
 - MainWindow.xaml.cs remains minimal (~20 lines)
-- MainWindowViewModel handles only navigation and global state
-- All placeholder pages are navigable
+- All 291 existing tests pass
 - No serial port functionality moved yet
 
-**Code Changes Allowed:** Yes (Shell infrastructure only)
+**Code Changes Allowed:** Yes (Shell UI structure only)
 
-**Tests Required:** Yes (navigation logic tests)
+**Tests Required:** No (if only XAML changes, no new logic)
 
 **Manual UI Verification Required:** Yes
 

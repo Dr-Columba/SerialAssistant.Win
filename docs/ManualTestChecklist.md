@@ -19,6 +19,42 @@ This document provides a step-by-step manual testing guide for SerialAssistant.W
 - [ ] **Step 1.2** Verify main window displays correctly
 - [ ] **Step 1.3** Verify initial state (Disconnected, parameters at defaults)
 
+### Feature F1: Application Shell Skeleton Verification
+
+#### F1.1 Shell Structure Visibility
+
+- [ ] **Step F1.1** Verify left navigation panel is visible
+- [ ] **Step F1.2** Verify navigation items exist: Terminal, Modbus, Templates, Logs, Settings
+- [ ] **Step F1.3** Verify Terminal button is highlighted/enabled (current active)
+- [ ] **Step F1.4** Verify Modbus, Templates, Logs, Settings buttons are visible (may be disabled as placeholders)
+- [ ] **Step F1.5** Verify top status bar is visible
+- [ ] **Step F1.6** Verify top status bar shows "SerialAssistant.Win" text
+- [ ] **Step F1.7** Verify top status bar shows version "v0.2.1"
+- [ ] **Step F1.8** Verify bottom status bar is visible
+- [ ] **Step F1.9** Verify bottom status bar shows "Ready" or similar status text
+- [ ] **Step F1.10** Verify bottom status bar shows "Feature F1: Application Shell Skeleton"
+
+#### F1.2 Existing Terminal Functionality Preservation
+
+- [ ] **Step F1.11** Verify serial port settings panel is visible (COM port, baud rate, etc.)
+- [ ] **Step F1.12** Verify receive area is visible with TX/RX display
+- [ ] **Step F1.13** Verify send area is visible with text input and send button
+- [ ] **Step F1.14** Verify "发送结尾" (Send Line Ending) dropdown is visible (Feature A)
+- [ ] **Step F1.15** Verify "显示时间戳" checkbox is visible (Feature B)
+- [ ] **Step F1.16** Verify "显示方向" checkbox is visible (Feature B)
+- [ ] **Step F1.17** Verify "接收缓存" dropdown is visible (Feature C)
+- [ ] **Step F1.18** Verify "发送历史" dropdown is visible (Feature D)
+- [ ] **Step F1.19** Verify "清空历史" button is visible (Feature D)
+
+#### F1.3 MainWindow.xaml.cs Boundary Check
+
+- [ ] **Step F1.20** Open `src/SerialAssistant.App/MainWindow.xaml.cs`
+- [ ] **Step F1.21** Verify file contains only `InitializeComponent()` call
+- [ ] **Step F1.22** Verify no button click handlers exist
+- [ ] **Step F1.23** Verify no navigation logic exists
+- [ ] **Step F1.24** Verify no serial port logic exists
+- [ ] **Step F1.25** Verify file length is minimal (~20 lines or less)
+
 ### 2. Serial Port Scanning
 
 - [ ] **Step 2.1** Click "刷新" (Refresh) button

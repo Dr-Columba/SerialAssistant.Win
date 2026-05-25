@@ -504,6 +504,73 @@ Future Phases: Add Features
 └── N1: Add final styling
 ```
 
+## 17. Feature F1 Implementation Notes
+
+### 17.1 Shell Structure Implemented
+
+**Status:** Shell skeleton established in MainWindow.xaml
+
+**Current Structure:**
+```
+MainWindow.xaml
+├── Top Status Bar (App title, Connection status, Version)
+├── Main Content Area
+│   ├── Left Navigation Panel (Terminal, Modbus, Templates, Logs, Settings)
+│   └── Main Workspace (Current terminal functionality)
+└── Bottom Status Bar (Ready status, Phase indicator, Tool description)
+```
+
+### 17.2 Terminal Still in MainWindow
+
+**Important:** Terminal functionality remains in MainWindow for F1.
+
+**Current State:**
+- Serial port settings area: Present in MainWindow
+- Receive area: Present in MainWindow
+- Send area: Present in MainWindow
+- Status bar: Present in MainWindow
+
+**F2 Migration Plan:**
+- Terminal functionality will be moved to TerminalPage.xaml
+- Terminal logic will be moved to TerminalViewModel
+- MainWindow will become pure Shell container
+
+### 17.3 Navigation Panel State
+
+**Current Implementation:**
+- Static buttons (no command binding)
+- Terminal button highlighted (current page)
+- Other buttons disabled (placeholder)
+- No navigation logic yet
+
+**F2+ Enhancement:**
+- Add navigation command binding
+- Enable page switching
+- Implement placeholder content for Modbus/Templates/Logs/Settings
+
+### 17.4 Visual Style Notes
+
+**Current Phase (F1):**
+- Structural UI only
+- Simple borders and backgrounds
+- No complex styling
+- No theme system
+- No advanced icons
+
+**Future Phase (N1):**
+- Modern visual design
+- Consistent color scheme
+- Professional appearance
+- Reference: MQTTX modern workbench direction
+
+### 17.5 MainWindow.xaml.cs Status
+
+**Maintained:**
+- Minimal code-behind
+- Only InitializeComponent
+- No business logic added
+- No event handlers added
+
 ---
 
 *Last updated: May 2026*
