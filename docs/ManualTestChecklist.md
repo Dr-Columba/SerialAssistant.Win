@@ -55,6 +55,40 @@ This document provides a step-by-step manual testing guide for SerialAssistant.W
 - [ ] **Step F1.24** Verify no serial port logic exists
 - [ ] **Step F1.25** Verify file length is minimal (~20 lines or less)
 
+### Feature F2A: Terminal UI Extraction Verification
+
+#### F2A.1 TerminalPage Visibility and Structure
+
+- [ ] **Step F2A.1** Run application, verify Terminal page displays by default
+- [ ] **Step F2A.2** Verify serial port settings panel is visible
+- [ ] **Step F2A.3** Verify receive area is visible
+- [ ] **Step F2A.4** Verify send area is visible
+- [ ] **Step F2A.5** Verify status bar at bottom of Terminal page is visible
+
+#### F2A.2 Feature A-D Controls Visibility
+
+- [ ] **Step F2A.6** Verify "发送结尾" (Send Line Ending) dropdown is visible (Feature A)
+- [ ] **Step F2A.7** Verify "显示时间戳" checkbox is visible (Feature B)
+- [ ] **Step F2A.8** Verify "显示方向" checkbox is visible (Feature B)
+- [ ] **Step F2A.9** Verify "接收缓存" dropdown is visible (Feature C)
+- [ ] **Step F2A.10** Verify "发送历史" dropdown is visible (Feature D)
+- [ ] **Step F2A.11** Verify "清空历史" button is visible (Feature D)
+- [ ] **Step F2A.12** Verify "清空接收区" button is visible
+
+#### F2A.3 Shell Structure Preservation
+
+- [ ] **Step F2A.13** Verify left navigation panel is still visible
+- [ ] **Step F2A.14** Verify top status bar is still visible
+- [ ] **Step F2A.15** Verify bottom status bar shows "Feature F2A: Terminal Page Extraction"
+
+#### F2A.4 Code-behind Boundary Check
+
+- [ ] **Step F2A.16** Open `src/SerialAssistant.App/MainWindow.xaml.cs`
+- [ ] **Step F2A.17** Verify file contains only `InitializeComponent()` call
+- [ ] **Step F2A.18** Open `src/SerialAssistant.App/Views/TerminalPage.xaml.cs`
+- [ ] **Step F2A.19** Verify file contains only `InitializeComponent()` call
+- [ ] **Step F2A.20** Verify no business logic in either code-behind file
+
 ### 2. Serial Port Scanning
 
 - [ ] **Step 2.1** Click "刷新" (Refresh) button
