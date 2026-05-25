@@ -1,6 +1,25 @@
 # SerialAssistant.Win
 
-A Windows serial port assistant application built with C# + .NET 8 + WPF.
+An engineering-grade serial communication debugging tool for Windows 11.
+
+## Product Vision
+
+SerialAssistant.Win is positioned as an **engineering-grade communication debugging tool** for professional engineers working with serial communication, Modbus protocols, and industrial automation systems. It prioritizes architecture maintainability, protocol extensibility, testability, configuration reliability, and engineering efficiency over minimal binary size or flashy UI effects.
+
+**Key Principles:**
+- Not a minimalistic serial terminal - built for professional use
+- Protocol-agnostic design for future extensibility
+- Comprehensive test coverage for critical logic
+- Modern but restrained UI focused on productivity
+- Framework-dependent deployment for smaller footprint
+
+**Documentation:**
+- [Product Vision](docs/ProductVision.md) - Project positioning and goals
+- [Phase Plan](docs/PhasePlan.md) - Development roadmap
+- [UI Architecture](docs/UIInformationArchitecture.md) - UI design specifications
+- [Release Strategy](docs/ReleaseStrategy.md) - Deployment approach
+- [Architecture](docs/Architecture.md) - Technical architecture
+- [Manual Test Checklist](docs/ManualTestChecklist.md) - Testing guide
 
 ## Project Overview
 
