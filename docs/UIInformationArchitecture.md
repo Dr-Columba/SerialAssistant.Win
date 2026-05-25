@@ -573,4 +573,95 @@ MainWindow.xaml
 
 ---
 
+## 18. Feature F2A Implementation Notes
+
+### 18.1 Terminal UI Extracted to TerminalPage
+
+**Status:** Terminal UI successfully extracted to TerminalPage.xaml
+
+**New Files Created:**
+- `src/SerialAssistant.App/Views/TerminalPage.xaml` - Terminal UI UserControl
+- `src/SerialAssistant.App/Views/TerminalPage.xaml.cs` - Minimal code-behind
+
+### 18.2 TerminalPage Reuses MainWindowViewModel
+
+**Important:** TerminalPage does not have its own ViewModel yet.
+
+**Current State:**
+- TerminalPage inherits DataContext from MainWindow
+- All Bindings remain unchanged
+- SerialSettings, ReceiveDisplay, SendHistory still bound to MainWindowViewModel properties
+
+**Benefits:**
+- No ViewModel migration risk
+- All Feature A-D behavior preserved
+- No breaking changes to tests
+
+### 18.3 MainWindow.xaml Simplified
+
+**Changes:**
+- Shell structure preserved (top bar, navigation, bottom bar)
+- Main workspace now contains `<views:TerminalPage />`
+- TerminalPage fills remaining space in column 1
+
+**MainWindow.xaml Now Contains:**
+```xml
+<Window>
+    <Grid>
+        <!-- Top Status Bar -->
+        <Border Grid.Row="0" />
+
+        <!-- Main Content -->
+        <Grid Grid.Row="1">
+            <!-- Left Navigation Panel -->
+            <Border Grid.Column="0" />
+
+            <!-- Terminal Page -->
+            <views:TerminalPage Grid.Column="1" />
+        </Grid>
+
+        <!-- Bottom Status Bar -->
+        <Border Grid.Row="2" />
+    </Grid>
+</Window>
+```
+
+### 18.4 TerminalPage.xaml.cs Status
+
+**Maintained:**
+- Minimal code-behind (only InitializeComponent)
+- No business logic
+- No event handlers
+- No serial port operations
+- No file operations
+- No navigation logic
+
+### 18.5 F2B Migration Plan
+
+**Phase F2B will:**
+- Create TerminalViewModel
+- Migrate terminal logic from MainWindowViewModel to TerminalViewModel
+- Update TerminalPage to use TerminalViewModel
+- Update MainWindowViewModel to manage navigation only
+- Update tests accordingly
+
+### 18.6 Feature A-D Behavior Preservation
+
+| Feature | Status | Notes |
+|---------|--------|-------|
+| A | ✅ Preserved | Send line ending options (None/CR/LF/CRLF) |
+| B | ✅ Preserved | TX/RX direction, timestamp, text/HEX display |
+| C | ✅ Preserved | Receive buffer limit, MaxDisplayBytes |
+| D | ✅ Preserved | Send history, duplicate removal, max count |
+
+### 18.7 Visual Style Notes
+
+**Current Phase (F2A):**
+- No visual changes
+- TerminalPage uses same styling as original
+- No new styling introduced
+- Focus on structural extraction only
+
+---
+
 *Last updated: May 2026*

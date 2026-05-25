@@ -154,32 +154,90 @@ This document outlines the phased development plan for SerialAssistant.Win, orga
 
 ---
 
-### Feature F2: Terminal Page Migration
+### Feature F2A: Terminal UI Extraction
 
-**Goal:** Migrate existing serial terminal functionality from MainWindow to TerminalPage, preserve Feature A-D behavior
+**Status:** ✅ Completed
+
+**Goal:** Extract terminal UI from MainWindow.xaml to TerminalPage.xaml without ViewModel migration
 
 **Scope:**
-- Migrate terminal logic from MainWindowViewModel to TerminalViewModel
-- Migrate terminal XAML from MainWindow.xaml to TerminalPage.xaml
-- Create or update ReceiveDisplayViewModel if needed
-- Update MainWindowViewModel to coordinate with TerminalViewModel
+- Create TerminalPage.xaml UserControl with terminal UI
+- Create TerminalPage.xaml.cs with minimal code-behind
+- Update MainWindow.xaml to use TerminalPage
+- TerminalPage reuses MainWindowViewModel DataContext
+- All bindings remain unchanged
+
+**Allowed Modifications:**
+- src/SerialAssistant.App/MainWindow.xaml (replace terminal UI with TerminalPage)
+- src/SerialAssistant.App/Views/TerminalPage.xaml (new file)
+- src/SerialAssistant.App/Views/TerminalPage.xaml.cs (new file)
+- docs/UIInformationArchitecture.md (F2A implementation notes)
+- docs/PhasePlan.md (split F2 into F2A/F2B)
+- docs/ManualTestChecklist.md (F2A verification steps)
+- docs/FeatureReports/FeatureF2A-TerminalPageExtraction.md (new report)
+
+**Forbidden:**
+- Creating TerminalViewModel
+- Modifying MainWindowViewModel business logic
+- Changing any binding paths
+- Changing Feature A-D behavior
+- Implementing navigation logic
+- Implementing other page logic (Modbus/Templates/Logs/Settings)
+
+**Implementation Notes:**
+- F2A only extracts XAML structure
+- TerminalPage inherits DataContext from MainWindow
+- No ViewModel changes required
+- Zero risk to existing functionality
+- All 291 tests remain passing
+
+**Acceptance Criteria:**
+- TerminalPage.xaml created with all terminal UI
+- TerminalPage.xaml.cs contains only InitializeComponent
+- MainWindow.xaml uses TerminalPage correctly
+- Shell structure preserved (navigation, top/bottom bars)
+- All 291 existing tests pass
+- Feature A-D behavior unchanged
+
+**Code Changes Allowed:** Yes (XAML extraction only)
+
+**Tests Required:** No (no logic changes)
+
+**Manual UI Verification Required:** Yes
+
+**ValidationGate Compliance:** Required
+
+---
+
+### Feature F2B: TerminalViewModel Migration
+
+**Status:** Pending
+
+**Goal:** Migrate terminal logic from MainWindowViewModel to TerminalViewModel
+
+**Scope:**
+- Create TerminalViewModel with terminal-specific logic
+- Migrate serial port logic, send/receive logic, history management
+- Update TerminalPage to use TerminalViewModel
+- Update MainWindowViewModel to manage navigation only
 - Update tests for migrated functionality
 - Verify all Feature A-D behavior preserved
 
 **Allowed Modifications:**
-- src/SerialAssistant.App/MainWindow.xaml (remove terminal content)
-- src/SerialAssistant.App/MainWindow.xaml.cs (minimal if needed)
-- src/SerialAssistant.App/ViewModels/MainWindowViewModel.cs (refactor)
-- src/SerialAssistant.App/ViewModels/TerminalViewModel.cs (add terminal logic)
-- src/SerialAssistant.App/Views/TerminalPage.xaml (add terminal content)
-- src/SerialAssistant.App/ViewModels/ReceiveDisplayViewModel.cs (if needed)
+- src/SerialAssistant.App/ViewModels/TerminalViewModel.cs (new file)
+- src/SerialAssistant.App/MainWindowViewModel.cs (remove terminal logic)
+- src/SerialAssistant.App/Views/TerminalPage.xaml (update bindings if needed)
 - Tests for TerminalViewModel
+- docs/UIInformationArchitecture.md (F2B implementation notes)
+- docs/PhasePlan.md (update F2B status)
+- docs/FeatureReports/FeatureF2B-TerminalViewModelMigration.md (new report)
 
 **Migration Principles:**
-1. Copy existing logic to new location first
+1. Copy existing logic to TerminalViewModel first
 2. Test after each logical unit moved
-3. Remove old code only after verification
+3. Remove old code from MainWindowViewModel only after verification
 4. Maintain all existing tests
+5. Preserve all Feature A-D behavior
 
 **Feature A-D Behavior Requirements:**
 | Feature | Required Behavior | Migration Location |
@@ -200,14 +258,12 @@ This document outlines the phased development plan for SerialAssistant.Win, orga
 - All 291+ existing tests pass
 - Terminal functionality identical to before migration
 - MainWindowViewModel no longer contains terminal-specific logic
-- Feature A Send Line Ending works correctly
-- Feature B TX/RX marking and timestamp works correctly
-- Feature C Receive buffer limit works correctly
-- Feature D Send history works correctly
+- TerminalViewModel handles all terminal operations
+- Feature A-D behavior preserved
 
 **Code Changes Allowed:** Yes (refactoring for migration only)
 
-**Tests Required:** Yes (existing tests + migration tests)
+**Tests Required:** Yes (existing tests + TerminalViewModel tests)
 
 **Manual UI Verification Required:** Yes
 
