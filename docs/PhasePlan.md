@@ -6,13 +6,17 @@ This document outlines the phased development plan for SerialAssistant.Win, orga
 
 ## Current Status
 
-**Current Tag:** v0.2.0 (Features A-D Completed)
+**Current Tag:** v0.2.1 (Features A-E1 Completed)
 
 **Completed Features:**
 - Feature A: Send Line Ending Options
 - Feature B: TX/RX Direction Marking and Timestamp Display
 - Feature C: Receive Buffer Limit and Configuration
 - Feature D: Send History with UI and Persistence
+- Feature E1: Product Vision and Phase Roadmap Realignment
+
+**Current Phase:**
+- Feature E2: UI Information Architecture Detailed Design (in progress)
 
 ## Phase Roadmap
 
@@ -49,7 +53,7 @@ This document outlines the phased development plan for SerialAssistant.Win, orga
 
 ### Feature E2: UI Information Architecture Detailed Design
 
-**Goal:** Design detailed UI architecture before implementation
+**Goal:** Design detailed UI architecture before implementation, create implementation plan for F1 and F2
 
 **Scope:**
 - Define left navigation structure
@@ -57,7 +61,8 @@ This document outlines the phased development plan for SerialAssistant.Win, orga
 - Define main workspace layout
 - Define bottom status bar
 - Define page structure (Terminal, Modbus, Templates, Logs, Settings)
-- Update UIInformationArchitecture.md
+- Create Shell Implementation Plan section in UIInformationArchitecture.md
+- Update PhasePlan.md with refined F1 and F2 descriptions
 
 **Forbidden:**
 - Implementing UI code
@@ -68,10 +73,14 @@ This document outlines the phased development plan for SerialAssistant.Win, orga
 - UI architecture fully documented
 - Navigation structure defined
 - Page responsibilities clear
+- F1 and F2 implementation plans documented
+- Shell Implementation Plan added to UIInformationArchitecture.md
 
 **Code Changes Allowed:** No
 
 **Tests Required:** No
+
+**Manual UI Verification Required:** No (documentation-only phase)
 
 **Report Required:** Yes
 
@@ -79,60 +88,125 @@ This document outlines the phased development plan for SerialAssistant.Win, orga
 
 ### Feature F1: Application Shell Skeleton
 
-**Goal:** Build the main application shell with navigation
+**Goal:** Build the main application shell with navigation, placeholder pages, and basic navigation logic
 
 **Scope:**
+- Create MainWindow.xaml as Shell container with navigation structure
+- Create MainWindowViewModel with navigation logic
+- Create placeholder pages:
+  - TerminalPage.xaml / TerminalViewModel
+  - ModbusPage.xaml / ModbusViewModel
+  - TemplatesPage.xaml / TemplatesViewModel
+  - LogsPage.xaml / LogsViewModel
+  - SettingsPage.xaml / SettingsViewModel
 - Implement left navigation panel
-- Implement top status bar
-- Implement main workspace frame
-- Implement bottom status bar
-- Create base page infrastructure
-- Update MainWindow.xaml as Shell container
+- Implement main content frame
+- Verify navigation between pages works
+
+**Allowed Modifications:**
+- src/SerialAssistant.App/MainWindow.xaml (shell structure)
+- src/SerialAssistant.App/MainWindow.xaml.cs (minimal changes if needed)
+- src/SerialAssistant.App/ViewModels/ (new ViewModels)
+- src/SerialAssistant.App/Views/ (new page XAML files)
+- Tests for navigation logic
 
 **Forbidden:**
-- Modifying serial terminal logic
-- Moving existing functionality
+- Migrating existing serial terminal functionality
+- Implementing Modbus protocol
+- Changing existing Feature A-D behavior
+- Final visual styling
+- Introducing third-party UI libraries
+- Adding complex animations
+- Creating theme systems
+
+**Expected New Files:**
+- src/SerialAssistant.App/Views/TerminalPage.xaml
+- src/SerialAssistant.App/Views/ModbusPage.xaml
+- src/SerialAssistant.App/Views/TemplatesPage.xaml
+- src/SerialAssistant.App/Views/LogsPage.xaml
+- src/SerialAssistant.App/Views/SettingsPage.xaml
+- src/SerialAssistant.App/ViewModels/TerminalViewModel.cs
+- src/SerialAssistant.App/ViewModels/ModbusViewModel.cs
+- src/SerialAssistant.App/ViewModels/TemplatesViewModel.cs
+- src/SerialAssistant.App/ViewModels/LogsViewModel.cs
+- src/SerialAssistant.App/ViewModels/SettingsViewModel.cs
 
 **Acceptance Criteria:**
-- Shell UI renders correctly
-- Navigation between placeholder pages works
-- MainWindow.xaml.cs remains minimal
-- MainWindowViewModel handles only navigation
+- Shell UI renders correctly with navigation
+- Navigation between all placeholder pages works
+- MainWindow.xaml.cs remains minimal (~20 lines)
+- MainWindowViewModel handles only navigation and global state
+- All placeholder pages are navigable
+- No serial port functionality moved yet
 
 **Code Changes Allowed:** Yes (Shell infrastructure only)
 
-**Tests Required:** Yes (Navigation logic)
+**Tests Required:** Yes (navigation logic tests)
 
-**Report Required:** Yes
+**Manual UI Verification Required:** Yes
+
+**ValidationGate Compliance:** Required
 
 ---
 
 ### Feature F2: Terminal Page Migration
 
-**Goal:** Migrate existing serial terminal to TerminalPage
+**Goal:** Migrate existing serial terminal functionality from MainWindow to TerminalPage, preserve Feature A-D behavior
 
 **Scope:**
-- Create TerminalPage.xaml
-- Create TerminalViewModel
-- Move existing serial communication logic
-- Preserve Feature A-D behavior
-- Update Shell to include Terminal in navigation
+- Migrate terminal logic from MainWindowViewModel to TerminalViewModel
+- Migrate terminal XAML from MainWindow.xaml to TerminalPage.xaml
+- Create or update ReceiveDisplayViewModel if needed
+- Update MainWindowViewModel to coordinate with TerminalViewModel
+- Update tests for migrated functionality
+- Verify all Feature A-D behavior preserved
+
+**Allowed Modifications:**
+- src/SerialAssistant.App/MainWindow.xaml (remove terminal content)
+- src/SerialAssistant.App/MainWindow.xaml.cs (minimal if needed)
+- src/SerialAssistant.App/ViewModels/MainWindowViewModel.cs (refactor)
+- src/SerialAssistant.App/ViewModels/TerminalViewModel.cs (add terminal logic)
+- src/SerialAssistant.App/Views/TerminalPage.xaml (add terminal content)
+- src/SerialAssistant.App/ViewModels/ReceiveDisplayViewModel.cs (if needed)
+- Tests for TerminalViewModel
+
+**Migration Principles:**
+1. Copy existing logic to new location first
+2. Test after each logical unit moved
+3. Remove old code only after verification
+4. Maintain all existing tests
+
+**Feature A-D Behavior Requirements:**
+| Feature | Required Behavior | Migration Location |
+|---------|-------------------|-------------------|
+| A | Send line ending (None/CR/LF/CRLF) | TerminalViewModel |
+| B | TX/RX direction marking, timestamp | TerminalViewModel/ReceiveDisplayViewModel |
+| C | Receive buffer limit, MaxDisplayBytes | ReceiveDisplayViewModel |
+| D | Send history, duplicate removal | TerminalViewModel |
 
 **Forbidden:**
-- Changing existing functionality behavior
+- Changing existing Feature A-D behavior
 - Removing features
 - Breaking existing tests
+- Adding new features not in Feature A-D
+- Implementing Modbus protocol
 
 **Acceptance Criteria:**
-- All existing tests pass
-- Terminal functionality identical to before
-- MainWindowViewModel no longer contains terminal logic
+- All 291+ existing tests pass
+- Terminal functionality identical to before migration
+- MainWindowViewModel no longer contains terminal-specific logic
+- Feature A Send Line Ending works correctly
+- Feature B TX/RX marking and timestamp works correctly
+- Feature C Receive buffer limit works correctly
+- Feature D Send history works correctly
 
-**Code Changes Allowed:** Yes (refactoring only)
+**Code Changes Allowed:** Yes (refactoring for migration only)
 
-**Tests Required:** Yes (existing tests + new migration tests)
+**Tests Required:** Yes (existing tests + migration tests)
 
-**Report Required:** Yes
+**Manual UI Verification Required:** Yes
+
+**ValidationGate Compliance:** Required
 
 ---
 
@@ -400,9 +474,15 @@ This document outlines the phased development plan for SerialAssistant.Win, orga
 
 ```
 E1 → E2 → F1 → F2 → G1 → G2 → H1 → I1 → J1 → K1 → L1 → M1 → N1
-     ↓
-     └──→ G1 (can start after E2)
+                 ↓
+                 └──→ G1 (can start after F1)
 ```
+
+**Dependency Notes:**
+- E2 requires E1 to be complete
+- F1 requires E2 to be complete
+- F2 requires F1 to be complete
+- G1 can be started after F1 (parallel track with F2)
 
 ## Phase Duration Estimates
 

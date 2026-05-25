@@ -350,17 +350,159 @@ Global event → MainWindowViewModel → Property changed → All interested Vie
 - Smooth transitions
 - No unnecessary animations
 
-## 15. Future Expansion
+## 16. Shell Implementation Plan
 
-**Additional Pages (Future):**
-- DashboardPage - Overview dashboard
-- ScriptsPage - Automation scripts
-- DevicesPage - Device management
+This section defines the detailed plan for implementing the UI Shell in Feature F1 and migrating existing functionality in Feature F2.
 
-**Additional Navigation Items:**
-- Dashboard
-- Scripts
-- Devices
+### 16.1 MainWindow.xaml Future Responsibilities
+
+**Will Become:**
+- Shell container for all UI elements
+- Contains left navigation panel area
+- Contains top connection status bar area
+- Contains main content area (Frame for pages)
+- Contains bottom status bar area
+
+**Will NOT Contain:**
+- Serial port specific business logic
+- Modbus protocol logic
+- Log management logic
+- Template management logic
+- Any page-specific data binding
+
+### 16.2 MainWindow.xaml.cs Boundaries
+
+**Current State:**
+- Minimal code-behind with InitializeComponent
+- No business logic
+
+**Future State:**
+- Remains minimal (~20 lines)
+- No serial port, file, navigation, communication logic
+- No new code-behind events unless explicitly documented in future phases
+
+**Forbidden:**
+```csharp
+// The following patterns must NOT appear in MainWindow.xaml.cs:
+void OnSendClicked(object sender, RoutedEventArgs e) { }     // FORBIDDEN
+void OnPortChanged(object sender, SelectionChangedEventArgs e) { } // FORBIDDEN
+void OnDataReceived(object sender, SerialDataReceivedEventArgs e) { } // FORBIDDEN
+```
+
+### 16.3 MainWindowViewModel Future Responsibilities
+
+**Will ONLY Handle:**
+- Global navigation state (CurrentPage)
+- Current page selection
+- Global connection status summary
+- Navigation commands between pages
+
+**Will NOT Handle:**
+- Terminal display logic
+- Modbus protocol operations
+- Log management
+- Settings persistence
+- Send/Receive operations
+
+**Page-Specific Logic Must Be In:**
+- TerminalViewModel (for terminal operations)
+- ModbusViewModel (for Modbus operations)
+- LogsViewModel (for log operations)
+- TemplatesViewModel (for template operations)
+- SettingsViewModel (for settings operations)
+
+### 16.4 Future Page Split
+
+| Current Location | Future Location | Phase |
+|------------------|-----------------|-------|
+| MainWindowViewModel | TerminalViewModel | F2 |
+| MainWindow.xaml | TerminalPage.xaml | F2 |
+| Serial port logic | SerialPortService | F2 |
+| Receive display | ReceiveDisplayViewModel | F2 |
+
+### 16.5 Feature F1 Coding Boundaries
+
+**Allowed:**
+- Create shell layout (MainWindow.xaml with navigation)
+- Create placeholder pages (TerminalPage.xaml, etc.)
+- Create page ViewModels (empty shells)
+- Implement navigation logic in MainWindowViewModel
+- Add basic navigation commands
+
+**Forbidden:**
+- Migrating existing serial port functionality
+- Implementing Modbus protocol
+- Changing existing Feature A-D behavior
+- Final visual styling
+- Introducing third-party UI libraries
+- Adding complex animations
+- Creating theme systems
+
+### 16.6 Feature F2 Coding Boundaries
+
+**Allowed:**
+- Migrate existing terminal logic to TerminalViewModel
+- Move existing terminal XAML to TerminalPage.xaml
+- Create ReceiveDisplayViewModel as needed
+- Update MainWindowViewModel to coordinate with TerminalViewModel
+- Preserve all Feature A-D behavior
+
+**Migration Principles:**
+1. Copy existing logic to new location
+2. Test after each logical unit moved
+3. Remove old code only after verification
+4. Maintain all existing tests
+
+**Feature A-D Behavior Requirements:**
+| Feature | Required Behavior |
+|---------|-------------------|
+| A | Send line ending (None/CR/LF/CRLF) |
+| B | TX/RX direction marking, timestamp |
+| C | Receive buffer limit, MaxDisplayBytes |
+| D | Send history, duplicate removal |
+
+### 16.7 UI Style Boundaries
+
+**Reference:** MQTTX modern workbench direction
+
+**Current Phase (F1) Boundaries:**
+- Structure only, no final styling
+- No complex animations
+- No theme system
+- No advanced icon system
+- No third-party control libraries
+
+**Future Phase (N1) Boundaries:**
+- Color scheme optimization
+- Spacing and typography
+- Corner radius consistency
+- Icon system
+- Light/dark theme support
+- Status indicators
+
+### 16.8 Migration Sequence
+
+```
+Phase F1: Build Shell
+├── Create MainWindow.xaml with navigation shell
+├── Create MainWindowViewModel with navigation logic
+├── Create placeholder pages (TerminalPage, ModbusPage, etc.)
+└── Verify navigation works
+
+Phase F2: Migrate Terminal
+├── Copy terminal logic from MainWindowViewModel to TerminalViewModel
+├── Copy terminal XAML from MainWindow.xaml to TerminalPage.xaml
+├── Update MainWindowViewModel to coordinate
+├── Update tests
+└── Verify Feature A-D still works
+
+Future Phases: Add Features
+├── G1-H1: Add Modbus functionality
+├── J1: Add Templates functionality
+├── K1: Add Logs functionality
+├── L1: Add Settings page
+└── N1: Add final styling
+```
 
 ---
 
