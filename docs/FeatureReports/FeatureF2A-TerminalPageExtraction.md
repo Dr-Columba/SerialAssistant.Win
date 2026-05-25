@@ -19,11 +19,11 @@
 |------|-------------|-------------|
 | `src/SerialAssistant.App/Views/TerminalPage.xaml` | New | Terminal UI UserControl with all terminal functionality |
 | `src/SerialAssistant.App/Views/TerminalPage.xaml.cs` | New | Minimal code-behind (only InitializeComponent) |
-| `src/SerialAssistant.App/MainWindow.xaml` | Modified | Replaced terminal UI with TerminalPage reference |
+| `src/SerialAssistant.App/MainWindow.xaml` | Modified | Replaced terminal UI with TerminalPage reference; updated display version to v0.3.1 |
 | `docs/UIInformationArchitecture.md` | Modified | Added Section 18: Feature F2A Implementation Notes |
 | `docs/PhasePlan.md` | Modified | Split F2 into F2A (Completed) and F2B (Pending) |
 | `docs/ManualTestChecklist.md` | Modified | Added Feature F2A verification steps |
-| `docs/FeatureReports/FeatureF2A-TerminalPageExtraction.md` | Created | This report |
+| `docs/FeatureReports/FeatureF2A-TerminalPageExtraction.md` | Created | This report (updated with version fix note) |
 
 ---
 
@@ -311,6 +311,18 @@ src/SerialAssistant.App/Views/TerminalPage.xaml            |  178 +
 src/SerialAssistant.App/Views/TerminalPage.xaml.cs         |   12 +
 7 files changed, 649 insertions(+), 125 deletions(-)
 ```
+
+---
+
+## Version Fix Note
+
+**Issue:** UI displayed v0.2.1 but should display v0.3.1 (target version for F2A release)
+
+**Fix Applied:**
+- Updated `src/SerialAssistant.App/MainWindow.xaml` line 33:
+  - Changed `Text="v0.2.1"` to `Text="v0.3.1"`
+
+**Reason:** After F2A merge, the plan is to tag v0.3.1, so UI version display should reflect this.
 
 ---
 
