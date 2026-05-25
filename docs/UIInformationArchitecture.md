@@ -664,4 +664,76 @@ MainWindow.xaml
 
 ---
 
+## 19. Feature F2B1 Implementation Notes
+
+### 19.1 TerminalViewModel Introduced
+
+**Status:** TerminalViewModel successfully created and integrated
+
+**New Files Created:**
+- `src/SerialAssistant.App/ViewModels/TerminalViewModel.cs` - Terminal-specific ViewModel
+- `src/SerialAssistant.Tests/ViewModels/TerminalViewModelTests.cs` - Unit tests
+
+### 19.2 TerminalPage Now Binds to TerminalViewModel
+
+**Binding Configuration:**
+```xml
+<views:TerminalPage Grid.Column="1" DataContext="{Binding Terminal}" />
+```
+
+TerminalPage now directly binds to MainWindowViewModel.Terminal property.
+
+### 19.3 MainWindowViewModel Shell Transition
+
+**Current State:**
+- MainWindowViewModel now contains Terminal property
+- All terminal logic migrated to TerminalViewModel
+- MainWindowViewModel retains compatibility forwarding properties
+
+**Compatibility Forwarding Properties:**
+| Property | Forwarded To |
+|----------|-------------|
+| SerialSettings | Terminal.SerialSettings |
+| ReceiveDisplay | Terminal.ReceiveDisplay |
+| SendText | Terminal.SendText |
+| SendModes | Terminal.SendModes |
+| SelectedSendMode | Terminal.SelectedSendMode |
+| SendLineEndings | Terminal.SendLineEndings |
+| SelectedSendLineEnding | Terminal.SelectedSendLineEnding |
+| ConnectionState | Terminal.ConnectionState |
+| StatusMessage | Terminal.StatusMessage |
+| SentBytesCount | Terminal.SentBytesCount |
+| ConnectionButtonText | Terminal.ConnectionButtonText |
+| All Commands | Terminal.*Command |
+| SendHistory | Terminal.SendHistory |
+| MaxSendHistoryCount | Terminal.MaxSendHistoryCount |
+| SelectedSendHistoryItem | Terminal.SelectedSendHistoryItem |
+
+### 19.4 F2B2 Cleanup Plan
+
+**Phase F2B2 will:**
+- Remove compatibility forwarding properties from MainWindowViewModel
+- MainWindowViewModel becomes pure Shell ViewModel
+- Update MainWindowViewModelTests to reflect new structure
+- Remove Terminal property access tests from MainWindowViewModelTests
+
+### 19.5 Feature A-D Behavior Preservation
+
+| Feature | Status | Notes |
+|---------|--------|-------|
+| A | ✅ Preserved | Send line ending options via TerminalViewModel |
+| B | ✅ Preserved | TX/RX direction, timestamp via TerminalViewModel |
+| C | ✅ Preserved | Receive buffer limit via TerminalViewModel.ReceiveDisplay |
+| D | ✅ Preserved | Send history via TerminalViewModel |
+
+### 19.6 Test Coverage
+
+**New Tests Added:**
+- TerminalViewModelTests - 12 tests covering initialization, properties, commands
+
+**Existing Tests:**
+- All 291+ tests pass via compatibility forwarding
+
+---
+
 *Last updated: May 2026*

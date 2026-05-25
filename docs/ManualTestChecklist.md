@@ -89,6 +89,39 @@ This document provides a step-by-step manual testing guide for SerialAssistant.W
 - [ ] **Step F2A.19** Verify file contains only `InitializeComponent()` call
 - [ ] **Step F2A.20** Verify no business logic in either code-behind file
 
+### Feature F2B1: TerminalViewModel Verification
+
+#### F2B1.1 Terminal Functionality
+
+- [ ] **Step F2B1.1** Run application, verify Terminal page displays by default
+- [ ] **Step F2B1.2** Verify serial port settings panel is visible
+- [ ] **Step F2B1.3** Verify refresh button is enabled
+- [ ] **Step F2B1.4** Verify receive area is visible
+- [ ] **Step F2B1.5** Verify send area is visible
+
+#### F2B1.2 Feature A-D Controls
+
+- [ ] **Step F2B1.6** Verify "发送结尾" dropdown is visible (Feature A)
+- [ ] **Step F2B1.7** Verify "发送模式" dropdown is visible
+- [ ] **Step F2B1.8** Verify "发送历史" dropdown is visible (Feature D)
+- [ ] **Step F2B1.9** Verify "清空历史" button is visible (Feature D)
+- [ ] **Step F2B1.10** Verify "接收缓存" dropdown is visible (Feature C)
+- [ ] **Step F2B1.11** Verify "清空接收区" button is visible
+- [ ] **Step F2B1.12** Verify connection button is visible
+
+#### F2B1.3 Shell Structure
+
+- [ ] **Step F2B1.13** Verify left navigation panel is visible
+- [ ] **Step F2B1.14** Verify top status bar is visible
+- [ ] **Step F2B1.15** Verify bottom status bar shows "Feature F2B1: TerminalViewModel"
+
+#### F2B1.4 Code-behind Boundary
+
+- [ ] **Step F2B1.16** Open `src/SerialAssistant.App/MainWindow.xaml.cs`
+- [ ] **Step F2B1.17** Verify only `InitializeComponent()` is present
+- [ ] **Step F2B1.18** Open `src/SerialAssistant.App/Views/TerminalPage.xaml.cs`
+- [ ] **Step F2B1.19** Verify only `InitializeComponent()` is present
+
 ### 2. Serial Port Scanning
 
 - [ ] **Step 2.1** Click "刷新" (Refresh) button
