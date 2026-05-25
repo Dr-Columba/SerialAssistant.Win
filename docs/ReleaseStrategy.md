@@ -273,24 +273,24 @@ on:
 jobs:
   build:
     runs-on: windows-latest
-    
+
     steps:
     - uses: actions/checkout@v4
-    
+
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: '8.0.x'
-    
+
     - name: Build
       run: dotnet build -c Release
-    
+
     - name: Test
       run: dotnet test -c Release --no-build
-    
+
     - name: Publish
       run: dotnet publish .\src\SerialAssistant.App\SerialAssistant.App.csproj -c Release -r win-x64 --self-contained false -o .\publish
-    
+
     - name: Create Release
       uses: softprops/action-gh-release@v2
       with:

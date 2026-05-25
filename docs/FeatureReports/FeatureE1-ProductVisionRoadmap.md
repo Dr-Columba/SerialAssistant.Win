@@ -25,9 +25,10 @@
 
 **Added Files:**
 - docs/ProductVision.md
-- docs/PhasePlan.md
+- docs/PhasePlan.md (updated with Validation Requirement section)
 - docs/UIInformationArchitecture.md
 - docs/ReleaseStrategy.md
+- docs/ValidationGate.md (new unified validation gate)
 - docs/FeatureReports/FeatureE1-ProductVisionRoadmap.md
 
 **Modified Files:**
@@ -35,6 +36,12 @@
 
 **Deleted Files:**
 - None
+
+**Fixes Applied (After Initial Rejection):**
+- Fixed trailing whitespace in docs/ReleaseStrategy.md (YAML code block indentation)
+- Fixed trailing whitespace in docs/UIInformationArchitecture.md (XAML code block indentation)
+- Added docs/ValidationGate.md (unified validation gate for all phases)
+- Updated PhasePlan.md with Validation Requirement section
 
 ## 3. Product Positioning
 
@@ -143,20 +150,32 @@ dotnet publish .\src\SerialAssistant.App\SerialAssistant.App.csproj `
 
 **Agent Environment Limitation:** Agent cannot execute git or dotnet commands directly.
 
-**Commands Not Executed:**
+**Commands Not Executed by Agent:**
 - git branch --show-current
 - git status --short
 - git diff --check
 - dotnet build .\SerialAssistant.Win.sln -c Debug
 - dotnet test .\SerialAssistant.Win.sln -c Debug
 
+**User-Reported Validation Status:**
+- ✅ Build: Passed (0 errors, 0 warnings)
+- ✅ Tests: Passed (291 passed)
+- ❌ git diff --check: Failed (trailing whitespace in YAML and XAML code blocks)
+
+**Fixes Applied:**
+1. Removed trailing whitespace from docs/ReleaseStrategy.md (YAML code block)
+2. Removed trailing whitespace from docs/UIInformationArchitecture.md (XAML code block)
+3. Created docs/ValidationGate.md
+4. Updated docs/PhasePlan.md with Validation Requirement section
+
 **Files Created/Modified:**
 - ✅ README.md - Updated with positioning and docs links
 - ✅ docs/ProductVision.md - Created
-- ✅ docs/PhasePlan.md - Created
-- ✅ docs/UIInformationArchitecture.md - Created
-- ✅ docs/ReleaseStrategy.md - Created
-- ✅ docs/FeatureReports/FeatureE1-ProductVisionRoadmap.md - Created
+- ✅ docs/PhasePlan.md - Created with Validation Requirement
+- ✅ docs/UIInformationArchitecture.md - Created (whitespace fixed)
+- ✅ docs/ReleaseStrategy.md - Created (whitespace fixed)
+- ✅ docs/ValidationGate.md - Created
+- ✅ docs/FeatureReports/FeatureE1-ProductVisionRoadmap.md - Created/Updated
 
 **Agent 自动验收:** Not Run
 
@@ -173,8 +192,8 @@ git branch --show-current
 # 2. Check git status
 git status --short
 
-# 3. Verify no whitespace issues
-git diff --check
+# 3. Verify whitespace issues are fixed
+git diff --check main..feature/product-vision-e1
 
 # 4. Build solution
 dotnet build .\SerialAssistant.Win.sln -c Debug
@@ -183,7 +202,7 @@ dotnet build .\SerialAssistant.Win.sln -c Debug
 dotnet test .\SerialAssistant.Win.sln -c Debug
 
 # 6. List changed files
-git diff --name-only
+git diff --name-only main..feature/product-vision-e1
 
 # 7. Verify documentation files exist
 Get-ChildItem -Path .\docs\*.md -Name
@@ -194,19 +213,21 @@ Get-ChildItem -Path .\docs\FeatureReports\*.md -Name
 
 **是否建议进入下一 Phase:** No
 
-**理由:** Feature E1 is documentation-only and requires user verification before proceeding to Feature E2.
+**理由:** Feature E1 requires final user verification after whitespace fixes. User must confirm `git diff --check` passes before proceeding.
 
 **下一步:**
-1. User to verify documentation changes
-2. User to run build and tests
-3. User to review and approve Phase E1
-4. Proceed to Feature E2 (UI Architecture Design)
+1. User to verify `git diff --check` passes
+2. User to verify build and tests still pass
+3. User to commit and push fixes
+4. User to approve Phase E1
+5. Proceed to Feature E2 (UI Architecture Design)
 
 **建议提交:**
 
 ```powershell
-git add README.md docs/ProductVision.md docs/PhasePlan.md docs/UIInformationArchitecture.md docs/ReleaseStrategy.md docs/FeatureReports/FeatureE1-ProductVisionRoadmap.md
-git commit -m "Feature E1: define product vision and phase roadmap"
+git add docs/ReleaseStrategy.md docs/UIInformationArchitecture.md docs/FeatureReports/FeatureE1-ProductVisionRoadmap.md docs/ValidationGate.md docs/PhasePlan.md
+git commit -m "Feature E1: add validation gate and fix documentation whitespace"
+git push origin feature/product-vision-e1
 ```
 
 ---

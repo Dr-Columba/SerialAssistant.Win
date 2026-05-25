@@ -424,6 +424,40 @@ E1 → E2 → F1 → F2 → G1 → G2 → H1 → I1 → J1 → K1 → L1 → M1 
 
 **Total Estimate:** 28 days (approximately 6 weeks)
 
+## Validation Requirement
+
+All phases must follow the **Validation Gate** defined in [docs/ValidationGate.md](ValidationGate.md).
+
+### Required Verification
+Before declaring any phase complete, the following must pass:
+
+1. **Branch Check**: Current branch matches expected feature branch
+2. **Build Check**: `dotnet build -c Debug` passes with 0 errors
+3. **Test Check**: `dotnet test -c Debug` passes with all tests green
+4. **Diff Check**: `git diff --check` passes with no trailing whitespace
+5. **Scope Check**: Changed files match phase constraints
+6. **Report Check**: Phase report created/updated in docs/FeatureReports/
+
+### Phase Prompt Reference
+Each phase prompt should reference ValidationGate rather than repeating all commands:
+
+```
+Before completing this phase, verify:
+- git diff --check passes (no trailing whitespace)
+- Build and tests pass
+- Changed files match phase scope
+- Phase report created
+
+See docs/ValidationGate.md for complete validation requirements.
+```
+
+### Common Rejection Reasons
+- Trailing whitespace in any file (including .md)
+- Build errors or warnings
+- Test failures
+- Out-of-scope file changes
+- Missing Phase Report
+
 ---
 
 *Last updated: May 2026*

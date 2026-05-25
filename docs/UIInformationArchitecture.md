@@ -56,21 +56,21 @@ This document defines the UI structure for SerialAssistant.Win, following the pr
     <Grid>
         <!-- Row Definitions: TopBar, MainContent, BottomBar -->
         <!-- Column Definitions: NavPanel, Workspace -->
-        
+
         <!-- Top Status Bar -->
         <Grid Grid.Row="0">
             <!-- Connection Status, App Controls -->
         </Grid>
-        
+
         <!-- Main Content -->
         <Grid Grid.Row="1">
             <!-- Left Navigation Panel -->
             <NavigationView Grid.Column="0" />
-            
+
             <!-- Main Workspace -->
             <Frame Grid.Column="1" />
         </Grid>
-        
+
         <!-- Bottom Status Bar -->
         <Grid Grid.Row="2">
             <!-- Statistics, Status -->
