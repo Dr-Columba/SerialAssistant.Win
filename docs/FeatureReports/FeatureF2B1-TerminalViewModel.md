@@ -24,12 +24,12 @@
 |------|-------------|-------------|
 | `src/SerialAssistant.App/ViewModels/TerminalViewModel.cs` | New | Complete terminal ViewModel with all serial terminal logic |
 | `src/SerialAssistant.App/ViewModels/MainWindowViewModel.cs` | Modified | Added Terminal property and forwarding properties |
-| `src/SerialAssistant.App/MainWindow.xaml` | Modified | Set TerminalPage DataContext to {Binding Terminal} |
+| `src/SerialAssistant.App/MainWindow.xaml` | Modified | Set TerminalPage DataContext to {Binding Terminal}; updated display version to v0.3.2 |
 | `src/SerialAssistant.Tests/ViewModels/TerminalViewModelTests.cs` | New | Unit tests for TerminalViewModel |
 | `docs/UIInformationArchitecture.md` | Modified | Added Section 19: F2B1 Implementation Notes |
 | `docs/PhasePlan.md` | Modified | Split F2B into F2B1 (Completed) and F2B2 (Pending) |
 | `docs/ManualTestChecklist.md` | Modified | Added F2B1 verification steps |
-| `docs/FeatureReports/FeatureF2B1-TerminalViewModel.md` | Created | This report |
+| `docs/FeatureReports/FeatureF2B1-TerminalViewModel.md` | Created | This report (updated with version fix note) |
 
 ---
 
@@ -319,6 +319,22 @@ src/SerialAssistant.App/ViewModels/TerminalViewModel.cs   |  680 +++
 src/SerialAssistant.Tests/ViewModels/TerminalViewModelTests.cs |  120 +
 8 files changed, 1422 insertions(+), 590 deletions(-)
 ```
+
+---
+
+## Version Fix Note
+
+**Issue:** UI displayed v0.3.1 but should display v0.3.2 (target version for F2B1 release)
+
+**Fix Applied:**
+- Updated `src/SerialAssistant.App/MainWindow.xaml` line 33:
+  - Changed `Text="v0.3.1"` to `Text="v0.3.2"`
+
+**Reason:** After F2B1 merge, the plan is to tag v0.3.2, so UI version display should reflect this.
+
+**Future Improvement:**
+- Consider moving version to a centralized configuration (e.g., AssemblyInfo or appsettings.json)
+- This is noted as a potential future enhancement, not a required change for this phase
 
 ---
 
