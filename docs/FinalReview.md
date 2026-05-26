@@ -454,5 +454,79 @@ Before entering G1, verify:
 
 ---
 
+## Modbus Core Foundation Review
+
+### Overview
+
+This section documents the completion of G1: Modbus Core Foundation.
+
+### G1 Completed Content
+
+**Files Created:**
+- `src/SerialAssistant.Core/Modbus/Common/ModbusFunctionCode.cs`
+- `src/SerialAssistant.Core/Modbus/Common/ModbusDataType.cs`
+- `src/SerialAssistant.Core/Modbus/Models/ModbusRegisterValue.cs`
+- `src/SerialAssistant.Core/Modbus/Utilities/ModbusCrc16.cs`
+- `src/SerialAssistant.Tests/Modbus/Common/ModbusFunctionCodeTests.cs`
+- `src/SerialAssistant.Tests/Modbus/Common/ModbusDataTypeTests.cs`
+- `src/SerialAssistant.Tests/Modbus/Models/ModbusRegisterValueTests.cs`
+- `src/SerialAssistant.Tests/Modbus/Utilities/ModbusCrc16Tests.cs`
+
+**Test Coverage:**
+| Test Class | Tests | Status |
+|------------|-------|--------|
+| ModbusFunctionCodeTests | 8 | ✅ All pass |
+| ModbusDataTypeTests | 7 | ✅ All pass |
+| ModbusRegisterValueTests | 8 | ✅ All pass |
+| ModbusCrc16Tests | 11 | ✅ All pass |
+| **Total** | **34** | |
+
+### Layer Boundary Compliance
+
+| Rule | Status | Verification |
+|------|--------|--------------|
+| Core has no System.Windows | ✅ | No WPF references |
+| Core has no System.IO.Ports | ✅ | No serial port refs |
+| Core has no file operations | ✅ | No File./Directory. |
+| Core has no WPF references | ✅ | Pure .NET library |
+| No UI changes | ✅ | Only version text |
+| No Infrastructure changes | ✅ | Not touched |
+
+### Test Coverage Impact
+
+| Metric | Before G1 | After G1 |
+|--------|-----------|----------|
+| Total Tests | 320 | 354 |
+| New Tests | - | 34 |
+| Terminal Tests | 320 | 320 (unchanged) |
+| Modbus Tests | 0 | 34 |
+
+### G2 Pre-conditions
+
+G2 (Modbus RTU Frame Builder) can begin when:
+
+1. ✅ G1 is accepted
+2. ✅ docs/ModbusPlan.md G2 scope clear
+3. ✅ Architecture boundaries understood
+4. ✅ No UI implementation in G2
+
+### Warning: G2 Scope Restrictions
+
+**CRITICAL:** G2 must NOT modify UI.
+
+- G2 implements RTU frame building and parsing only
+- No ModbusPage creation
+- No ModbusViewModel modification
+- No TerminalViewModel modification
+- No MainWindowViewModel modification
+
+### Version Update
+
+- UI display updated from v0.3.3 to v0.4.0
+- Version update is isolated to MainWindow.xaml only
+- No functional changes to application
+
+---
+
 *Last updated: May 2026*
-*Modbus Planning Readiness: May 2026*
+*Modbus Core Foundation Review: May 2026*
