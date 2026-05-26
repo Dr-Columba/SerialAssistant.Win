@@ -237,3 +237,107 @@ None identified.
 SerialAssistant.Win has been completed in full compliance with all phase requirements, including Features A, B, and C. The codebase is clean, well-architected, thoroughly tested, and ready for use.
 
 **Recommendation**: Approve for final submission.
+
+---
+
+## Shell / Terminal Migration Review
+
+### Overview
+
+This section documents the completion of the Shell/Terminal migration phases (F1, F2A, F2B1, F2B2) and the closure review (F2C).
+
+### Completed Phases
+
+| Phase | Version | Status | Description |
+|-------|---------|--------|-------------|
+| F1 | v0.3.0 | ✅ Complete | Application Shell Skeleton |
+| F2A | v0.3.1 | ✅ Complete | TerminalPage Extraction |
+| F2B1 | v0.3.2 | ✅ Complete | TerminalViewModel Introduction |
+| F2B2 | v0.3.3 | ✅ Complete | MainWindowViewModel Terminal Cleanup |
+| F2C | - | ✅ Complete | Shell and Terminal Migration Closure |
+
+### Architecture Benefits
+
+1. **Clear Separation of Concerns**
+   - MainWindowViewModel: Shell coordination only
+   - TerminalViewModel: Terminal business logic
+   - ReceiveDisplayViewModel: Display management
+   - SerialSettingsViewModel: Settings management
+
+2. **Testable Architecture**
+   - Each ViewModel can be unit tested independently
+   - TerminalViewModelTests covers all terminal behavior
+   - MainWindowViewModelTests focuses on shell responsibilities
+
+3. **Extensibility**
+   - Future pages (Modbus, Templates, Logs, Settings) can follow the same pattern
+   - Each page owns its ViewModel
+   - No business logic in code-behind
+
+### Test Coverage Recovery
+
+**Issue Encountered:** During F2B2, test coverage was inadvertently reduced from 304 to 208 tests due to deletion of Terminal behavior tests.
+
+**Resolution:** TerminalViewModelTests was rebuilt with comprehensive coverage:
+- Feature A (Send Line Ending): 9 tests
+- Feature B (TX/RX Records): 15+ tests
+- Feature C (Receive Buffer): 6+ tests
+- Feature D (Send History): 40+ tests
+- Serial basic behavior: 30+ tests
+
+**Final Test Count:** 320 tests (exceeds 304 target by 16)
+
+### Warning: Test Coverage Protection
+
+**CRITICAL:** Future refactoring phases MUST NOT reduce test coverage by deleting tests.
+
+**Rules:**
+1. If tests are deleted during refactoring, they MUST be migrated to appropriate test classes
+2. Test count should not decrease without documented justification
+3. If test count decreases, the report MUST specify:
+   - Which tests were deleted
+   - Why they were deleted
+   - Where alternative coverage exists
+
+**F2B2 Recovery Example:**
+- Problem: Tests were deleted instead of migrated
+- Solution: Tests rebuilt in TerminalViewModelTests
+- Result: Test count increased from 208 to 320
+
+### Current Architecture State
+
+| Component | Responsibility | Lines of Code |
+|-----------|----------------|----------------|
+| MainWindowViewModel | Shell coordination, Terminal property | ~25 |
+| TerminalViewModel | Terminal business logic | ~800 |
+| ReceiveDisplayViewModel | Display management | ~400 |
+| SerialSettingsViewModel | Settings management | ~300 |
+
+### Pre-Modbus Prerequisites
+
+Before entering Modbus implementation (G1+), the following are confirmed:
+
+1. ✅ Shell architecture is stable
+2. ✅ Terminal functionality is isolated in TerminalViewModel
+3. ✅ Feature A-D behavior is preserved and tested
+4. ✅ Test coverage is comprehensive (320 tests)
+5. ✅ Code-behind files are minimal
+6. ✅ MainWindowViewModel is clean
+
+### Future Page Implementation Guidelines
+
+**Do:**
+- Create dedicated ViewModel for each page
+- Place business logic in ViewModels, not code-behind
+- Follow existing patterns (TerminalViewModel as reference)
+
+**Don't:**
+- Place business logic in MainWindowViewModel
+- Add business logic to code-behind files
+- Delete tests without migration
+- Reduce test coverage
+
+---
+
+*Last updated: May 2026*
+*Shell/Terminal Migration Review: May 2026*

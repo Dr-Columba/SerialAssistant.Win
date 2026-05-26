@@ -773,4 +773,96 @@ public OperationResult SaveSettings()
 
 ---
 
+## 20. Terminal Migration Closure Review
+
+### 20.1 Current Shell Structure
+
+**MainWindow.xaml as Shell:**
+```
+MainWindow.xaml
+├── Top Status Bar (App title, Connection status via Terminal.*, Version v0.3.3)
+├── Main Content Area
+│   ├── Left Navigation Panel (Terminal, Modbus, Templates, Logs, Settings)
+│   └── Main Workspace
+│       └── TerminalPage (current single real business page)
+└── Bottom Status Bar (Ready status, Phase indicator)
+```
+
+**Key Characteristics:**
+- MainWindow.xaml is purely a Shell container
+- No terminal-specific bindings in MainWindow itself
+- All terminal bindings go through TerminalPage → TerminalViewModel
+- Status bar now binds to Terminal.ConnectionState, Terminal.SerialSettings.*
+
+### 20.2 Current ViewModel Boundaries
+
+| ViewModel | Responsibility | Location |
+|-----------|----------------|----------|
+| MainWindowViewModel | Shell state, navigation, global status summary | ViewModels/MainWindowViewModel.cs |
+| TerminalViewModel | Terminal business logic (Feature A-D) | ViewModels/TerminalViewModel.cs |
+| ReceiveDisplayViewModel | Receive display, buffer management | ViewModels/ReceiveDisplayViewModel.cs |
+| SerialSettingsViewModel | Serial port settings | ViewModels/SerialSettingsViewModel.cs |
+
+**MainWindowViewModel Current State:**
+```csharp
+public class MainWindowViewModel : BaseViewModel
+{
+    public TerminalViewModel Terminal { get; }
+    public OperationResult SaveSettings() => Terminal.SaveSettings();
+}
+```
+
+**Boundary Rule:**
+Subsequent pages (Modbus, Templates, Logs, Settings) **MUST NOT** place business logic back into MainWindowViewModel.
+
+### 20.3 Current Code-behind Boundaries
+
+| File | Constraint | Current Status |
+|------|------------|----------------|
+| MainWindow.xaml.cs | Only InitializeComponent | ✅ Compliant |
+| TerminalPage.xaml.cs | Only InitializeComponent | ✅ Compliant |
+
+**All code-behind files must remain minimal.** Business logic belongs in ViewModels.
+
+### 20.4 Feature A-D Migration Status
+
+| Feature | Location | Status |
+|---------|----------|--------|
+| Feature A (Send Line Ending) | TerminalViewModel | ✅ Complete |
+| Feature B (TX/RX Direction & Timestamp) | TerminalViewModel + ReceiveDisplayViewModel | ✅ Complete |
+| Feature C (Receive Buffer Limit) | ReceiveDisplayViewModel | ✅ Complete |
+| Feature D (Send History) | TerminalViewModel | ✅ Complete |
+
+**All Feature A-D behavior is preserved in TerminalViewModel.**
+
+### 20.5 Test Coverage Distribution
+
+| Test Class | Test Count | Responsibility |
+|------------|------------|----------------|
+| TerminalViewModelTests | 120 | Feature A-D behavior, serial basics |
+| MainWindowViewModelTests | 44 | Shell responsibilities only |
+| Other tests | 156 | Infrastructure, Models, Commands |
+| **Total** | **320** | |
+
+### 20.6 Future Page Boundary Suggestions
+
+| Future Page | ViewModel | Rule |
+|-------------|-----------|------|
+| ModbusPage | ModbusViewModel | Business logic in ModbusViewModel, not MainWindowViewModel |
+| TemplatesPage | TemplatesViewModel | Business logic in TemplatesViewModel |
+| LogsPage | LogsViewModel | Business logic in LogsViewModel |
+| SettingsPage | SettingsViewModel | Business logic in SettingsViewModel |
+
+**Principle:** Each page owns its ViewModel. MainWindowViewModel only coordinates navigation and global state.
+
+### 20.7 Version and Tag Policy
+
+- **Current UI Display:** v0.3.3
+- **F2C Phase:** Documentation closure only, no code changes
+- **No new tag recommended for F2C**
+- **Next actual code/feature phase should update version appropriately**
+
+---
+
 *Last updated: May 2026*
+*Terminal Migration Closure Review: May 2026*

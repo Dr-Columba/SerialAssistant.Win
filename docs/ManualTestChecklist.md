@@ -153,6 +153,51 @@ This document provides a step-by-step manual testing guide for SerialAssistant.W
 - [ ] **Step F2B2.19** Verify only contains Terminal property and SaveSettings method
 - [ ] **Step F2B2.20** Verify no forwarding properties exist
 
+### Feature F2C: Shell and Terminal Migration Closure Verification
+
+#### F2C.1 Application Startup
+
+- [ ] **Step F2C.1** Run application
+- [ ] **Step F2C.2** Verify application starts without errors
+- [ ] **Step F2C.3** Verify shell layout displays correctly
+
+#### F2C.2 Shell Structure Visibility
+
+- [ ] **Step F2C.4** Verify left navigation panel is visible
+- [ ] **Step F2C.5** Verify Terminal is the default displayed page
+- [ ] **Step F2C.6** Verify top status bar is visible
+- [ ] **Step F2C.7** Verify bottom status bar is visible
+
+#### F2C.3 Version Display
+
+- [ ] **Step F2C.8** Verify UI displays version "v0.3.3"
+
+#### F2C.4 Feature A-D Controls Visibility
+
+- [ ] **Step F2C.9** Verify serial port settings area is visible
+- [ ] **Step F2C.10** Verify receive area is visible
+- [ ] **Step F2C.11** Verify send area is visible
+- [ ] **Step F2C.12** Verify "发送结尾" dropdown is visible (Feature A)
+- [ ] **Step F2C.13** Verify "发送历史" dropdown is visible (Feature D)
+- [ ] **Step F2C.14** Verify "接收缓存" dropdown is visible (Feature C)
+
+#### F2C.5 Code-behind Boundary Check
+
+- [ ] **Step F2C.15** Open `src/SerialAssistant.App/MainWindow.xaml.cs`
+- [ ] **Step F2C.16** Verify only `InitializeComponent()` is present
+- [ ] **Step F2C.17** Verify no business logic exists
+- [ ] **Step F2C.18** Open `src/SerialAssistant.App/Views/TerminalPage.xaml.cs`
+- [ ] **Step F2C.19** Verify only `InitializeComponent()` is present
+- [ ] **Step F2C.20** Verify no business logic exists
+
+#### F2C.6 Build and Test Verification
+
+- [ ] **Step F2C.21** Run `dotnet build .\SerialAssistant.Win.sln -c Debug`
+- [ ] **Step F2C.22** Verify build succeeds with 0 warnings, 0 errors
+- [ ] **Step F2C.23** Run `dotnet test .\SerialAssistant.Win.sln -c Debug`
+- [ ] **Step F2C.24** Verify test count shows 320 passed
+- [ ] **Step F2C.25** Verify all tests pass
+
 ### 2. Serial Port Scanning
 
 - [ ] **Step 2.1** Click "刷新" (Refresh) button
