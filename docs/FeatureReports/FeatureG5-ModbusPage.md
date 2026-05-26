@@ -368,6 +368,36 @@ dotnet run --project .\src\SerialAssistant.App\SerialAssistant.App.csproj -c Deb
 - ✅ No changes to Core RTU/TCP protocol implementation
 - ✅ Terminal functionality completely preserved
 
+## Fix Notes 2
+
+### Issue: TerminalPage and ModbusPage Simultaneous Rendering
+
+**Problem**:
+- When switching to ModbusPage, TerminalPage controls were still visible through the transparent background
+- TerminalPage serial port settings area was visible behind ModbusPage
+- TerminalPage status text overlapped with ModbusPage status text
+
+**Root Cause**:
+- ModbusPage UserControl had no background color, making it transparent
+- Both pages were rendered in the same Grid container with only Visibility control
+- Without an opaque background, the lower page showed through
+
+**Solution**:
+- Added `Background="White"` to ModbusPage UserControl
+- Ensured TerminalPage and ModbusPage are mutually exclusive through Visibility binding
+- MainWindowViewModel maintains proper state: IsTerminalSelected and IsModbusSelected are always opposites
+
+### Verification after Fix 2
+- ✅ TerminalPage and ModbusPage now mutually exclusive
+- ✅ ModbusPage fully covers the workspace when visible
+- ✅ No TerminalPage controls visible when ModbusPage is active
+- ✅ Status text no longer overlaps
+- ✅ Build passes with 0 warnings, 0 errors
+- ✅ All 515 tests pass
+- ✅ No changes to Core RTU/TCP protocol
+- ✅ No changes to Infrastructure layer
+- ✅ No changes to TerminalViewModel
+
 ---
 
 **Report Created**: 2026-05-26
