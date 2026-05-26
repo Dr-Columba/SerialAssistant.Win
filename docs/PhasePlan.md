@@ -271,35 +271,63 @@ This document outlines the phased development plan for SerialAssistant.Win, orga
 
 ### Feature F2B2: MainWindowViewModel Terminal Cleanup
 
-**Status:** Pending
+**Status:** ✅ Completed
 
-**Goal:** Remove compatibility forwarding properties from MainWindowViewModel
+**Goal:** Remove Terminal compatibility forwarding properties from MainWindowViewModel, making it a pure Shell ViewModel
 
 **Scope:**
-- Remove terminal-related forwarding properties from MainWindowViewModel
-- MainWindowViewModel becomes pure Shell ViewModel
-- Update MainWindowViewModelTests to reflect new structure
-- Verify all tests still pass
-- Update documentation
+- Remove all compatibility forwarding properties from MainWindowViewModel
+- Update MainWindow.xaml status bar bindings to use Terminal.*
+- Update MainWindowViewModelTests to use Terminal property
+- Verify all tests pass
+- Update version display to v0.3.3
 
-**Allowed Modifications:**
-- src/SerialAssistant.App/MainWindowViewModel.cs (remove forwarding properties)
-- src/SerialAssistant.Tests/ViewModels/MainWindowViewModelTests.cs (update tests)
-- docs/UIInformationArchitecture.md (F2B2 implementation notes)
-- docs/PhasePlan.md (update F2B2 status)
-- docs/FeatureReports/FeatureF2B2-Cleanup.md (new report)
+**Implementation:**
+1. MainWindow.xaml status bar now binds to Terminal.ConnectionState, Terminal.SerialSettings.*
+2. MainWindowViewModel only contains Terminal property and SaveSettings method
+3. MainWindowViewModelTests updated to use viewModel.Terminal.*
+4. All terminal logic remains in TerminalViewModel
+
+**Feature A-D Behavior Requirements:**
+| Feature | Required Behavior | Implementation Location |
+|---------|-------------------|-------------------|
+| A | Send line ending (None/CR/LF/CRLF) | TerminalViewModel |
+| B | TX/RX direction marking, timestamp | TerminalViewModel/ReceiveDisplayViewModel |
+| C | Receive buffer limit, MaxDisplayBytes | ReceiveDisplayViewModel |
+| D | Send history, duplicate removal | TerminalViewModel |
+
+**Forbidden:**
+- Changing existing Feature A-D behavior
+- Removing features
+- Breaking existing tests
+- Adding new features not in Feature A-D
 
 **Acceptance Criteria:**
-- All tests pass
-- MainWindowViewModel contains only Shell-related logic
-- TerminalViewModel is the sole owner of terminal logic
-- No forwarding properties remain
+- All 291+ existing tests pass
+- MainWindowViewModel contains only Terminal property and SaveSettings
+- MainWindow.xaml status bar uses Terminal.* bindings
+- Version display updated to v0.3.3
 
-**Code Changes Allowed:** Yes (cleanup refactoring)
+**Code Changes Allowed:** Yes (cleanup refactoring only)
 
 **Tests Required:** Yes (update existing tests)
 
 **Manual UI Verification Required:** Yes
+
+---
+
+### Feature F2B: TerminalViewModel Migration - COMPLETED
+
+**Summary:** TerminalViewModel Migration phase is complete.
+
+**Achievements:**
+- F2B1: Introduced TerminalViewModel
+- F2B2: Cleaned MainWindowViewModel terminal forwarding
+
+**Next Steps:**
+- Proceed to Modbus planning phase
+- Consider implementing Modbus functionality
+- Consider implementing Templates, Logs, Settings pages
 
 **ValidationGate Compliance:** Required
 

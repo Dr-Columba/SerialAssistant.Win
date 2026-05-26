@@ -24,13 +24,13 @@
 
                 <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center">
                     <TextBlock Text="状态: " VerticalAlignment="Center" />
-                    <TextBlock Text="{Binding ConnectionState}" VerticalAlignment="Center" FontWeight="Bold" Margin="5,0,20,0" />
-                    <TextBlock Text="{Binding SerialSettings.SelectedPortName}" VerticalAlignment="Center" Margin="0,0,5,0" />
+                    <TextBlock Text="{Binding Terminal.ConnectionState}" VerticalAlignment="Center" FontWeight="Bold" Margin="5,0,20,0" />
+                    <TextBlock Text="{Binding Terminal.SerialSettings.SelectedPortName}" VerticalAlignment="Center" Margin="0,0,5,0" />
                     <TextBlock Text="@" VerticalAlignment="Center" Margin="0,0,5,0" />
-                    <TextBlock Text="{Binding SerialSettings.SelectedBaudRate}" VerticalAlignment="Center" />
+                    <TextBlock Text="{Binding Terminal.SerialSettings.SelectedBaudRate}" VerticalAlignment="Center" />
                 </StackPanel>
 
-                <TextBlock Grid.Column="2" Text="v0.3.2" VerticalAlignment="Center" Foreground="Gray" />
+                <TextBlock Grid.Column="2" Text="v0.3.3" VerticalAlignment="Center" Foreground="Gray" />
             </Grid>
         </Border>
 
@@ -81,7 +81,7 @@
 
                 <TextBlock Grid.Column="0" Text="Ready" VerticalAlignment="Center" />
 
-                <TextBlock Grid.Column="1" Text="Feature F2B1: TerminalViewModel" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="Gray" />
+                <TextBlock Grid.Column="1" Text="Feature F2B2: MainWindowViewModel Terminal Cleanup" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="Gray" />
 
                 <TextBlock Grid.Column="2" Text="Engineering Communication Tool" VerticalAlignment="Center" Foreground="Gray" />
             </Grid>
