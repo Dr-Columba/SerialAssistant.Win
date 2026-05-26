@@ -254,6 +254,69 @@ This document provides a step-by-step manual testing guide for SerialAssistant.W
 - [ ] **Step G0.35** Verify test count is still 320 passed
 - [ ] **Step G0.36** Verify no new tests were added (G0 is documentation only)
 
+### Feature G1: Modbus Core Foundation Verification
+
+#### G1.1 Core Modbus Directory Structure
+
+- [ ] **Step G1.1** Verify `src/SerialAssistant.Core/Modbus/` directory exists
+- [ ] **Step G1.2** Verify `src/SerialAssistant.Core/Modbus/Common/` directory exists
+- [ ] **Step G1.3** Verify `src/SerialAssistant.Core/Modbus/Models/` directory exists
+- [ ] **Step G1.4** Verify `src/SerialAssistant.Core/Modbus/Utilities/` directory exists
+
+#### G1.2 Core Modbus Files
+
+- [ ] **Step G1.5** Verify `ModbusFunctionCode.cs` exists
+- [ ] **Step G1.6** Verify `ModbusDataType.cs` exists
+- [ ] **Step G1.7** Verify `ModbusRegisterValue.cs` exists
+- [ ] **Step G1.8** Verify `ModbusCrc16.cs` exists
+
+#### G1.3 Core Modbus Tests Directory
+
+- [ ] **Step G1.9** Verify `src/SerialAssistant.Tests/Modbus/` directory exists
+- [ ] **Step G1.10** Verify `src/SerialAssistant.Tests/Modbus/Common/` exists
+- [ ] **Step G1.11** Verify `src/SerialAssistant.Tests/Modbus/Models/` exists
+- [ ] **Step G1.12** Verify `src/SerialAssistant.Tests/Modbus/Utilities/` exists
+
+#### G1.4 Core Modbus Tests Files
+
+- [ ] **Step G1.13** Verify `ModbusFunctionCodeTests.cs` exists
+- [ ] **Step G1.14** Verify `ModbusDataTypeTests.cs` exists
+- [ ] **Step G1.15** Verify `ModbusRegisterValueTests.cs` exists
+- [ ] **Step G1.16** Verify `ModbusCrc16Tests.cs` exists
+
+#### G1.5 Layer Boundary Compliance
+
+- [ ] **Step G1.17** Verify Core Modbus files have no `System.Windows` reference
+- [ ] **Step G1.18** Verify Core Modbus files have no `System.IO.Ports` reference
+- [ ] **Step G1.19** Verify Core Modbus files have no `File.` operations
+- [ ] **Step G1.20** Verify Core Modbus files have no `Directory.` operations
+
+#### G1.6 CRC16 Standard Test Vector
+
+- [ ] **Step G1.21** Run `dotnet test .\SerialAssistant.Win.sln -c Debug --filter ModbusCrc16Tests`
+- [ ] **Step G1.22** Verify CRC for `{ 0x01, 0x03, 0x00, 0x00, 0x00, 0x0A }` is `0xCDC5`
+- [ ] **Step G1.23** Verify `AppendCrc` appends C5 CD (low byte first, high byte second)
+
+#### G1.7 Build and Test Verification
+
+- [ ] **Step G1.24** Run `dotnet build .\SerialAssistant.Win.sln -c Debug`
+- [ ] **Step G1.25** Verify build succeeds with 0 warnings, 0 errors
+- [ ] **Step G1.26** Run `dotnet test .\SerialAssistant.Win.sln -c Debug`
+- [ ] **Step G1.27** Verify test count shows 354 passed (320 + 34 new)
+- [ ] **Step G1.28** Verify all existing Terminal tests still pass
+
+#### G1.8 Version Update Verification
+
+- [ ] **Step G1.29** Open `src/SerialAssistant.App/MainWindow.xaml`
+- [ ] **Step G1.30** Verify version text shows "v0.4.0"
+
+#### G1.9 Application Startup
+
+- [ ] **Step G1.31** Run application with `dotnet run --project src/SerialAssistant.App`
+- [ ] **Step G1.32** Verify application starts without errors
+- [ ] **Step G1.33** Verify UI displays version "v0.4.0"
+- [ ] **Step G1.34** Verify Terminal page still works correctly
+
 ### 2. Serial Port Scanning
 
 - [ ] **Step 2.1** Click "刷新" (Refresh) button

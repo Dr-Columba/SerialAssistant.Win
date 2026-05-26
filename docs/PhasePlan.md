@@ -439,22 +439,35 @@ This document outlines the phased development plan for SerialAssistant.Win, orga
 
 ### Feature G1: Modbus Core Foundation
 
-**Status:** Planned
+**Status:** ✅ Completed
 
 **Goal:** Implement Core layer base models, enums, and CRC16 utility
+
+**Implementation Date:** 2026-05-26
+
+**Files Created:**
+- `src/SerialAssistant.Core/Modbus/Common/ModbusFunctionCode.cs`
+- `src/SerialAssistant.Core/Modbus/Common/ModbusDataType.cs`
+- `src/SerialAssistant.Core/Modbus/Models/ModbusRegisterValue.cs`
+- `src/SerialAssistant.Core/Modbus/Utilities/ModbusCrc16.cs`
+- `src/SerialAssistant.Tests/Modbus/Common/ModbusFunctionCodeTests.cs`
+- `src/SerialAssistant.Tests/Modbus/Common/ModbusDataTypeTests.cs`
+- `src/SerialAssistant.Tests/Modbus/Models/ModbusRegisterValueTests.cs`
+- `src/SerialAssistant.Tests/Modbus/Utilities/ModbusCrc16Tests.cs`
+- `src/SerialAssistant.App/MainWindow.xaml` (version update to v0.4.0)
 
 **Scope:**
 - ModbusFunctionCode enum
 - ModbusDataType enum
 - ModbusCrc16 utility
 - ModbusRegisterValue model
-- Base request/response models
-- Unit tests for CRC16
+- Unit tests for all components
 - Reference: docs/ModbusPlan.md Section 4
 
 **Allowed Modifications:**
 - src/SerialAssistant.Core/Modbus/* (new directory)
 - src/SerialAssistant.Tests/Modbus/* (new directory)
+- src/SerialAssistant.App/MainWindow.xaml (version only)
 
 **Forbidden:**
 - No UI implementation
@@ -464,11 +477,12 @@ This document outlines the phased development plan for SerialAssistant.Win, orga
 - No System.IO.Ports references
 
 **Acceptance Criteria:**
-- CRC16 passes all test vectors
-- All enums defined
-- Base models created
-- All unit tests pass
-- No UI dependencies
+- CRC16 passes all test vectors ✅
+- All enums defined ✅
+- Base models created ✅
+- All unit tests pass ✅ (34 new tests)
+- No UI dependencies ✅
+- Test count: 354 total (was 320)
 
 **Code Changes Allowed:** Yes (Core and Tests only)
 

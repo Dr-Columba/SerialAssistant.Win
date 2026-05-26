@@ -713,5 +713,54 @@ public class ModbusParseError
 
 ---
 
+## 16. G1 Implementation Notes
+
+### G1 Completed (2026-05-26)
+
+**Status:** Implemented
+
+**Files Created:**
+- `src/SerialAssistant.Core/Modbus/Common/ModbusFunctionCode.cs`
+- `src/SerialAssistant.Core/Modbus/Common/ModbusDataType.cs`
+- `src/SerialAssistant.Core/Modbus/Models/ModbusRegisterValue.cs`
+- `src/SerialAssistant.Core/Modbus/Utilities/ModbusCrc16.cs`
+- `src/SerialAssistant.Tests/Modbus/Common/ModbusFunctionCodeTests.cs`
+- `src/SerialAssistant.Tests/Modbus/Common/ModbusDataTypeTests.cs`
+- `src/SerialAssistant.Tests/Modbus/Models/ModbusRegisterValueTests.cs`
+- `src/SerialAssistant.Tests/Modbus/Utilities/ModbusCrc16Tests.cs`
+
+**What Was Implemented:**
+1. ModbusFunctionCode enum with all 8 function codes (0x01-0x10)
+2. ModbusDataType enum with 7 data types
+3. ModbusRegisterValue model with Address, RawValue, DataType, HighByte, LowByte, SignedValue
+4. ModbusCrc16 utility with Compute, LowByte, HighByte, AppendCrc, Validate methods
+
+**What Was NOT Implemented:**
+- RTU frame builder (G2)
+- RTU frame parser (G2)
+- TCP frame builder (G3)
+- TCP frame parser (G3)
+- Request/Response models (future phases)
+- UI (G5)
+
+**Test Coverage:**
+- 8 tests for ModbusFunctionCode
+- 7 tests for ModbusDataType
+- 8 tests for ModbusRegisterValue
+- 11 tests for ModbusCrc16
+- Total: 34 new tests added
+
+**Version Update:**
+- UI display updated from v0.3.3 to v0.4.0
+
+**Next Phase (G2):**
+- Implement ModbusRtuFrame model
+- Implement ModbusRtuFrameBuilder
+- Implement ModbusRtuFrameParser
+- Support function codes 03, 04, 06, 10
+
+---
+
 *Document created: 2026-05-26*
-*Phase: G0 - Modbus Planning*
+*Last updated: 2026-05-26*
+*Phase: G1 - Modbus Core Foundation Complete*

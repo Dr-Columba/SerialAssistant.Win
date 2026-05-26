@@ -842,47 +842,45 @@ ModbusResponse / ModbusExceptionResponse
 ModbusViewModel displays result
 ```
 
-### Proposed Namespace Structure
+### Current Namespace Structure (G1 Implemented)
 
 ```
 src/SerialAssistant.Core/Modbus/
-├── Enums/
-│   ├── ModbusFunctionCode.cs
-│   └── ModbusDataType.cs
-├── Models/
-│   ├── ModbusRequest.cs
-│   ├── ModbusResponse.cs
-│   ├── ModbusExceptionResponse.cs
-│   └── ModbusRegisterValue.cs
-├── Rtu/
+├── Common/                              ✅ Implemented
+│   ├── ModbusFunctionCode.cs            ✅ Implemented
+│   └── ModbusDataType.cs                ✅ Implemented
+├── Models/                              ✅ Implemented
+│   └── ModbusRegisterValue.cs           ✅ Implemented
+├── Utilities/                           ✅ Implemented
+│   └── ModbusCrc16.cs                   ✅ Implemented
+├── Rtu/                                 ⬜ Pending (G2)
 │   ├── ModbusRtuFrame.cs
 │   ├── ModbusRtuFrameBuilder.cs
 │   └── ModbusRtuFrameParser.cs
-├── Tcp/
+├── Tcp/                                 ⬜ Pending (G3)
 │   ├── ModbusTcpFrame.cs
 │   ├── MbapHeader.cs
 │   ├── ModbusTcpFrameBuilder.cs
 │   └── ModbusTcpFrameParser.cs
 └── Utils/
-    ├── ModbusCrc16.cs
-    └── ModbusByteUtils.cs
+    └── ModbusByteUtils.cs               ⬜ Pending
 ```
 
 ### Implementation Order
 
 ```
-G1: Core Foundation
-├── ModbusCrc16
-├── ModbusFunctionCode enum
-├── ModbusDataType enum
-└── Base models
+G1: Core Foundation (Completed 2026-05-26)
+├── ModbusCrc16 ✅
+├── ModbusFunctionCode enum ✅
+├── ModbusDataType enum ✅
+└── ModbusRegisterValue ✅
 
-G2: RTU Implementation
+G2: RTU Implementation (Planned)
 ├── ModbusRtuFrameBuilder
 ├── ModbusRtuFrameParser
 └── Function codes 03, 04, 06, 10
 
-G3: TCP Implementation
+G3: TCP Implementation (Planned)
 ├── MbapHeader
 ├── ModbusTcpFrameBuilder
 ├── ModbusTcpFrameParser
