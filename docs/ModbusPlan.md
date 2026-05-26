@@ -761,6 +761,55 @@ public class ModbusParseError
 
 ---
 
+## 17. G2 Implementation Notes
+
+### G2 Completed (2026-05-26)
+
+**Status:** Implemented
+
+**Files Created:**
+- `src/SerialAssistant.Core/Modbus/Rtu/ModbusRtuErrorCode.cs`
+- `src/SerialAssistant.Core/Modbus/Rtu/ModbusRtuFrame.cs`
+- `src/SerialAssistant.Core/Modbus/Rtu/ModbusRtuParseResult.cs`
+- `src/SerialAssistant.Core/Modbus/Rtu/ModbusRtuRequestBuilder.cs`
+- `src/SerialAssistant.Core/Modbus/Rtu/ModbusRtuResponseParser.cs`
+- `src/SerialAssistant.Tests/Modbus/Rtu/ModbusRtuFrameTests.cs`
+- `src/SerialAssistant.Tests/Modbus/Rtu/ModbusRtuRequestBuilderTests.cs`
+- `src/SerialAssistant.Tests/Modbus/Rtu/ModbusRtuResponseParserTests.cs`
+- `src/SerialAssistant.App/MainWindow.xaml` (version update to v0.4.1)
+
+**What Was Implemented:**
+1. ModbusRtuErrorCode enum with error types
+2. ModbusRtuFrame class with SlaveAddress, FunctionCode, Data, Crc
+3. ModbusRtuParseResult class for parsing results
+4. ModbusRtuRequestBuilder with methods for 03, 04, 06, 10 function codes
+5. ModbusRtuResponseParser with support for 03, 04, 06, 10 and exception responses
+
+**What Was NOT Implemented:**
+- TCP frame builder (G3)
+- TCP frame parser (G3)
+- MBAP header (G3)
+- UI (G5)
+- ModbusViewModel (G4)
+
+**Test Coverage:**
+- 8 tests for ModbusRtuFrame
+- 14 tests for ModbusRtuRequestBuilder
+- 16 tests for ModbusRtuResponseParser
+- Total: 38 new tests added
+
+**Version Update:**
+- UI display updated from v0.4.0 to v0.4.1
+
+**Next Phase (G3):**
+- Implement ModbusTcpFrame model
+- Implement ModbusTcpFrameBuilder
+- Implement ModbusTcpFrameParser
+- Support function codes 03, 04, 06, 10
+- Implement MBAP header
+
+---
+
 *Document created: 2026-05-26*
 *Last updated: 2026-05-26*
-*Phase: G1 - Modbus Core Foundation Complete*
+*Phase: G2 - Modbus RTU Frame Builder and Parser Complete*

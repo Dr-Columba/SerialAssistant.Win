@@ -842,7 +842,7 @@ ModbusResponse / ModbusExceptionResponse
 ModbusViewModel displays result
 ```
 
-### Current Namespace Structure (G1 Implemented)
+### Current Namespace Structure (G1 and G2 Implemented)
 
 ```
 src/SerialAssistant.Core/Modbus/
@@ -853,10 +853,12 @@ src/SerialAssistant.Core/Modbus/
 │   └── ModbusRegisterValue.cs           ✅ Implemented
 ├── Utilities/                           ✅ Implemented
 │   └── ModbusCrc16.cs                   ✅ Implemented
-├── Rtu/                                 ⬜ Pending (G2)
-│   ├── ModbusRtuFrame.cs
-│   ├── ModbusRtuFrameBuilder.cs
-│   └── ModbusRtuFrameParser.cs
+├── Rtu/                                 ✅ Implemented (G2)
+│   ├── ModbusRtuErrorCode.cs         ✅ Implemented
+│   ├── ModbusRtuFrame.cs             ✅ Implemented
+│   ├── ModbusRtuParseResult.cs       ✅ Implemented
+│   ├── ModbusRtuRequestBuilder.cs  ✅ Implemented
+│   └── ModbusRtuResponseParser.cs      ✅ Implemented
 ├── Tcp/                                 ⬜ Pending (G3)
 │   ├── ModbusTcpFrame.cs
 │   ├── MbapHeader.cs
@@ -875,10 +877,11 @@ G1: Core Foundation (Completed 2026-05-26)
 ├── ModbusDataType enum ✅
 └── ModbusRegisterValue ✅
 
-G2: RTU Implementation (Planned)
-├── ModbusRtuFrameBuilder
-├── ModbusRtuFrameParser
-└── Function codes 03, 04, 06, 10
+G2: RTU Implementation (Completed 2026-05-26)
+├── ModbusRtuFrame ✅
+├── ModbusRtuRequestBuilder ✅
+├── ModbusRtuResponseParser ✅
+└── Function codes 03, 04, 06, 10 ✅
 
 G3: TCP Implementation (Planned)
 ├── MbapHeader
