@@ -810,6 +810,58 @@ public class ModbusParseError
 
 ---
 
+---
+
+## 18. G3 Implementation Notes
+
+### G3 Completed (2026-05-26)
+
+**Status:** Implemented
+
+**Files Created:**
+- `src/SerialAssistant.Core/Modbus/Tcp/ModbusTcpErrorCode.cs`
+- `src/SerialAssistant.Core/Modbus/Tcp/MbapHeader.cs`
+- `src/SerialAssistant.Core/Modbus/Tcp/ModbusTcpParseResult.cs`
+- `src/SerialAssistant.Core/Modbus/Tcp/ModbusTcpFrame.cs`
+- `src/SerialAssistant.Core/Modbus/Tcp/ModbusTcpRequestBuilder.cs`
+- `src/SerialAssistant.Core/Modbus/Tcp/ModbusTcpResponseParser.cs`
+- `src/SerialAssistant.Tests/Modbus/Tcp/MbapHeaderTests.cs`
+- `src/SerialAssistant.Tests/Modbus/Tcp/ModbusTcpFrameTests.cs`
+- `src/SerialAssistant.Tests/Modbus/Tcp/ModbusTcpRequestBuilderTests.cs`
+- `src/SerialAssistant.Tests/Modbus/Tcp/ModbusTcpResponseParserTests.cs`
+- `src/SerialAssistant.App/MainWindow.xaml` (version update to v0.4.2)
+
+**What Was Implemented:**
+1. ModbusTcpErrorCode enum with error types
+2. MbapHeader class with TransactionId, ProtocolId, Length, UnitId
+3. ModbusTcpParseResult class for parsing results
+4. ModbusTcpFrame class with Header, FunctionCode, Data
+5. ModbusTcpRequestBuilder with methods for 03, 04, 06, 10 function codes
+6. ModbusTcpResponseParser with support for 03, 04, 06, 10 and exception responses
+
+**What Was NOT Implemented:**
+- TCP Socket communication (G3 - Infrastructure)
+- UI (G5)
+- ModbusViewModel (G4)
+
+**Test Coverage:**
+- 8 tests for MbapHeader
+- 8 tests for ModbusTcpFrame
+- 15 tests for ModbusTcpRequestBuilder
+- 18 tests for ModbusTcpResponseParser
+- Total: 49 new tests added
+
+**Version Update:**
+- UI display updated from v0.4.1 to v0.4.2
+
+**Next Phase (G4):**
+- Implement ModbusViewModel
+- Connection state management
+- Register value management
+- Error handling
+
+---
+
 *Document created: 2026-05-26*
 *Last updated: 2026-05-26*
-*Phase: G2 - Modbus RTU Frame Builder and Parser Complete*
+*Phase: G3 - Modbus TCP Frame Builder and Parser Complete*

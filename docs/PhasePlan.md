@@ -551,15 +551,30 @@ This document outlines the phased development plan for SerialAssistant.Win, orga
 
 ### Feature G3: Modbus TCP Frame Builder and Parser
 
-**Status:** Planned
+**Status:** ✅ Completed
 
 **Goal:** Implement TCP/MBAP frame building and parsing
+
+**Implementation Date:** 2026-05-26
+
+**Files Created:**
+- `src/SerialAssistant.Core/Modbus/Tcp/ModbusTcpErrorCode.cs`
+- `src/SerialAssistant.Core/Modbus/Tcp/MbapHeader.cs`
+- `src/SerialAssistant.Core/Modbus/Tcp/ModbusTcpParseResult.cs`
+- `src/SerialAssistant.Core/Modbus/Tcp/ModbusTcpFrame.cs`
+- `src/SerialAssistant.Core/Modbus/Tcp/ModbusTcpRequestBuilder.cs`
+- `src/SerialAssistant.Core/Modbus/Tcp/ModbusTcpResponseParser.cs`
+- `src/SerialAssistant.Tests/Modbus/Tcp/MbapHeaderTests.cs`
+- `src/SerialAssistant.Tests/Modbus/Tcp/ModbusTcpFrameTests.cs`
+- `src/SerialAssistant.Tests/Modbus/Tcp/ModbusTcpRequestBuilderTests.cs`
+- `src/SerialAssistant.Tests/Modbus/Tcp/ModbusTcpResponseParserTests.cs`
+- `src/SerialAssistant.App/MainWindow.xaml` (version update to v0.4.2)
 
 **Scope:**
 - MbapHeader model
 - ModbusTcpFrame model
-- ModbusTcpFrameBuilder
-- ModbusTcpFrameParser
+- ModbusTcpRequestBuilder
+- ModbusTcpResponseParser
 - Support function codes: 03, 04, 06, 10
 - Unit tests for TCP frames
 - Reference: docs/ModbusPlan.md Section 9

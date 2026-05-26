@@ -528,5 +528,79 @@ G2 (Modbus RTU Frame Builder) can begin when:
 
 ---
 
+## Modbus TCP Frame Review
+
+### Overview
+
+This section documents the completion of G3: Modbus TCP Frame Builder and Parser.
+
+### G3 Completed Content
+
+**Files Created:**
+- `src/SerialAssistant.Core/Modbus/Tcp/MbapHeader.cs`
+- `src/SerialAssistant.Core/Modbus/Tcp/ModbusTcpFrame.cs`
+- `src/SerialAssistant.Core/Modbus/Tcp/ModbusTcpRequestBuilder.cs`
+- `src/SerialAssistant.Core/Modbus/Tcp/ModbusTcpResponseParser.cs`
+- `src/SerialAssistant.Core/Modbus/Tcp/ModbusTcpErrorCode.cs`
+- `src/SerialAssistant.Core/Modbus/Tcp/ModbusTcpParseResult.cs`
+
+**Test Coverage:**
+| Test Class | Tests | Status |
+|------------|-------|--------|
+| MbapHeaderTests | 8 | ✅ All pass |
+| ModbusTcpFrameTests | 8 | ✅ All pass |
+| ModbusTcpRequestBuilderTests | 15 | ✅ All pass |
+| ModbusTcpResponseParserTests | 18 | ✅ All pass |
+| **Total** | **48** | |
+
+### G3 Key Implementation Details
+
+| Item | Status | Description |
+|------|--------|-------------|
+| MbapHeader | ✅ Complete | TransactionId, ProtocolId, Length, UnitId |
+| ModbusTcpFrame | ✅ Complete | Header + FunctionCode + Data |
+| ModbusTcpRequestBuilder | ✅ Complete | Supports function codes 03/04/06/10 |
+| ModbusTcpResponseParser | ✅ Complete | Supports function codes 03/04/06/10, exception handling |
+| MBAP Length Validation | ✅ Complete | Validates Length field matches actual data |
+| No CRC | ✅ Complete | Modbus TCP does not use CRC |
+
+### Layer Boundary Compliance
+
+| Rule | Status | Verification |
+|------|--------|--------------|
+| Core has no System.Windows | ✅ | No WPF references |
+| Core has no System.IO.Ports | ✅ | No serial port refs |
+| Core has no file operations | ✅ | No File./Directory. |
+| No Infrastructure changes | ✅ | Not touched |
+| No MainWindow.xaml.cs changes | ✅ | Unmodified |
+| No TerminalPage.xaml.cs changes | ✅ | Unmodified |
+
+### Test Coverage Impact
+
+| Metric | Before G3 | After G3 |
+|--------|-----------|----------|
+| Total Tests | 392 | 440 |
+| New Tests | - | 48 |
+| RTU Tests | 38 | 38 (unchanged) |
+| TCP Tests | 0 | 48 |
+
+### G4 Pre-conditions
+
+G4 (ModbusViewModel) must comply with the following:
+
+1. ✅ **Do NOT re-implement RTU/TCP frame building** - Use existing Core implementations
+2. ✅ **Do NOT re-implement RTU/TCP frame parsing** - Use existing Core implementations
+3. ✅ **Only call Core protocol layer** - App/ViewModel layer delegates to Core
+4. ✅ **No byte-level manipulation** - Frame building/parsing belongs in Core
+
+### Version Update
+
+- UI display updated from v0.4.1 to v0.4.2
+- Version update is isolated to MainWindow.xaml only
+- No functional changes to application
+
+---
+
 *Last updated: May 2026*
 *Modbus Core Foundation Review: May 2026*
+*Modbus TCP Frame Review: May 2026*

@@ -842,7 +842,7 @@ ModbusResponse / ModbusExceptionResponse
 ModbusViewModel displays result
 ```
 
-### Current Namespace Structure (G1 and G2 Implemented)
+### Current Namespace Structure (G1, G2, G3 Implemented)
 
 ```
 src/SerialAssistant.Core/Modbus/
@@ -854,16 +854,18 @@ src/SerialAssistant.Core/Modbus/
 ├── Utilities/                           ✅ Implemented
 │   └── ModbusCrc16.cs                   ✅ Implemented
 ├── Rtu/                                 ✅ Implemented (G2)
-│   ├── ModbusRtuErrorCode.cs         ✅ Implemented
-│   ├── ModbusRtuFrame.cs             ✅ Implemented
-│   ├── ModbusRtuParseResult.cs       ✅ Implemented
-│   ├── ModbusRtuRequestBuilder.cs  ✅ Implemented
-│   └── ModbusRtuResponseParser.cs      ✅ Implemented
-├── Tcp/                                 ⬜ Pending (G3)
-│   ├── ModbusTcpFrame.cs
-│   ├── MbapHeader.cs
-│   ├── ModbusTcpFrameBuilder.cs
-│   └── ModbusTcpFrameParser.cs
+│   ├── ModbusRtuErrorCode.cs            ✅ Implemented
+│   ├── ModbusRtuFrame.cs                ✅ Implemented
+│   ├── ModbusRtuParseResult.cs          ✅ Implemented
+│   ├── ModbusRtuRequestBuilder.cs       ✅ Implemented
+│   └── ModbusRtuResponseParser.cs       ✅ Implemented
+├── Tcp/                                 ✅ Implemented (G3)
+│   ├── ModbusTcpErrorCode.cs            ✅ Implemented
+│   ├── MbapHeader.cs                    ✅ Implemented
+│   ├── ModbusTcpParseResult.cs          ✅ Implemented
+│   ├── ModbusTcpFrame.cs                ✅ Implemented
+│   ├── ModbusTcpRequestBuilder.cs       ✅ Implemented
+│   └── ModbusTcpResponseParser.cs       ✅ Implemented
 └── Utils/
     └── ModbusByteUtils.cs               ⬜ Pending
 ```
@@ -883,11 +885,12 @@ G2: RTU Implementation (Completed 2026-05-26)
 ├── ModbusRtuResponseParser ✅
 └── Function codes 03, 04, 06, 10 ✅
 
-G3: TCP Implementation (Planned)
-├── MbapHeader
-├── ModbusTcpFrameBuilder
-├── ModbusTcpFrameParser
-└── Function codes 03, 04, 06, 10
+G3: TCP Implementation (Completed 2026-05-26)
+├── MbapHeader ✅
+├── ModbusTcpFrame ✅
+├── ModbusTcpRequestBuilder ✅
+├── ModbusTcpResponseParser ✅
+└── Function codes 03, 04, 06, 10 ✅
 
 G4: ModbusViewModel
 ├── Connection state
