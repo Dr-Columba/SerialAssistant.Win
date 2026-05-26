@@ -900,11 +900,15 @@ G4: ModbusViewModel (Completed 2026-05-26)
 ├── Error handling ✅
 └── HEX conversion ✅
 
-G5: ModbusPage UI
-├── Address input
-├── Function code selection
-├── Read/Write buttons
-└── Response display
+G5: ModbusPage UI (Completed 2026-05-26)
+├── ModbusPage.xaml ✅
+├── ModbusPage.xaml.cs ✅
+├── MainWindowViewModel navigation ✅
+├── MainWindow.xaml navigation buttons ✅
+├── Address input ✅
+├── Function code selection ✅
+├── Read/Write buttons ✅
+└── Response display ✅
 ```
 
 ### App Layer Modbus ViewModel Implementation
@@ -964,5 +968,102 @@ Core.Utilities.HexConverter
 
 ---
 
+## ModbusPage UI Implementation
+
+### Overview
+
+This section describes the ModbusPage minimal UI implementation (G5).
+
+### ModbusPage Location
+
+- `src/SerialAssistant.App/Views/ModbusPage.xaml` - UI layout
+- `src/SerialAssistant.App/Views/ModbusPage.xaml.cs` - Minimal code-behind (only InitializeComponent)
+
+### ModbusPage UI Structure
+
+```
+ModbusPage (UserControl)
+├── Header: "Modbus"
+├── Left Panel: Parameters
+│   ├── TransportMode selection (ComboBox)
+│   ├── RequestKind selection (ComboBox)
+│   ├── UnitId input (TextBox)
+│   ├── TransactionId input (TextBox)
+│   ├── StartAddress input (TextBox)
+│   ├── Quantity input (TextBox)
+│   └── SingleWriteValue input (TextBox)
+├── Right Panel: Multiple Write Values
+│   ├── MultipleWriteValuesText (TextBox with multiline)
+│   ├── Build Request button
+│   ├── Parse Response button
+│   └── Clear button
+├── Bottom Left: Request Display
+│   └── RequestHex (ReadOnly TextBox)
+└── Bottom Right: Response and Parsing
+    ├── ResponseHex (Input TextBox)
+    └── ParsedSummary (ReadOnly TextBox)
+```
+
+### Data Binding
+
+ModbusPage directly binds to ModbusViewModel properties:
+
+- `ItemsSource="{Binding TransportModes}"`
+- `SelectedItem="{Binding SelectedTransportMode}"`
+- `ItemsSource="{Binding RequestKinds}"`
+- `SelectedItem="{Binding SelectedRequestKind}"`
+- `Text="{Binding UnitId, UpdateSourceTrigger=PropertyChanged}"`
+- `Command="{Binding BuildRequestCommand}"`
+- `Command="{Binding ParseResponseCommand}"`
+- `Command="{Binding ClearCommand}"`
+
+### ModbusViewModel UI Collection Additions
+
+**New Properties:**
+- `TransportModes`: `IReadOnlyList<ModbusTransportMode>` (Rtu, Tcp)
+- `RequestKinds`: `IReadOnlyList<ModbusRequestKind>` (03, 04, 06, 10)
+
+These are static collections for UI binding purposes only.
+
+### MainWindowViewModel Navigation Additions
+
+**Navigation Properties:**
+- `IsTerminalSelected`: `bool` (default: true)
+- `IsModbusSelected`: `bool` (default: false)
+- `IsTerminalPageVisible`: `bool` (computed from IsTerminalSelected)
+- `IsModbusPageVisible`: `bool` (computed from IsModbusSelected)
+
+**Navigation Commands:**
+- `ShowTerminalCommand`: Sets IsTerminalSelected = true
+- `ShowModbusCommand`: Sets IsModbusSelected = true
+
+### MainWindow.xaml Navigation Updates
+
+- Added BooleanToVisibilityConverter to Window.Resources
+- TerminalPage bound to `IsTerminalPageVisible`
+- ModbusPage bound to `IsModbusPageVisible`
+- Navigation buttons in left panel bound to commands
+- ModbusPage.DataContext set to `{Binding Modbus}`
+
+### Layer Boundary Compliance (G5)
+
+✅ ModbusPage.xaml.cs contains only InitializeComponent
+✅ No business logic in code-behind
+✅ All UI state stored in ModbusViewModel
+✅ No System.IO.Ports references in ModbusViewModel
+✅ No file system access in ModbusViewModel
+✅ No Infrastructure layer changes
+✅ No TerminalViewModel changes
+✅ No MainWindow.xaml.cs changes
+✅ ModbusPage binds directly to ModbusViewModel
+✅ MainWindowViewModel only handles navigation, not Modbus business logic
+
+### Version Update
+
+UI display version updated from v0.4.3 to v0.4.4 in MainWindow.xaml.
+
+---
+
 *Last updated: May 2026*
 *Modbus Architecture Planning: May 2026*
+*G5 ModbusPage UI Complete: May 2026*

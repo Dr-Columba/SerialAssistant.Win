@@ -442,5 +442,111 @@ namespace SerialAssistant.Tests.ViewModels
             Assert.NotNull(viewModel.Terminal.SerialSettings);
             Assert.NotNull(viewModel.Terminal.ReceiveDisplay);
         }
+
+        [Fact]
+        public void Default_IsTerminalSelected_IsTrue()
+        {
+            var viewModel = new MainWindowViewModel();
+            Assert.True(viewModel.IsTerminalSelected);
+        }
+
+        [Fact]
+        public void Default_IsModbusSelected_IsFalse()
+        {
+            var viewModel = new MainWindowViewModel();
+            Assert.False(viewModel.IsModbusSelected);
+        }
+
+        [Fact]
+        public void Default_IsTerminalPageVisible_IsTrue()
+        {
+            var viewModel = new MainWindowViewModel();
+            Assert.True(viewModel.IsTerminalPageVisible);
+        }
+
+        [Fact]
+        public void Default_IsModbusPageVisible_IsFalse()
+        {
+            var viewModel = new MainWindowViewModel();
+            Assert.False(viewModel.IsModbusPageVisible);
+        }
+
+        [Fact]
+        public void Modbus_NotNull()
+        {
+            var viewModel = new MainWindowViewModel();
+            Assert.NotNull(viewModel.Modbus);
+        }
+
+        [Fact]
+        public void ShowModbusCommand_SetsIsModbusSelected_True()
+        {
+            var viewModel = new MainWindowViewModel();
+            viewModel.ShowModbusCommand.Execute(null);
+            Assert.True(viewModel.IsModbusSelected);
+        }
+
+        [Fact]
+        public void ShowModbusCommand_SetsIsTerminalSelected_False()
+        {
+            var viewModel = new MainWindowViewModel();
+            viewModel.ShowModbusCommand.Execute(null);
+            Assert.False(viewModel.IsTerminalSelected);
+        }
+
+        [Fact]
+        public void ShowTerminalCommand_SetsIsTerminalSelected_True()
+        {
+            var viewModel = new MainWindowViewModel();
+            viewModel.ShowModbusCommand.Execute(null);
+            viewModel.ShowTerminalCommand.Execute(null);
+            Assert.True(viewModel.IsTerminalSelected);
+        }
+
+        [Fact]
+        public void ShowTerminalCommand_SetsIsModbusSelected_False()
+        {
+            var viewModel = new MainWindowViewModel();
+            viewModel.ShowModbusCommand.Execute(null);
+            viewModel.ShowTerminalCommand.Execute(null);
+            Assert.False(viewModel.IsModbusSelected);
+        }
+
+        [Fact]
+        public void ShowModbusCommand_UpdatesIsModbusPageVisible_True()
+        {
+            var viewModel = new MainWindowViewModel();
+            viewModel.ShowModbusCommand.Execute(null);
+            Assert.True(viewModel.IsModbusPageVisible);
+        }
+
+        [Fact]
+        public void ShowTerminalCommand_UpdatesIsTerminalPageVisible_True()
+        {
+            var viewModel = new MainWindowViewModel();
+            viewModel.ShowModbusCommand.Execute(null);
+            viewModel.ShowTerminalCommand.Execute(null);
+            Assert.True(viewModel.IsTerminalPageVisible);
+        }
+
+        [Fact]
+        public void Terminal_Still_NotNull_AfterShowModbus()
+        {
+            var viewModel = new MainWindowViewModel();
+            viewModel.ShowModbusCommand.Execute(null);
+            Assert.NotNull(viewModel.Terminal);
+        }
+
+        [Fact]
+        public void SaveSettings_Still_Delegates_AfterShowModbus()
+        {
+            var fakeScanner = new FakeSerialPortScanner();
+            var fakeService = new FakeSerialPortService();
+            var fakeSettingsService = new FakeAppSettingsService();
+            var viewModel = new MainWindowViewModel(fakeScanner, fakeService, null, fakeSettingsService);
+            viewModel.ShowModbusCommand.Execute(null);
+            var result = viewModel.SaveSettings();
+            Assert.True(result.IsSuccess);
+        }
     }
 }

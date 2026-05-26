@@ -657,7 +657,7 @@ This document outlines the phased development plan for SerialAssistant.Win, orga
 
 ### Feature G5: ModbusPage Minimal UI
 
-**Status:** Planned
+**Status:** Completed
 
 **Goal:** Implement minimal UI for register read/write
 
@@ -675,6 +675,8 @@ This document outlines the phased development plan for SerialAssistant.Win, orga
 - src/SerialAssistant.App/Views/ModbusPage.xaml (new file)
 - src/SerialAssistant.App/Views/ModbusPage.xaml.cs (new file)
 - src/SerialAssistant.App/MainWindow.xaml (navigation binding update)
+- src/SerialAssistant.App/ViewModels/MainWindowViewModel.cs
+- src/SerialAssistant.App/ViewModels/ModbusViewModel.cs (add UI collections)
 
 **Forbidden:**
 - Complex charting
@@ -689,10 +691,12 @@ This document outlines the phased development plan for SerialAssistant.Win, orga
 - Write operation works
 - Response displays correctly
 - Navigation to ModbusPage works
+- All unit tests pass (54 new tests added to MainWindowViewModelTests and ModbusViewModelTests)
+- Test count: 568 total (was 494)
 
 **Code Changes Allowed:** Yes (UI and minimal code-behind)
 
-**Tests Required:** No (manual verification only)
+**Tests Required:** Yes
 
 **Manual UI Verification Required:** Yes
 

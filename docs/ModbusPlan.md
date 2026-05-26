@@ -907,6 +907,31 @@ public class ModbusParseError
 
 ---
 
+## G5 Implementation Notes
+
+**Completed:**
+- ✅ ModbusPage.xaml created with minimal UI
+- ✅ ModbusPage.xaml.cs created with InitializeComponent only
+- ✅ MainWindowViewModel updated with navigation properties
+- ✅ MainWindow.xaml updated with navigation buttons
+- ✅ ModbusPage binds directly to ModbusViewModel
+- ✅ ModbusViewModel updated with TransportModes and RequestKinds collections
+- ✅ Version updated from v0.4.3 to v0.4.4
+- ✅ Shell navigation between Terminal and Modbus pages works
+
+**Not Implemented (Future Phase):**
+- ❌ Real serial port sending
+- ❌ TCP socket communication
+- ❌ Infrastructure layer changes
+
+**Version Update:**
+- UI display updated from v0.4.3 to v0.4.4
+
+**Next Phase (G6):**
+- Manual testing and documentation
+
+---
+
 *Document created: 2026-05-26*
 *Last updated: 2026-05-26*
-*Phase: G4 - ModbusViewModel Minimal Workflow Complete*
+*Phase: G5 - ModbusPage Minimal UI Complete*

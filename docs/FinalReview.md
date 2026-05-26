@@ -668,7 +668,80 @@ G5 (ModbusPage Minimal UI) must comply with the following:
 
 ---
 
+## ModbusPage Minimal UI Review
+
+### Overview
+
+This section documents the completion of G5: ModbusPage Minimal UI.
+
+### G5 Completed Content
+
+**Files Created:**
+- `src/SerialAssistant.App/Views/ModbusPage.xaml`
+- `src/SerialAssistant.App/Views/ModbusPage.xaml.cs`
+
+**Files Updated:**
+- `src/SerialAssistant.App/ViewModels/MainWindowViewModel.cs` - Added navigation properties and commands
+- `src/SerialAssistant.App/ViewModels/ModbusViewModel.cs` - Added TransportModes and RequestKinds collections
+- `src/SerialAssistant.App/MainWindow.xaml` - Added navigation buttons and visibility bindings, updated version
+
+**Files Updated (Tests):**
+- `src/SerialAssistant.Tests/ViewModels/MainWindowViewModelTests.cs` - Added navigation tests
+- `src/SerialAssistant.Tests/ViewModels/ModbusViewModelTests.cs` - Added UI collection tests
+
+### G5 Key Implementation Details
+
+| Item | Status | Description |
+|------|--------|-------------|
+| ModbusPage.xaml | ✅ Complete | Minimal UI with all required elements |
+| ModbusPage.xaml.cs | ✅ Complete | Only InitializeComponent, no business logic |
+| MainWindowViewModel Navigation | ✅ Complete | IsTerminalSelected, IsModbusSelected, ShowTerminalCommand, ShowModbusCommand |
+| MainWindow.xaml Navigation | ✅ Complete | Navigation buttons with command bindings |
+| ModbusPage Data Binding | ✅ Complete | Directly binds to ModbusViewModel |
+| ModbusViewModel Collections | ✅ Complete | TransportModes and RequestKinds for ComboBox binding |
+| Terminal Page Preservation | ✅ Complete | Terminal page still works unchanged |
+| G4 ModbusViewModel Use | ✅ Complete | No new protocol implementation, uses existing G4 ViewModel |
+
+### Layer Boundary Compliance (G5)
+
+| Rule | Status | Verification |
+|------|--------|--------------|
+| No System.IO.Ports in ViewModel | ✅ | No serial port refs in ModbusViewModel or MainWindowViewModel |
+| No file system access | ✅ | No File./Directory. operations |
+| No WPF references in ViewModels | ✅ | ViewModels have no UI-specific code |
+| Delegates to Core | ✅ | All protocol work still uses Core RTU/TCP |
+| No Infrastructure changes | ✅ | Infrastructure layer untouched |
+| No TerminalViewModel changes | ✅ | Terminal functionality preserved |
+| No MainWindow.xaml.cs changes | ✅ | Only InitializeComponent remains |
+| No ModbusPage.xaml.cs logic | ✅ | Only InitializeComponent |
+| No new protocol implementation | ✅ | Uses existing G4 ModbusViewModel |
+
+### Test Coverage Impact
+
+| Metric | Before G5 | After G5 |
+|--------|-----------|----------|
+| Total Tests | 494 | 568 |
+| New Tests | - | 74 |
+
+### G6 Pre-conditions
+
+G6 (Modbus Manual Test and Documentation Closure) must comply with the following:
+
+1. ✅ **No new code implementation** - Only manual testing and documentation
+2. ✅ **No new features** - G5 is the last implementation phase
+3. ✅ **No test changes** - Only manual verification
+4. ✅ **No version change** - v0.4.4 is final for G series
+
+### Version Update (G5)
+
+- UI display updated from v0.4.3 to v0.4.4
+- Version update is isolated to MainWindow.xaml only
+- Bottom status bar text updated to "Feature G5: ModbusPage Minimal UI"
+
+---
+
 *Last updated: May 2026*
 *Modbus Core Foundation Review: May 2026*
 *Modbus TCP Frame Review: May 2026*
 *ModbusViewModel Review: May 2026*
+*ModbusPage Review: May 2026*
