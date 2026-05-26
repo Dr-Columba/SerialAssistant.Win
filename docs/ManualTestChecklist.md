@@ -317,6 +317,71 @@ This document provides a step-by-step manual testing guide for SerialAssistant.W
 - [ ] **Step G1.33** Verify UI displays version "v0.4.0"
 - [ ] **Step G1.34** Verify Terminal page still works correctly
 
+### Feature G3: Modbus TCP Frame Builder and Parser Verification
+
+#### G3.1 Core Modbus TCP Files
+
+- [ ] **Step G3.1** Verify `src/SerialAssistant.Core/Modbus/Tcp/MbapHeader.cs` exists
+- [ ] **Step G3.2** Verify `src/SerialAssistant.Core/Modbus/Tcp/ModbusTcpFrame.cs` exists
+- [ ] **Step G3.3** Verify `src/SerialAssistant.Core/Modbus/Tcp/ModbusTcpRequestBuilder.cs` exists
+- [ ] **Step G3.4** Verify `src/SerialAssistant.Core/Modbus/Tcp/ModbusTcpResponseParser.cs` exists
+- [ ] **Step G3.5** Verify `src/SerialAssistant.Core/Modbus/Tcp/ModbusTcpErrorCode.cs` exists
+- [ ] **Step G3.6** Verify `src/SerialAssistant.Core/Modbus/Tcp/ModbusTcpParseResult.cs` exists
+
+#### G3.2 Core Modbus TCP Tests
+
+- [ ] **Step G3.7** Verify `src/SerialAssistant.Tests/Modbus/Tcp/MbapHeaderTests.cs` exists
+- [ ] **Step G3.8** Verify `src/SerialAssistant.Tests/Modbus/Tcp/ModbusTcpFrameTests.cs` exists
+- [ ] **Step G3.9** Verify `src/SerialAssistant.Tests/Modbus/Tcp/ModbusTcpRequestBuilderTests.cs` exists
+- [ ] **Step G3.10** Verify `src/SerialAssistant.Tests/Modbus/Tcp/ModbusTcpResponseParserTests.cs` exists
+
+#### G3.3 Request Builder Tests
+
+- [ ] **Step G3.11** Run `dotnet test .\SerialAssistant.Win.sln -c Debug --filter ModbusTcpRequestBuilderTests`
+- [ ] **Step G3.12** Verify 0x03 Read Holding Registers request builds correctly
+- [ ] **Step G3.13** Verify 0x04 Read Input Registers request builds correctly
+- [ ] **Step G3.14** Verify 0x06 Write Single Register request builds correctly
+- [ ] **Step G3.15** Verify 0x10 Write Multiple Registers request builds correctly
+
+#### G3.4 Response Parser Tests
+
+- [ ] **Step G3.16** Run `dotnet test .\SerialAssistant.Win.sln -c Debug --filter ModbusTcpResponseParserTests`
+- [ ] **Step G3.17** Verify MBAP Length validation works correctly
+- [ ] **Step G3.18** Verify exception response parsing works correctly
+
+#### G3.5 Layer Boundary Compliance
+
+- [ ] **Step G3.19** Verify Core Modbus TCP files have no `System.Windows` reference
+- [ ] **Step G3.20** Verify Core Modbus TCP files have no `System.IO.Ports` reference
+- [ ] **Step G3.21** Verify Core Modbus TCP files have no `File.` operations
+- [ ] **Step G3.22** Verify Core Modbus TCP files have no `Directory.` operations
+
+#### G3.6 Build and Test Verification
+
+- [ ] **Step G3.23** Run `dotnet build .\SerialAssistant.Win.sln -c Debug`
+- [ ] **Step G3.24** Verify build succeeds with 0 warnings, 0 errors
+- [ ] **Step G3.25** Run `dotnet test .\SerialAssistant.Win.sln -c Debug`
+- [ ] **Step G3.26** Verify test count shows 440 passed
+- [ ] **Step G3.27** Verify all tests pass
+
+#### G3.7 Version Update Verification
+
+- [ ] **Step G3.28** Open `src/SerialAssistant.App/MainWindow.xaml`
+- [ ] **Step G3.29** Verify version text shows "v0.4.2"
+
+#### G3.8 Application Startup
+
+- [ ] **Step G3.30** Run application with `dotnet run --project src/SerialAssistant.App`
+- [ ] **Step G3.31** Verify application starts without errors
+- [ ] **Step G3.32** Verify UI displays version "v0.4.2"
+- [ ] **Step G3.33** Verify Terminal page still works correctly
+
+#### G3.9 Scope Control Verification
+
+- [ ] **Step G3.34** Verify no changes to Infrastructure layer
+- [ ] **Step G3.35** Verify `src/SerialAssistant.App/MainWindow.xaml.cs` unchanged
+- [ ] **Step G3.36** Verify `src/SerialAssistant.App/Views/TerminalPage.xaml.cs` unchanged
+
 ### 2. Serial Port Scanning
 
 - [ ] **Step 2.1** Click "刷新" (Refresh) button

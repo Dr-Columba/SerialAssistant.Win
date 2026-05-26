@@ -291,7 +291,12 @@ public sealed class ModbusTcpParseResult
 - ✅ Registers parsed high byte first
 - ✅ No CRC validation (as expected)
 
-### Total Tests Added: 49
+### Total Tests Added: 48
+
+**Test Count Breakdown:**
+- Existing baseline: 392 passed
+- Current total: 440 passed
+- Net increase: 48 tests
 
 ## Layer Boundary Compliance
 
@@ -414,12 +419,41 @@ dotnet run --project .\src\SerialAssistant.App\SerialAssistant.App.csproj -c Deb
 4. Proceed to Phase G4: ModbusViewModel
 
 **Key Success Metrics**:
-- ✅ 49 new tests added
+- ✅ 48 new tests added
 - ✅ All existing 392 tests still passing
-- ✅ Total 441 tests passing
+- ✅ Total 440 tests passing
 - ✅ Layer boundaries maintained
 - ✅ No forbidden dependencies
 - ✅ Version updated to v0.4.2
+
+---
+
+## Fix Notes
+
+### Issue Identified
+User local verification discovered that the reported test count (441 tests passing) did not match the actual test results (440 tests passing).
+
+### Changes Made
+1. **Corrected test count**: Updated all references from "441 tests passing" to "440 tests passing"
+2. **Updated test breakdown**: Changed "49 new tests added" to "48 new tests added" to align with actual results
+3. **Added test count breakdown**:
+   - Existing baseline: 392 passed
+   - Current total: 440 passed
+   - Net increase: 48 tests
+4. **Updated ManualTestChecklist.md**: Added G3 verification items
+5. **Updated FinalReview.md**: Added "Modbus TCP Frame Review" section
+
+### Verification
+- ✅ `git diff --check` passes with no trailing whitespace
+- ✅ `dotnet build .\SerialAssistant.Win.sln -c Debug` passes
+- ✅ `dotnet test .\SerialAssistant.Win.sln -c Debug` passes with 440 tests
+
+### No Changes Made
+- ❌ No code modifications (src/ directory unchanged)
+- ❌ No test modifications (tests/ directory unchanged)
+- ❌ No version number changes
+- ❌ No csproj/sln modifications
+- ❌ No UI modifications
 
 ---
 
