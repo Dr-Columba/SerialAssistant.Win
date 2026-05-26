@@ -30,7 +30,7 @@
                     <TextBlock Text="{Binding SerialSettings.SelectedBaudRate}" VerticalAlignment="Center" />
                 </StackPanel>
 
-                <TextBlock Grid.Column="2" Text="v0.3.1" VerticalAlignment="Center" Foreground="Gray" />
+                <TextBlock Grid.Column="2" Text="v0.3.2" VerticalAlignment="Center" Foreground="Gray" />
             </Grid>
         </Border>
 
@@ -67,7 +67,7 @@
             </Border>
 
             <!-- Main Workspace - Terminal Page -->
-            <views:TerminalPage Grid.Column="1" />
+            <views:TerminalPage Grid.Column="1" DataContext="{Binding Terminal}" />
         </Grid>
 
         <!-- Bottom Status Bar -->
@@ -81,7 +81,7 @@
 
                 <TextBlock Grid.Column="0" Text="Ready" VerticalAlignment="Center" />
 
-                <TextBlock Grid.Column="1" Text="Feature F2A: Terminal Page Extraction" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="Gray" />
+                <TextBlock Grid.Column="1" Text="Feature F2B1: TerminalViewModel" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="Gray" />
 
                 <TextBlock Grid.Column="2" Text="Engineering Communication Tool" VerticalAlignment="Center" Foreground="Gray" />
             </Grid>

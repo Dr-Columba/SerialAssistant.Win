@@ -209,38 +209,38 @@ This document outlines the phased development plan for SerialAssistant.Win, orga
 
 ---
 
-### Feature F2B: TerminalViewModel Migration
+### Feature F2B1: TerminalViewModel Introduction
 
-**Status:** Pending
+**Status:** ✅ Completed
 
-**Goal:** Migrate terminal logic from MainWindowViewModel to TerminalViewModel
+**Goal:** Introduce TerminalViewModel and migrate terminal logic, maintain compatibility with existing tests
 
 **Scope:**
-- Create TerminalViewModel with terminal-specific logic
-- Migrate serial port logic, send/receive logic, history management
-- Update TerminalPage to use TerminalViewModel
-- Update MainWindowViewModel to manage navigation only
-- Update tests for migrated functionality
+- Create TerminalViewModel with all terminal-specific logic
+- Update TerminalPage to bind to TerminalViewModel
+- Update MainWindowViewModel to contain Terminal property
+- Add compatibility forwarding properties in MainWindowViewModel
+- Add TerminalViewModelTests
 - Verify all Feature A-D behavior preserved
 
 **Allowed Modifications:**
 - src/SerialAssistant.App/ViewModels/TerminalViewModel.cs (new file)
-- src/SerialAssistant.App/MainWindowViewModel.cs (remove terminal logic)
-- src/SerialAssistant.App/Views/TerminalPage.xaml (update bindings if needed)
-- Tests for TerminalViewModel
-- docs/UIInformationArchitecture.md (F2B implementation notes)
-- docs/PhasePlan.md (update F2B status)
-- docs/FeatureReports/FeatureF2B-TerminalViewModelMigration.md (new report)
+- src/SerialAssistant.App/MainWindowViewModel.cs (add Terminal property and forwarding)
+- src/SerialAssistant.App/MainWindow.xaml (update TerminalPage DataContext)
+- src/SerialAssistant.Tests/ViewModels/TerminalViewModelTests.cs (new file)
+- docs/UIInformationArchitecture.md (F2B1 implementation notes)
+- docs/PhasePlan.md (split F2B into F2B1/F2B2)
+- docs/FeatureReports/FeatureF2B1-TerminalViewModel.md (new report)
 
-**Migration Principles:**
-1. Copy existing logic to TerminalViewModel first
-2. Test after each logical unit moved
-3. Remove old code from MainWindowViewModel only after verification
-4. Maintain all existing tests
-5. Preserve all Feature A-D behavior
+**Implementation Strategy:**
+1. Create TerminalViewModel with full terminal logic
+2. MainWindowViewModel creates and owns TerminalViewModel
+3. MainWindowViewModel provides forwarding properties for test compatibility
+4. TerminalPage binds to MainWindowViewModel.Terminal
+5. All existing tests pass via forwarding
 
 **Feature A-D Behavior Requirements:**
-| Feature | Required Behavior | Migration Location |
+| Feature | Required Behavior | Implementation Location |
 |---------|-------------------|-------------------|
 | A | Send line ending (None/CR/LF/CRLF) | TerminalViewModel |
 | B | TX/RX direction marking, timestamp | TerminalViewModel/ReceiveDisplayViewModel |
@@ -257,13 +257,47 @@ This document outlines the phased development plan for SerialAssistant.Win, orga
 **Acceptance Criteria:**
 - All 291+ existing tests pass
 - Terminal functionality identical to before migration
-- MainWindowViewModel no longer contains terminal-specific logic
-- TerminalViewModel handles all terminal operations
-- Feature A-D behavior preserved
+- TerminalViewModel created with all terminal logic
+- TerminalPage bound to TerminalViewModel
+- MainWindowViewModel contains Terminal property with forwarding
 
 **Code Changes Allowed:** Yes (refactoring for migration only)
 
-**Tests Required:** Yes (existing tests + TerminalViewModel tests)
+**Tests Required:** Yes (TerminalViewModelTests added)
+
+**Manual UI Verification Required:** Yes
+
+---
+
+### Feature F2B2: MainWindowViewModel Terminal Cleanup
+
+**Status:** Pending
+
+**Goal:** Remove compatibility forwarding properties from MainWindowViewModel
+
+**Scope:**
+- Remove terminal-related forwarding properties from MainWindowViewModel
+- MainWindowViewModel becomes pure Shell ViewModel
+- Update MainWindowViewModelTests to reflect new structure
+- Verify all tests still pass
+- Update documentation
+
+**Allowed Modifications:**
+- src/SerialAssistant.App/MainWindowViewModel.cs (remove forwarding properties)
+- src/SerialAssistant.Tests/ViewModels/MainWindowViewModelTests.cs (update tests)
+- docs/UIInformationArchitecture.md (F2B2 implementation notes)
+- docs/PhasePlan.md (update F2B2 status)
+- docs/FeatureReports/FeatureF2B2-Cleanup.md (new report)
+
+**Acceptance Criteria:**
+- All tests pass
+- MainWindowViewModel contains only Shell-related logic
+- TerminalViewModel is the sole owner of terminal logic
+- No forwarding properties remain
+
+**Code Changes Allowed:** Yes (cleanup refactoring)
+
+**Tests Required:** Yes (update existing tests)
 
 **Manual UI Verification Required:** Yes
 
