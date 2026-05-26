@@ -198,6 +198,62 @@ This document provides a step-by-step manual testing guide for SerialAssistant.W
 - [ ] **Step F2C.24** Verify test count shows 320 passed
 - [ ] **Step F2C.25** Verify all tests pass
 
+### Feature G0: Modbus Planning Verification
+
+#### G0.1 Documentation Files
+
+- [ ] **Step G0.1** Verify `docs/ModbusPlan.md` exists
+- [ ] **Step G0.2** Verify ModbusPlan.md contains Purpose section
+- [ ] **Step G0.3** Verify ModbusPlan.md contains Modbus Scope section
+- [ ] **Step G0.4** Verify ModbusPlan.md contains Supported Function Codes Roadmap
+- [ ] **Step G0.5** Verify ModbusPlan.md contains Core Layer Design
+- [ ] **Step G0.6** Verify ModbusPlan.md contains RTU Frame Rules
+- [ ] **Step G0.7** Verify ModbusPlan.md contains TCP Frame Rules
+- [ ] **Step G0.8** Verify ModbusPlan.md contains Test Strategy section
+
+#### G0.2 PhasePlan Updates
+
+- [ ] **Step G0.9** Verify `docs/PhasePlan.md` contains G0 section
+- [ ] **Step G0.10** Verify PhasePlan.md contains G1 section (Modbus Core Foundation)
+- [ ] **Step G0.11** Verify PhasePlan.md contains G2 section (RTU Frames)
+- [ ] **Step G0.12** Verify PhasePlan.md contains G3 section (TCP Frames)
+- [ ] **Step G0.13** Verify PhasePlan.md contains G4 section (ModbusViewModel)
+- [ ] **Step G0.14** Verify PhasePlan.md contains G5 section (ModbusPage UI)
+- [ ] **Step G0.15** Verify PhasePlan.md contains G6 section (Documentation Closure)
+- [ ] **Step G0.16** Verify each phase has scope, allowed/forbidden modifications
+
+#### G0.3 Architecture Updates
+
+- [ ] **Step G0.17** Verify `docs/Architecture.md` contains Modbus Architecture Planning section
+- [ ] **Step G0.18** Verify Architecture.md specifies Core layer rules
+- [ ] **Step G0.19** Verify Architecture.md specifies Infrastructure layer rules
+- [ ] **Step G0.20** Verify Architecture.md specifies App layer rules
+- [ ] **Step G0.21** Verify Architecture.md defines dependency direction
+
+#### G0.4 UIInformationArchitecture Updates
+
+- [ ] **Step G0.22** Verify `docs/UIInformationArchitecture.md` contains Modbus UI Planning section
+- [ ] **Step G0.23** Verify UIInformationArchitecture.md defines ModbusPage position
+- [ ] **Step G0.24** Verify UIInformationArchitecture.md defines ModbusViewModel boundary
+- [ ] **Step G0.25** Verify UIInformationArchitecture.md specifies ModbusPage is independent
+
+#### G0.5 Code Restriction Compliance
+
+- [ ] **Step G0.26** Verify no changes to `src/` directory
+- [ ] **Step G0.27** Verify no changes to `tests/` directory
+- [ ] **Step G0.28** Verify no changes to `*.csproj` files
+- [ ] **Step G0.29** Verify no changes to `*.sln` files
+- [ ] **Step G0.30** Verify no changes to UI XAML files
+- [ ] **Step G0.31** Verify no changes to version numbers
+
+#### G0.6 Build and Test Baseline
+
+- [ ] **Step G0.32** Run `dotnet build .\SerialAssistant.Win.sln -c Debug`
+- [ ] **Step G0.33** Verify build succeeds with 0 warnings, 0 errors
+- [ ] **Step G0.34** Run `dotnet test .\SerialAssistant.Win.sln -c Debug`
+- [ ] **Step G0.35** Verify test count is still 320 passed
+- [ ] **Step G0.36** Verify no new tests were added (G0 is documentation only)
+
 ### 2. Serial Port Scanning
 
 - [ ] **Step 2.1** Click "刷新" (Refresh) button
