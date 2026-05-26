@@ -140,7 +140,7 @@ This report documents the completion of Feature G5: ModbusPage Minimal UI. The f
 
 ## Test Coverage
 
-### MainWindowViewModelTests (60 new tests)
+### MainWindowViewModelTests (7 new tests)
 
 | Test Category | Description |
 |---------------|-------------|
@@ -148,8 +148,6 @@ This report documents the completion of Feature G5: ModbusPage Minimal UI. The f
 | Navigation | ShowTerminalCommand, ShowModbusCommand work |
 | PropertyChanged | Navigating raises PropertyChanged events |
 | Modbus Property | Modbus property initialized and not null |
-| Terminal Preservation | Terminal property still works |
-| SaveSettings | SaveSettings still delegates to Terminal |
 
 ### ModbusViewModelTests (14 new tests)
 
@@ -161,8 +159,8 @@ This report documents the completion of Feature G5: ModbusPage Minimal UI. The f
 ### Total Test Impact
 
 - **Previous baseline**: 494 passed
-- **Current total**: 568 passed
-- **Net increase**: 74 tests
+- **Current total**: 515 passed
+- **Net increase**: 21 tests
 
 ## Layer Boundary Compliance
 
@@ -239,7 +237,7 @@ Current branch: `feature/modbus-page-g5` ✅
 
 ### ✅ Test Check
 
-`dotnet test` passes with all tests green ✅ (568 passed)
+`dotnet test` passes with all tests green ✅ (515 passed)
 
 ### ✅ Diff Check
 
@@ -261,10 +259,10 @@ Phase report created ✅
 
 ## Agent Validation
 
-**Agent Execution**: Full implementation completed
-**Tests Written**: 74 new tests
+**Agent Execution**: Full implementation completed with layout fix
+**Tests Written**: 21 new tests
 **Build Status**: Success
-**Test Status**: All tests passed
+**Test Status**: All tests passed (515)
 **Documentation**: Updated
 
 ## User Verification Commands
@@ -322,15 +320,53 @@ dotnet run --project .\src\SerialAssistant.App\SerialAssistant.App.csproj -c Deb
 4. Proceed to Phase G6: Modbus Manual Test and Documentation Closure
 
 **Key Success Metrics**:
-- ✅ 74 new tests added
+- ✅ 21 new tests added
 - ✅ All existing 494 tests still passing
-- ✅ Total 568 tests passing
+- ✅ Total 515 tests passing
 - ✅ Layer boundaries strictly maintained
 - ✅ No forbidden dependencies
 - ✅ Version updated to v0.4.4
 - ✅ Terminal functionality completely preserved
 - ✅ ModbusPage binds directly to G4 ViewModel
 - ✅ No new protocol implementation
+- ✅ ModbusPage layout fixed and properly contained within shell workspace
+
+---
+
+## Fix Notes
+
+### Issue 1: ModbusPage Layout Overlapping
+**Problem**:
+- ModbusPage content was overlapping with the top status bar
+- UI elements within ModbusPage were overlapping each other
+- Page did not fit properly within the shell workspace
+
+**Solution**:
+- Refactored ModbusPage.xaml with cleaner Grid-based layout
+- Fixed Grid row definitions with proper Height settings (Auto for fixed content, * for flexible content)
+- Added proper Margin and Padding to all elements
+- Separated UI sections into distinct Grid rows: Title, Parameters, Buttons, Request, Response+Result, Status
+- Ensured no negative margins or absolute positioning
+
+### Issue 2: Test Count Documentation Inaccuracy
+**Problem**:
+- Documentation incorrectly reported 568 passed tests
+- Documentation incorrectly reported 74 new tests added
+
+**Solution**:
+- Corrected documentation to reflect actual test results:
+  - Previous baseline: 494 passed
+  - Current total: 515 passed
+  - Net increase: 21 tests
+
+### Verification after Fix
+- ✅ ModbusPage no longer overlaps with top/bottom status bars or left navigation
+- ✅ All UI elements properly spaced and visible
+- ✅ Build passes with 0 warnings, 0 errors
+- ✅ All 515 tests pass
+- ✅ No changes to Infrastructure layer
+- ✅ No changes to Core RTU/TCP protocol implementation
+- ✅ Terminal functionality completely preserved
 
 ---
 

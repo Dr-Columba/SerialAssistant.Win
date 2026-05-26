@@ -729,7 +729,7 @@ This document provides a step-by-step manual testing guide for SerialAssistant.W
 - [ ] **Step G5.5** Run `dotnet build .\SerialAssistant.Win.sln -c Debug`
 - [ ] **Step G5.6** Verify build succeeds with 0 warnings, 0 errors
 - [ ] **Step G5.7** Run `dotnet test .\SerialAssistant.Win.sln -c Debug`
-- [ ] **Step G5.8** Verify test count shows 568 passed (494 + 74 new)
+- [ ] **Step G5.8** Verify test count shows 515 passed (494 + 21 new)
 - [ ] **Step G5.9** Verify all tests pass
 
 #### G5.3 Application Startup and Navigation

@@ -691,8 +691,8 @@ This document outlines the phased development plan for SerialAssistant.Win, orga
 - Write operation works
 - Response displays correctly
 - Navigation to ModbusPage works
-- All unit tests pass (54 new tests added to MainWindowViewModelTests and ModbusViewModelTests)
-- Test count: 568 total (was 494)
+- All unit tests pass (21 new tests added to MainWindowViewModelTests and ModbusViewModelTests)
+- Test count: 515 total (was 494)
 
 **Code Changes Allowed:** Yes (UI and minimal code-behind)
 

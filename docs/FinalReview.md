@@ -720,8 +720,8 @@ This section documents the completion of G5: ModbusPage Minimal UI.
 
 | Metric | Before G5 | After G5 |
 |--------|-----------|----------|
-| Total Tests | 494 | 568 |
-| New Tests | - | 74 |
+| Total Tests | 494 | 515 |
+| New Tests | - | 21 |
 
 ### G6 Pre-conditions
 
