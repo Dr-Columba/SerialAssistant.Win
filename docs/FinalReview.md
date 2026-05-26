@@ -618,7 +618,7 @@ This section documents the completion of G4: ModbusViewModel Minimal Workflow.
 **Test Coverage:**
 | Test Class | Tests | Status |
 |------------|-------|--------|
-| ModbusViewModelTests | 58 | ✅ All pass |
+| ModbusViewModelTests | 54 | ✅ All pass |
 
 ### G4 Key Implementation Details
 
