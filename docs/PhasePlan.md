@@ -333,7 +333,89 @@ This document outlines the phased development plan for SerialAssistant.Win, orga
 
 ---
 
+### Feature F2C: Shell and Terminal Migration Closure
+
+**Status:** ✅ Completed
+
+**Goal:** Documentation closure for Shell/Terminal migration phases, no code changes
+
+**Scope:**
+- Update UIInformationArchitecture.md with closure review
+- Update PhasePlan.md with F2C status and future roadmap
+- Update ManualTestChecklist.md with F2C verification items
+- Update FinalReview.md with Shell/Terminal Migration Review
+- Create FeatureF2C report
+
+**Allowed Modifications:**
+- docs/UIInformationArchitecture.md
+- docs/PhasePlan.md
+- docs/ManualTestChecklist.md
+- docs/FinalReview.md
+- docs/FeatureReports/FeatureF2C-TerminalMigrationClosure.md
+
+**Forbidden:**
+- No src modifications
+- No tests modifications
+- No csproj/sln modifications
+- No UI modifications
+- No version number changes
+- No tag creation
+
+**Version/Tag Policy:**
+- Current UI display: v0.3.3
+- F2C is documentation-only phase
+- No new tag recommended for F2C
+- Next actual feature phase should update version appropriately
+
+**Acceptance Criteria:**
+- All documentation files updated
+- F2B2 test coverage restoration acknowledged
+- Future page boundary rules documented
+- No code changes made
+- Test count: 320 passed
+
+**Code Changes Allowed:** No
+
+**Tests Required:** No
+
+**Manual UI Verification Required:** Yes
+
+**ValidationGate Compliance:** Required
+
+---
+
+### Feature G0: Modbus Planning and Test Strategy
+
+**Status:** Planned
+
+**Goal:** Define Modbus implementation approach and test strategy before coding
+
+**Scope:**
+- Document Modbus RTU/TCP requirements
+- Define protocol implementation boundaries
+- Create test strategy for Modbus functionality
+- Identify dependencies on Core/Infrastructure layers
+
+**Forbidden:**
+- No code implementation
+- No test implementation
+
+**Acceptance Criteria:**
+- Modbus implementation plan documented
+- Test strategy defined
+- Dependencies identified
+
+**Code Changes Allowed:** No
+
+**Tests Required:** No
+
+**Report Required:** Yes
+
+---
+
 ### Feature G1: Modbus Core Protocol Layer
+
+**Status:** Planned
 
 **Goal:** Implement core Modbus protocol objects and algorithms
 
