@@ -72,10 +72,12 @@
 
             <!-- Main Workspace -->
             <Grid Grid.Column="1">
-                <views:TerminalPage DataContext="{Binding Terminal}"
-                                    Visibility="{Binding IsTerminalPageVisible, Converter={StaticResource BoolToVis}}" />
-                <views:ModbusPage DataContext="{Binding Modbus}"
-                                    Visibility="{Binding IsModbusPageVisible, Converter={StaticResource BoolToVis}}" />
+                <Grid Visibility="{Binding IsTerminalPageVisible, Converter={StaticResource BoolToVis}}">
+                    <views:TerminalPage DataContext="{Binding Terminal}" />
+                </Grid>
+                <Grid Visibility="{Binding IsModbusPageVisible, Converter={StaticResource BoolToVis}}">
+                    <views:ModbusPage DataContext="{Binding Modbus}" />
+                </Grid>
             </Grid>
         </Grid>
 

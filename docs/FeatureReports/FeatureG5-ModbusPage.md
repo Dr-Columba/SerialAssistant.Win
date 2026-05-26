@@ -159,8 +159,8 @@ This report documents the completion of Feature G5: ModbusPage Minimal UI. The f
 ### Total Test Impact
 
 - **Previous baseline**: 494 passed
-- **Current total**: 515 passed
-- **Net increase**: 21 tests
+- **Current total**: 520 passed
+- **Net increase**: 26 tests
 
 ## Layer Boundary Compliance
 
@@ -237,7 +237,7 @@ Current branch: `feature/modbus-page-g5` ✅
 
 ### ✅ Test Check
 
-`dotnet test` passes with all tests green ✅ (515 passed)
+`dotnet test` passes with all tests green ✅ (520 passed)
 
 ### ✅ Diff Check
 
@@ -428,6 +428,62 @@ dotnet run --project .\src\SerialAssistant.App\SerialAssistant.App.csproj -c Deb
 - ✅ No changes to Core RTU/TCP protocol
 - ✅ No changes to Infrastructure layer
 - ✅ No changes to TerminalViewModel
+
+## Fix Notes 4
+
+### Issue: Page Visibility Binding Source Incorrect
+
+**Problem**:
+- User found clicking Terminal button still didn't switch back to TerminalPage
+- Root cause was TerminalPage and ModbusPage both setting DataContext and Visibility at the same element
+- This caused Visibility bindings to try resolving from TerminalViewModel/ModbusViewModel instead of MainWindowViewModel
+- ModbusPage was displayed by default because it was written after TerminalPage in XAML
+
+**Root Cause**:
+- TerminalPage.DataContext = TerminalViewModel, so Visibility binding tried to find IsTerminalPageVisible on TerminalViewModel
+- ModbusPage.DataContext = ModbusViewModel, so Visibility binding tried to find IsModbusPageVisible on ModbusViewModel
+- But the visibility properties belong to MainWindowViewModel
+
+**Solution**:
+- Moved Visibility binding to outer Grid containers
+- Each page now wrapped in its own Grid
+- Outer Grid uses Window's DataContext (MainWindowViewModel) for Visibility
+- Only the inner UserControl sets DataContext="{Binding Terminal}" or DataContext="{Binding Modbus}"
+- Maintained RelativeSource on navigation buttons for safety
+
+```xml
+<Grid Grid.Column="1">
+    <Grid Visibility="{Binding IsTerminalPageVisible, Converter={StaticResource BoolToVis}}">
+        <views:TerminalPage DataContext="{Binding Terminal}" />
+    </Grid>
+    <Grid Visibility="{Binding IsModbusPageVisible, Converter={StaticResource BoolToVis}}">
+        <views:ModbusPage DataContext="{Binding Modbus}" />
+    </Grid>
+</Grid>
+```
+
+**Additional Tests**:
+- Added 5 new tests for comprehensive coverage:
+  1. ShowModbusCommand sets IsTerminalPageVisible to false
+  2. ShowTerminalCommand sets IsModbusPageVisible to false
+  3. Repeated page switching (3 rounds) works correctly
+  4. ShowTerminalCommand when already on Terminal has no side effects
+  5. ShowModbusCommand when already on Modbus has no side effects
+
+### Verification after Fix 4
+- ✅ TerminalPage visible by default
+- ✅ ModbusPage hidden by default
+- ✅ Clicking Modbus button shows ModbusPage and hides TerminalPage
+- ✅ Clicking Terminal button shows TerminalPage and hides ModbusPage
+- ✅ Pages can be switched back and forth repeatedly
+- ✅ No more overlapping page displays
+- ✅ Build passes with 0 warnings, 0 errors
+- ✅ All 520 tests pass
+- ✅ No changes to Core RTU/TCP protocol
+- ✅ No changes to Infrastructure layer
+- ✅ No changes to TerminalViewModel
+- ✅ No changes to TerminalPage.xaml or TerminalPage.xaml.cs
+- ✅ No new event handlers added
 
 ---
 

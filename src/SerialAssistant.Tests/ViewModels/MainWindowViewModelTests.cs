@@ -548,5 +548,90 @@ namespace SerialAssistant.Tests.ViewModels
             var result = viewModel.SaveSettings();
             Assert.True(result.IsSuccess);
         }
+
+        [Fact]
+        public void ShowModbusCommand_SetsIsTerminalPageVisible_False()
+        {
+            var viewModel = new MainWindowViewModel();
+            viewModel.ShowModbusCommand.Execute(null);
+            Assert.False(viewModel.IsTerminalPageVisible);
+        }
+
+        [Fact]
+        public void ShowTerminalCommand_SetsIsModbusPageVisible_False()
+        {
+            var viewModel = new MainWindowViewModel();
+            viewModel.ShowModbusCommand.Execute(null);
+            viewModel.ShowTerminalCommand.Execute(null);
+            Assert.False(viewModel.IsModbusPageVisible);
+        }
+
+        [Fact]
+        public void RepeatedPageSwitching_WorksCorrectly()
+        {
+            var viewModel = new MainWindowViewModel();
+
+            // Round 1
+            viewModel.ShowModbusCommand.Execute(null);
+            Assert.True(viewModel.IsModbusPageVisible);
+            Assert.False(viewModel.IsTerminalPageVisible);
+
+            viewModel.ShowTerminalCommand.Execute(null);
+            Assert.False(viewModel.IsModbusPageVisible);
+            Assert.True(viewModel.IsTerminalPageVisible);
+
+            // Round 2
+            viewModel.ShowModbusCommand.Execute(null);
+            Assert.True(viewModel.IsModbusPageVisible);
+            Assert.False(viewModel.IsTerminalPageVisible);
+
+            viewModel.ShowTerminalCommand.Execute(null);
+            Assert.False(viewModel.IsModbusPageVisible);
+            Assert.True(viewModel.IsTerminalPageVisible);
+
+            // Round 3
+            viewModel.ShowModbusCommand.Execute(null);
+            Assert.True(viewModel.IsModbusPageVisible);
+            Assert.False(viewModel.IsTerminalPageVisible);
+
+            viewModel.ShowTerminalCommand.Execute(null);
+            Assert.False(viewModel.IsModbusPageVisible);
+            Assert.True(viewModel.IsTerminalPageVisible);
+        }
+
+        [Fact]
+        public void ShowTerminalCommand_WhenAlreadyTerminal_NoSideEffects()
+        {
+            var viewModel = new MainWindowViewModel();
+            bool wasTerminalSelected = viewModel.IsTerminalSelected;
+            bool wasModbusSelected = viewModel.IsModbusSelected;
+            bool wasTerminalPageVisible = viewModel.IsTerminalPageVisible;
+            bool wasModbusPageVisible = viewModel.IsModbusPageVisible;
+
+            viewModel.ShowTerminalCommand.Execute(null);
+
+            Assert.Equal(wasTerminalSelected, viewModel.IsTerminalSelected);
+            Assert.Equal(wasModbusSelected, viewModel.IsModbusSelected);
+            Assert.Equal(wasTerminalPageVisible, viewModel.IsTerminalPageVisible);
+            Assert.Equal(wasModbusPageVisible, viewModel.IsModbusPageVisible);
+        }
+
+        [Fact]
+        public void ShowModbusCommand_WhenAlreadyModbus_NoSideEffects()
+        {
+            var viewModel = new MainWindowViewModel();
+            viewModel.ShowModbusCommand.Execute(null);
+            bool wasTerminalSelected = viewModel.IsTerminalSelected;
+            bool wasModbusSelected = viewModel.IsModbusSelected;
+            bool wasTerminalPageVisible = viewModel.IsTerminalPageVisible;
+            bool wasModbusPageVisible = viewModel.IsModbusPageVisible;
+
+            viewModel.ShowModbusCommand.Execute(null);
+
+            Assert.Equal(wasTerminalSelected, viewModel.IsTerminalSelected);
+            Assert.Equal(wasModbusSelected, viewModel.IsModbusSelected);
+            Assert.Equal(wasTerminalPageVisible, viewModel.IsTerminalPageVisible);
+            Assert.Equal(wasModbusPageVisible, viewModel.IsModbusPageVisible);
+        }
     }
 }
