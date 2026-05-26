@@ -496,14 +496,27 @@ This document outlines the phased development plan for SerialAssistant.Win, orga
 
 ### Feature G2: Modbus RTU Frame Builder and Parser
 
-**Status:** Planned
+**Status:** ✅ Completed
 
 **Goal:** Implement RTU frame building and parsing for core function codes
 
+**Implementation Date:** 2026-05-26
+
+**Files Created:**
+- `src/SerialAssistant.Core/Modbus/Rtu/ModbusRtuErrorCode.cs`
+- `src/SerialAssistant.Core/Modbus/Rtu/ModbusRtuFrame.cs`
+- `src/SerialAssistant.Core/Modbus/Rtu/ModbusRtuParseResult.cs`
+- `src/SerialAssistant.Core/Modbus/Rtu/ModbusRtuRequestBuilder.cs`
+- `src/SerialAssistant.Core/Modbus/Rtu/ModbusRtuResponseParser.cs`
+- `src/SerialAssistant.Tests/Modbus/Rtu/ModbusRtuFrameTests.cs`
+- `src/SerialAssistant.Tests/Modbus/Rtu/ModbusRtuRequestBuilderTests.cs`
+- `src/SerialAssistant.Tests/Modbus/Rtu/ModbusRtuResponseParserTests.cs`
+- `src/SerialAssistant.App/MainWindow.xaml` (version update to v0.4.1)
+
 **Scope:**
 - ModbusRtuFrame model
-- ModbusRtuFrameBuilder
-- ModbusRtuFrameParser
+- ModbusRtuRequestBuilder
+- ModbusRtuResponseParser
 - Support function codes: 03, 04, 06, 10
 - Unit tests for RTU frames
 - Reference: docs/ModbusPlan.md Section 8
