@@ -339,5 +339,120 @@ Before entering Modbus implementation (G1+), the following are confirmed:
 
 ---
 
+## Modbus Planning Readiness
+
+### Overview
+
+This section documents the readiness for Modbus implementation following the completion of Shell/Terminal migration phases.
+
+### Current Status
+
+The SerialAssistant.Win project has completed:
+
+| Phase | Status | Description |
+|-------|--------|-------------|
+| F1 | ✅ Complete | Application Shell Skeleton |
+| F2A | ✅ Complete | TerminalPage Extraction |
+| F2B1 | ✅ Complete | TerminalViewModel Introduction |
+| F2B2 | ✅ Complete | MainWindowViewModel Terminal Cleanup |
+| F2C | ✅ Complete | Shell and Terminal Migration Closure |
+| G0 | ✅ Complete | Modbus Planning and Test Strategy |
+
+### Modbus Implementation Prerequisites
+
+Before entering G1 (Modbus Core Foundation), the following prerequisites are confirmed:
+
+1. ✅ Shell architecture is stable
+2. ✅ Terminal functionality is isolated in TerminalViewModel
+3. ✅ Feature A-D behavior is preserved and tested
+4. ✅ Test coverage is comprehensive (320 tests)
+5. ✅ Code-behind files are minimal
+6. ✅ MainWindowViewModel is clean
+7. ✅ Modbus planning documentation is complete
+
+### Architecture Requirements for Modbus
+
+**CRITICAL RULES:**
+
+1. **Start from Core Layer**
+   - Modbus implementation must begin with Core/Modbus
+   - No UI implementation in G1-G3
+   - Pure protocol models and algorithms
+
+2. **Do NOT Implement UI First**
+   - G1-G3 are Core-only phases
+   - UI implementation starts at G5 (ModbusPage)
+   - G4 creates ModbusViewModel without XAML
+
+3. **Do NOT Concatenate Protocol Bytes in App Layer**
+   - Frame building goes in Core layer
+   - App layer delegates to Core
+   - No byte-level manipulation in ViewModels
+
+4. **Do NOT Introduce Infrastructure Dependencies in Core**
+   - Core/Modbus has no System.IO.Ports reference
+   - Core/Modbus has no file system access
+   - Core/Modbus has no WPF reference
+
+### Phase Implementation Order
+
+```
+G0 (Done): Modbus Planning and Test Strategy
+    ↓
+G1 (Next): Modbus Core Foundation (CRC16, base models)
+    ↓
+G2: Modbus RTU Frame Builder and Parser
+    ↓
+G3: Modbus TCP Frame Builder and Parser
+    ↓
+G4: ModbusViewModel Minimal Workflow
+    ↓
+G5: ModbusPage Minimal UI
+    ↓
+G6: Modbus Manual Test and Documentation Closure
+```
+
+### G1 Pre-conditions
+
+G1 (Modbus Core Foundation) can begin when:
+
+1. ✅ G0 is accepted
+2. ✅ docs/ModbusPlan.md is reviewed
+3. ✅ Architecture boundaries are understood
+4. ✅ PhasePlan.md G1 scope is clear
+
+### Warning: Modbus Implementation Pitfalls
+
+**Pitfall 1: Implementing UI Before Core**
+- **Problem:** Starting with UI implementation
+- **Solution:** Follow G1→G2→G3→G4→G5 order
+- **Risk:** Protocol logic mixed with UI state
+
+**Pitfall 2: Bypassing Core for Protocol**
+- **Problem:** Building frames in ViewModel
+- **Solution:** Delegate to Core layer
+- **Risk:** Duplicated protocol logic, untestable
+
+**Pitfall 3: Adding Dependencies to Core**
+- **Problem:** WPF or System.IO.Ports in Core
+- **Solution:** Keep Core pure
+- **Risk:** Platform lock-in, untestable code
+
+**Pitfall 4: Protocol Logic in Infrastructure**
+- **Problem:** CRC or frame building in Infrastructure
+- **Solution:** Protocol logic in Core, transport in Infrastructure
+- **Risk:** Layer contamination
+
+### Documentation Review Checklist
+
+Before entering G1, verify:
+
+- [ ] docs/ModbusPlan.md reviewed and understood
+- [ ] docs/Architecture.md - Modbus Architecture Planning section understood
+- [ ] docs/PhasePlan.md - G1 scope clear
+- [ ] docs/UIInformationArchitecture.md - Modbus UI Planning understood
+
+---
+
 *Last updated: May 2026*
-*Shell/Terminal Migration Review: May 2026*
+*Modbus Planning Readiness: May 2026*

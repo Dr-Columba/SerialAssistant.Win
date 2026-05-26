@@ -860,9 +860,119 @@ Subsequent pages (Modbus, Templates, Logs, Settings) **MUST NOT** place business
 - **Current UI Display:** v0.3.3
 - **F2C Phase:** Documentation closure only, no code changes
 - **No new tag recommended for F2C**
-- **Next actual code/feature phase should update version appropriately**
+- **Next actual code/feature phase should update version appropriately
+
+---
+
+## 21. Modbus UI Planning
+
+### 21.1 ModbusPage Position
+
+**ModbusPage is a standalone page, NOT a part of TerminalPage.**
+
+```
+MainWindow.xaml
+├── Top Status Bar
+├── Main Content Area
+│   ├── Left Navigation Panel
+│   │   ├── Terminal (current)
+│   │   ├── Modbus (future)
+│   │   ├── Templates
+│   │   ├── Logs
+│   │   └── Settings
+│   └── Main Workspace
+│       ├── TerminalPage (current)
+│       └── ModbusPage (future - G5)
+└── Bottom Status Bar
+```
+
+### 21.2 ModbusViewModel Boundary
+
+**ModbusViewModel is independent from MainWindowViewModel.**
+
+```
+MainWindowViewModel
+├── Terminal (TerminalViewModel) - Shell-owned
+└── Navigation state
+
+ModbusViewModel (standalone)
+├── Connection settings (RTU: port, TCP: IP:port)
+├── Function code selection
+├── Address/quantity inputs
+├── Register values
+├── Response display
+└── Error handling
+```
+
+**CRITICAL:** Do NOT add Modbus controls to TerminalPage.
+**CRITICAL:** Do NOT add Modbus business logic to MainWindowViewModel.
+
+### 21.3 ModbusPage UI Structure
+
+**Minimal UI (G5 scope):**
+
+```
+┌─────────────────────────────────────────────────────────┐
+│ Connection Settings                                      │
+│ ┌─────────────────┐ ┌───────────────┐ ┌────────────┐ │
+│ │ Protocol (RTU)  │ │ Port / IP     │ │ Connect    │ │
+│ └─────────────────┘ └───────────────┘ └────────────┘ │
+├─────────────────────────────────────────────────────────┤
+│ Request Parameters                                       │
+│ ┌─────────────────┐ ┌───────────────┐ ┌────────────┐ │
+│ │ Function Code   │ │ Starting Addr │ │ Quantity   │ │
+│ └─────────────────┘ └───────────────┘ └────────────┘ │
+│ ┌──────────────┐ ┌──────────────┐ ┌──────────────┐ │
+│ │   Read       │ │   Write      │ │   Write...   │ │
+│ └──────────────┘ └──────────────┘ └──────────────┘ │
+├─────────────────────────────────────────────────────────┤
+│ Response Display                                         │
+│ ┌─────────────────────────────────────────────────────┐ │
+│ │                                                     │ │
+│ │ [Response data or error message]                   │ │
+│ │                                                     │ │
+│ └─────────────────────────────────────────────────────┘ │
+└─────────────────────────────────────────────────────────┘
+```
+
+### 21.4 G0 Does NOT Implement UI Switch
+
+**Current state (G0):**
+- Terminal page is default and only active page
+- Left navigation shows Modbus button (placeholder)
+- No Modbus functionality implemented yet
+
+**Future state (G5):**
+- Left navigation switches between pages
+- ModbusPage becomes active when Modbus selected
+- TerminalPage becomes active when Terminal selected
+
+### 21.5 Modbus UI Principles
+
+**Do:**
+- Create dedicated ModbusPage.xaml
+- Create dedicated ModbusViewModel
+- Keep Modbus UI minimal for G5
+- Delegate protocol work to Core layer
+
+**Don't:**
+- Don't add Modbus controls to TerminalPage
+- Don't add Modbus business logic to MainWindowViewModel
+- Don't add Modbus controls to MainWindow.xaml
+- Don't implement protocol in UI layer
+
+### 21.6 Future Enhancements (Post-G6)
+
+Future UI enhancements may include:
+- Register table view
+- Multiple simultaneous operations
+- Coil/Input bit toggle
+- Response charting
+- Batch operations
+
+These are out of scope for G5 minimal UI.
 
 ---
 
 *Last updated: May 2026*
-*Terminal Migration Closure Review: May 2026*
+*Modbus UI Planning: May 2026*

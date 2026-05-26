@@ -386,7 +386,7 @@ This document outlines the phased development plan for SerialAssistant.Win, orga
 
 ### Feature G0: Modbus Planning and Test Strategy
 
-**Status:** Planned
+**Status:** ✅ Completed
 
 **Goal:** Define Modbus implementation approach and test strategy before coding
 
@@ -395,141 +395,312 @@ This document outlines the phased development plan for SerialAssistant.Win, orga
 - Define protocol implementation boundaries
 - Create test strategy for Modbus functionality
 - Identify dependencies on Core/Infrastructure layers
+- Create docs/ModbusPlan.md
+
+**Allowed Modifications:**
+- docs/PhasePlan.md
+- docs/UIInformationArchitecture.md
+- docs/Architecture.md
+- docs/ManualTestChecklist.md
+- docs/FinalReview.md
+- docs/FeatureReports/FeatureG0-ModbusPlanning.md
+- docs/ModbusPlan.md
 
 **Forbidden:**
 - No code implementation
 - No test implementation
+- No src modifications
+- No csproj/sln modifications
+- No UI modifications
+- No version number changes
+
+**Version/Tag Policy:**
+- Current UI display: v0.3.3
+- G0 is documentation-only phase
+- No new tag recommended for G0
+- Next actual code phase (G1) should update version appropriately
 
 **Acceptance Criteria:**
 - Modbus implementation plan documented
 - Test strategy defined
 - Dependencies identified
+- No code changes made
+- Test count: 320 passed
 
 **Code Changes Allowed:** No
 
 **Tests Required:** No
 
-**Report Required:** Yes
+**Manual UI Verification Required:** Yes
+
+**ValidationGate Compliance:** Required
 
 ---
 
-### Feature G1: Modbus Core Protocol Layer
+### Feature G1: Modbus Core Foundation
 
 **Status:** Planned
 
-**Goal:** Implement core Modbus protocol objects and algorithms
+**Goal:** Implement Core layer base models, enums, and CRC16 utility
 
 **Scope:**
-- Implement Modbus function codes (01-16)
-- Implement CRC16 calculation
-- Implement RTU frame structure
-- Create base request/response models
-- Implement protocol exceptions
+- ModbusFunctionCode enum
+- ModbusDataType enum
+- ModbusCrc16 utility
+- ModbusRegisterValue model
+- Base request/response models
+- Unit tests for CRC16
+- Reference: docs/ModbusPlan.md Section 4
+
+**Allowed Modifications:**
+- src/SerialAssistant.Core/Modbus/* (new directory)
+- src/SerialAssistant.Tests/Modbus/* (new directory)
 
 **Forbidden:**
-- Referencing WPF
-- Referencing System.IO.Ports
-- Accessing file system
+- No UI implementation
+- No Infrastructure implementation
+- No frame builder/parser
+- No WPF references
+- No System.IO.Ports references
 
 **Acceptance Criteria:**
-- Core protocol objects work correctly
-- CRC16 validation passes
+- CRC16 passes all test vectors
+- All enums defined
+- Base models created
 - All unit tests pass
 - No UI dependencies
 
-**Code Changes Allowed:** Yes (Core layer only)
+**Code Changes Allowed:** Yes (Core and Tests only)
 
-**Tests Required:** Yes (comprehensive protocol tests)
+**Tests Required:** Yes (CRC16 tests)
+
+**Manual UI Verification Required:** No
 
 **Report Required:** Yes
 
 ---
 
-### Feature G2: Modbus RTU Request/Response Handling
+### Feature G2: Modbus RTU Frame Builder and Parser
 
-**Goal:** Implement Modbus RTU request building and response parsing
+**Status:** Planned
+
+**Goal:** Implement RTU frame building and parsing for core function codes
 
 **Scope:**
-- Read Coils (01)
-- Read Discrete Inputs (02)
-- Read Holding Registers (03)
-- Read Input Registers (04)
-- Write Single Coil (05)
-- Write Single Register (06)
-- Write Multiple Coils (15)
-- Write Multiple Registers (16)
+- ModbusRtuFrame model
+- ModbusRtuFrameBuilder
+- ModbusRtuFrameParser
+- Support function codes: 03, 04, 06, 10
+- Unit tests for RTU frames
+- Reference: docs/ModbusPlan.md Section 8
+
+**Allowed Modifications:**
+- src/SerialAssistant.Core/Modbus/Rtu/* (new directory)
+- src/SerialAssistant.Tests/Modbus/Rtu/* (new directory)
 
 **Forbidden:**
-- UI implementation
-- Serial port communication
+- No UI implementation
+- No TCP implementation
+- No Infrastructure implementation
 
 **Acceptance Criteria:**
-- All function codes implemented
-- Request/response round-trip works
-- Error handling for invalid responses
+- 03 Read Holding Registers: frame building and parsing works
+- 04 Read Input Registers: frame building and parsing works
+- 06 Write Single Register: frame building and parsing works
+- 10 Write Multiple Registers: frame building and parsing works
+- CRC validation works
+- Exception response parsing works
+- All unit tests pass
 
-**Code Changes Allowed:** Yes (Core layer only)
+**Code Changes Allowed:** Yes (Core and Tests only)
+
+**Tests Required:** Yes (RTU frame tests)
+
+**Manual UI Verification Required:** No
+
+**Report Required:** Yes
+
+---
+
+### Feature G3: Modbus TCP Frame Builder and Parser
+
+**Status:** Planned
+
+**Goal:** Implement TCP/MBAP frame building and parsing
+
+**Scope:**
+- MbapHeader model
+- ModbusTcpFrame model
+- ModbusTcpFrameBuilder
+- ModbusTcpFrameParser
+- Support function codes: 03, 04, 06, 10
+- Unit tests for TCP frames
+- Reference: docs/ModbusPlan.md Section 9
+
+**Allowed Modifications:**
+- src/SerialAssistant.Core/Modbus/Tcp/* (new directory)
+- src/SerialAssistant.Tests/Modbus/Tcp/* (new directory)
+
+**Forbidden:**
+- No UI implementation
+- No Infrastructure implementation
+
+**Acceptance Criteria:**
+- 03 Read Holding Registers: frame building and parsing works
+- 04 Read Input Registers: frame building and parsing works
+- 06 Write Single Register: frame building and parsing works
+- 10 Write Multiple Registers: frame building and parsing works
+- MBAP header validation works
+- All unit tests pass
+
+**Code Changes Allowed:** Yes (Core and Tests only)
+
+**Tests Required:** Yes (TCP frame tests)
+
+**Manual UI Verification Required:** No
+
+**Report Required:** Yes
+
+---
+
+### Feature G4: ModbusViewModel Minimal Workflow
+
+**Status:** Planned
+
+**Goal:** Establish ModbusViewModel without complex UI
+
+**Scope:**
+- ModbusViewModel
+- Connection state management
+- Register value management
+- Error handling
+- Unit tests
+- Reference: docs/ModbusPlan.md Section 5
+
+**Allowed Modifications:**
+- src/SerialAssistant.App/ViewModels/ModbusViewModel.cs (new file)
+- src/SerialAssistant.Tests/ViewModels/ModbusViewModelTests.cs (new file)
+
+**Forbidden:**
+- No XAML implementation
+- No frame building/parsing (delegates to Core)
+- No System.IO.Ports references in ViewModel
+
+**Acceptance Criteria:**
+- ModbusViewModel created
+- Connection state tracking works
+- Register read/write operations work
+- Error handling works
+- All unit tests pass
+
+**Code Changes Allowed:** Yes (App and Tests only)
 
 **Tests Required:** Yes
 
+**Manual UI Verification Required:** No
+
 **Report Required:** Yes
 
 ---
 
-### Feature H1: Modbus RTU Minimal UI Loop
+### Feature G5: ModbusPage Minimal UI
 
-**Goal:** Basic Modbus RTU UI for register read/write
+**Status:** Planned
+
+**Goal:** Implement minimal UI for register read/write
 
 **Scope:**
-- Create ModbusPage.xaml
-- Create ModbusViewModel
-- Basic register read functionality
-- Basic register write functionality
-- Connection status display
+- ModbusPage.xaml (new file)
+- ModbusPage.xaml.cs (new file)
+- Address input
+- Quantity input
+- Function code selection
+- Read/Write buttons
+- Response display
+- Reference: docs/ModbusPlan.md Section 5
+
+**Allowed Modifications:**
+- src/SerialAssistant.App/Views/ModbusPage.xaml (new file)
+- src/SerialAssistant.App/Views/ModbusPage.xaml.cs (new file)
+- src/SerialAssistant.App/MainWindow.xaml (navigation binding update)
 
 **Forbidden:**
-- Complex UI features
-- Full protocol implementation
+- Complex charting
+- Multiple simultaneous operations
+- Advanced styling
 
 **Acceptance Criteria:**
-- Can connect to Modbus RTU device
-- Can read holding registers
-- Can write holding registers
-- Basic error handling
+- Address input works
+- Quantity input works
+- Function code selection works
+- Read operation works
+- Write operation works
+- Response displays correctly
+- Navigation to ModbusPage works
 
-**Code Changes Allowed:** Yes
+**Code Changes Allowed:** Yes (UI and minimal code-behind)
 
-**Tests Required:** Yes
+**Tests Required:** No (manual verification only)
+
+**Manual UI Verification Required:** Yes
 
 **Report Required:** Yes
 
 ---
 
-### Feature I1: Modbus TCP Support
+### Feature G6: Modbus Manual Test and Documentation Closure
 
-**Goal:** Add Modbus TCP protocol support
+**Status:** Planned
+
+**Goal:** Complete manual testing and documentation
 
 **Scope:**
-- Create TCP communication abstraction
-- Implement Modbus TCP frame format
-- Handle TCP-specific considerations
-- Integrate with existing Modbus core
+- Manual test checklist for Modbus
+- Documentation updates
+- Final verification
+- Reference: docs/ModbusPlan.md Section 12
+
+**Allowed Modifications:**
+- docs/ManualTestChecklist.md
+- docs/ModbusPlan.md (if updates needed)
+- docs/FinalReview.md
 
 **Forbidden:**
-- Breaking existing RTU functionality
+- No new features
+- No code implementation
+- No test implementation
 
 **Acceptance Criteria:**
-- Modbus TCP communication works
-- Both RTU and TCP available
-- Protocol selection in UI
+- Manual test checklist complete
+- All Modbus functionality verified
+- Documentation up to date
+- G1-G5 test counts documented
 
-**Code Changes Allowed:** Yes
+**Code Changes Allowed:** No
 
-**Tests Required:** Yes
+**Tests Required:** No
+
+**Manual UI Verification Required:** Yes
 
 **Report Required:** Yes
 
 ---
+
+### Feature G0-G6 Summary
+
+| Phase | Type | Focus | Code Allowed |
+|-------|------|-------|--------------|
+| G0 | Planning | Documentation only | No |
+| G1 | Core | CRC16, base models | Core + Tests |
+| G2 | Core | RTU frames | Core + Tests |
+| G3 | Core | TCP frames | Core + Tests |
+| G4 | App | ModbusViewModel | App + Tests |
+| G5 | UI | ModbusPage | UI + minimal |
+| G6 | Closure | Testing + Docs | No |
+
+---
+
+## Future Phases
 
 ### Feature J1: Message Templates and Periodic Sending
 

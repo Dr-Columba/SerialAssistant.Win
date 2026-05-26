@@ -731,3 +731,187 @@ JsonAppSettingsService.Save writes to settings.json
 - SelectedSendHistoryItem (always null after restore)
 - SendText (current input)
 - TX/RX communication records
+
+---
+
+## Modbus Architecture Planning
+
+### Overview
+
+This section defines the architecture for Modbus functionality in SerialAssistant.Win. The design follows the same layered architecture principles established for serial terminal functionality.
+
+### Layer Responsibilities for Modbus
+
+| Layer | Modbus Responsibility | Examples |
+|-------|----------------------|----------|
+| Core | Pure protocol implementation | ModbusCrc16, ModbusRtuFrame, ModbusTcpFrame |
+| Infrastructure | Transport adapters | ISerialPortService, ITcpService (future) |
+| App | UI state and user interaction | ModbusViewModel, ModbusPage |
+
+### Core Layer Modbus Rules
+
+**DO:**
+- Protocol models (frames, requests, responses)
+- CRC16 calculation
+- Frame building and parsing algorithms
+- Function code enums
+- Data type definitions
+
+**DO NOT:**
+- Reference WPF
+- Reference System.IO.Ports
+- Access file system
+- Contain UI state
+- Implement transport logic
+
+### Infrastructure Layer Modbus Rules (Future)
+
+**DO:**
+- Serial port transport adapter
+- TCP socket transport adapter
+- Connection management
+
+**DO NOT:**
+- Reference WPF
+- Implement Modbus protocol rules
+- Contain UI ViewModel
+
+### App Layer Modbus Rules
+
+**DO:**
+- ModbusPage (UI)
+- ModbusViewModel (state management)
+- Form input handling
+- Command triggering
+- Result display
+
+**DO NOT:**
+- Directly concatenate protocol bytes
+- Implement CRC calculations
+- Bypass Core protocol layer
+
+### Critical Boundary Rules
+
+1. **MainWindowViewModel does NOT host Modbus business logic**
+   - MainWindowViewModel remains a pure Shell ViewModel
+   - Modbus logic goes into ModbusViewModel
+
+2. **ModbusViewModel does NOT reference System.IO.Ports**
+   - Uses ISerialPortService interface
+   - Protocol work delegated to Core layer
+
+3. **Core Modbus does NOT access file system**
+   - Pure protocol implementation
+   - No configuration file I/O
+
+4. **Core Modbus does NOT reference WPF**
+   - Pure .NET library
+   - Can be unit tested without UI dependencies
+
+### Dependency Direction
+
+```
+UI (ModbusPage)
+    ↓
+ViewModel (ModbusViewModel)
+    ↓
+Core Protocol (SerialAssistant.Core.Modbus)
+    ↓
+Infrastructure Transport (ISerialPortService, ITcpService)
+```
+
+### Data Flow
+
+```
+User Input (Address, Quantity, Function Code)
+    ↓
+ModbusViewModel.CreateRequest()
+    ↓
+ModbusRtuFrameBuilder.Build() / ModbusTcpFrameBuilder.Build()
+    ↓
+ISerialPortService.Send() / ITcpService.Send()
+    ↓
+Transport sends bytes over wire
+    ↓
+Response received
+    ↓
+ModbusRtuFrameParser.Parse() / ModbusTcpFrameParser.Parse()
+    ↓
+ModbusResponse / ModbusExceptionResponse
+    ↓
+ModbusViewModel displays result
+```
+
+### Proposed Namespace Structure
+
+```
+src/SerialAssistant.Core/Modbus/
+├── Enums/
+│   ├── ModbusFunctionCode.cs
+│   └── ModbusDataType.cs
+├── Models/
+│   ├── ModbusRequest.cs
+│   ├── ModbusResponse.cs
+│   ├── ModbusExceptionResponse.cs
+│   └── ModbusRegisterValue.cs
+├── Rtu/
+│   ├── ModbusRtuFrame.cs
+│   ├── ModbusRtuFrameBuilder.cs
+│   └── ModbusRtuFrameParser.cs
+├── Tcp/
+│   ├── ModbusTcpFrame.cs
+│   ├── MbapHeader.cs
+│   ├── ModbusTcpFrameBuilder.cs
+│   └── ModbusTcpFrameParser.cs
+└── Utils/
+    ├── ModbusCrc16.cs
+    └── ModbusByteUtils.cs
+```
+
+### Implementation Order
+
+```
+G1: Core Foundation
+├── ModbusCrc16
+├── ModbusFunctionCode enum
+├── ModbusDataType enum
+└── Base models
+
+G2: RTU Implementation
+├── ModbusRtuFrameBuilder
+├── ModbusRtuFrameParser
+└── Function codes 03, 04, 06, 10
+
+G3: TCP Implementation
+├── MbapHeader
+├── ModbusTcpFrameBuilder
+├── ModbusTcpFrameParser
+└── Function codes 03, 04, 06, 10
+
+G4: ModbusViewModel
+├── Connection state
+├── Request/response handling
+└── Error management
+
+G5: ModbusPage UI
+├── Address input
+├── Function code selection
+├── Read/Write buttons
+└── Response display
+```
+
+### Testing Strategy
+
+| Component | Test Type | Dependencies |
+|-----------|-----------|--------------|
+| ModbusCrc16 | Unit | None |
+| ModbusRtuFrameBuilder | Unit | None |
+| ModbusRtuFrameParser | Unit | None |
+| ModbusTcpFrameBuilder | Unit | None |
+| ModbusTcpFrameParser | Unit | None |
+| ModbusViewModel | Unit | Fake services |
+
+---
+
+*Last updated: May 2026*
+*Modbus Architecture Planning: May 2026*
