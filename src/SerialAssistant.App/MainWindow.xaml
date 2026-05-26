@@ -57,9 +57,9 @@
 
                     <StackPanel Grid.Row="1" Margin="5">
                         <Button Content="Terminal" Margin="5" Padding="10,8" HorizontalContentAlignment="Left"
-                                Command="{Binding ShowTerminalCommand}" />
+                                Command="{Binding DataContext.ShowTerminalCommand, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" />
                         <Button Content="Modbus" Margin="5" Padding="10,8" HorizontalContentAlignment="Left"
-                                Command="{Binding ShowModbusCommand}" />
+                                Command="{Binding DataContext.ShowModbusCommand, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" />
                         <Button Content="Templates" Margin="5" Padding="10,8" HorizontalContentAlignment="Left"
                                 IsEnabled="False" />
                         <Button Content="Logs" Margin="5" Padding="10,8" HorizontalContentAlignment="Left"

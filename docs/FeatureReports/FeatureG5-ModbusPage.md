@@ -398,6 +398,37 @@ dotnet run --project .\src\SerialAssistant.App\SerialAssistant.App.csproj -c Deb
 - ✅ No changes to Infrastructure layer
 - ✅ No changes to TerminalViewModel
 
+## Fix Notes 3
+
+### Issue: Terminal Navigation Not Working From ModbusPage
+
+**Problem**:
+- Clicking Terminal button while on ModbusPage did not switch back to TerminalPage
+- Interface remained stuck on ModbusPage
+- ShowTerminalCommand was not being executed
+
+**Root Cause**:
+- Navigation buttons' DataContext was potentially being inherited from a child element instead of the Window's DataContext
+- Without explicit binding source, the Command binding could not resolve ShowTerminalCommand/ShowModbusCommand
+
+**Solution**:
+- Changed navigation button Command bindings to use explicit RelativeSource binding to the Window's DataContext:
+  ```xml
+  Command="{Binding DataContext.ShowTerminalCommand, RelativeSource={RelativeSource AncestorType={x:Type Window}}}"
+  Command="{Binding DataContext.ShowModbusCommand, RelativeSource={RelativeSource AncestorType={x:Type Window}}}"
+  ```
+- This ensures commands are always resolved from MainWindowViewModel regardless of the visual tree structure
+
+### Verification after Fix 3
+- ✅ Clicking Terminal button now switches from ModbusPage to TerminalPage
+- ✅ Clicking Modbus button now switches from TerminalPage to ModbusPage
+- ✅ Bidirectional navigation works correctly
+- ✅ Build passes with 0 warnings, 0 errors
+- ✅ All 515 tests pass
+- ✅ No changes to Core RTU/TCP protocol
+- ✅ No changes to Infrastructure layer
+- ✅ No changes to TerminalViewModel
+
 ---
 
 **Report Created**: 2026-05-26
