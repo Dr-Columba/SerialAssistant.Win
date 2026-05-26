@@ -892,10 +892,13 @@ G3: TCP Implementation (Completed 2026-05-26)
 ├── ModbusTcpResponseParser ✅
 └── Function codes 03, 04, 06, 10 ✅
 
-G4: ModbusViewModel
-├── Connection state
-├── Request/response handling
-└── Error management
+G4: ModbusViewModel (Completed 2026-05-26)
+├── ModbusTransportMode enum ✅
+├── ModbusRequestKind enum ✅
+├── Request building (RTU/TCP) ✅
+├── Response parsing (RTU/TCP) ✅
+├── Error handling ✅
+└── HEX conversion ✅
 
 G5: ModbusPage UI
 ├── Address input
@@ -903,6 +906,50 @@ G5: ModbusPage UI
 ├── Read/Write buttons
 └── Response display
 ```
+
+### App Layer Modbus ViewModel Implementation
+
+**ModbusViewModel Location:** `src/SerialAssistant.App/ViewModels/ModbusViewModel.cs`
+
+**Key Characteristics:**
+- Inherits from `BaseViewModel` (INotifyPropertyChanged)
+- Uses `RelayCommand` for commands
+- Delegates protocol work to Core layer
+- No System.IO.Ports references
+- No file system access
+- No WPF references
+
+**ModbusViewModel Dependencies:**
+```
+ModbusViewModel
+    ↓
+Core.Modbus.Rtu.ModbusRtuRequestBuilder
+Core.Modbus.Rtu.ModbusRtuResponseParser
+Core.Modbus.Tcp.ModbusTcpRequestBuilder
+Core.Modbus.Tcp.ModbusTcpResponseParser
+Core.Utilities.HexConverter
+```
+
+**ModbusViewModel Properties:**
+- `SelectedTransportMode`: Rtu/Tcp selection
+- `SelectedRequestKind`: Function code selection (03/04/06/10)
+- `UnitId`: Slave/Unit address (1-247)
+- `TransactionId`: TCP transaction ID
+- `StartAddress`: Register address
+- `Quantity`: Number of registers
+- `SingleWriteValue`: Value for single register write
+- `MultipleWriteValuesText`: Comma/space separated hex values
+- `RequestHex`: Built request as hex string
+- `ResponseHex`: Input response hex string
+- `ParsedSummary`: Human-readable parse result
+- `StatusMessage`: Operation status
+- `IsRtu`, `IsTcp`: Computed flags
+- `HasRequest`, `HasParsedResponse`: Computed flags
+
+**ModbusViewModel Commands:**
+- `BuildRequestCommand`: Builds request frame via Core
+- `ParseResponseCommand`: Parses response via Core
+- `ClearCommand`: Clears all inputs and results
 
 ### Testing Strategy
 

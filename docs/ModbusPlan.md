@@ -862,6 +862,51 @@ public class ModbusParseError
 
 ---
 
+## 19. G4 Implementation Notes
+
+### G4 Completed (2026-05-26)
+
+**Status:** Implemented
+
+**Files Created:**
+- `src/SerialAssistant.App/ViewModels/ModbusTransportMode.cs`
+- `src/SerialAssistant.App/ViewModels/ModbusRequestKind.cs`
+- `src/SerialAssistant.App/ViewModels/ModbusViewModel.cs`
+- `src/SerialAssistant.Tests/ViewModels/ModbusViewModelTests.cs`
+- `src/SerialAssistant.App/MainWindow.xaml` (version update to v0.4.3)
+
+**What Was Implemented:**
+1. ModbusTransportMode enum (Rtu, Tcp)
+2. ModbusRequestKind enum (ReadHoldingRegisters, ReadInputRegisters, WriteSingleRegister, WriteMultipleRegisters)
+3. ModbusViewModel with:
+   - Transport mode selection (RTU/TCP)
+   - Request kind selection
+   - Request building via Core RTU/TCP builders
+   - Response parsing via Core RTU/TCP parsers
+   - HEX conversion using existing HexConverter
+   - Status management
+4. Comprehensive unit tests (54 tests)
+
+**What Was NOT Implemented:**
+- ModbusPage.xaml (G5)
+- Real serial port sending
+- TCP Socket communication
+- Infrastructure modifications
+
+**Test Coverage:**
+- 54 new tests added to ModbusViewModelTests
+- Total tests: 494 (was 440)
+
+**Version Update:**
+- UI display updated from v0.4.2 to v0.4.3
+
+**Next Phase (G5):**
+- Implement ModbusPage.xaml
+- Bind to ModbusViewModel
+- Implement register read/write UI
+
+---
+
 *Document created: 2026-05-26*
 *Last updated: 2026-05-26*
-*Phase: G3 - Modbus TCP Frame Builder and Parser Complete*
+*Phase: G4 - ModbusViewModel Minimal Workflow Complete*

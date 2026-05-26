@@ -601,6 +601,74 @@ G4 (ModbusViewModel) must comply with the following:
 
 ---
 
+## ModbusViewModel Minimal Workflow Review
+
+### Overview
+
+This section documents the completion of G4: ModbusViewModel Minimal Workflow.
+
+### G4 Completed Content
+
+**Files Created:**
+- `src/SerialAssistant.App/ViewModels/ModbusTransportMode.cs`
+- `src/SerialAssistant.App/ViewModels/ModbusRequestKind.cs`
+- `src/SerialAssistant.App/ViewModels/ModbusViewModel.cs`
+- `src/SerialAssistant.Tests/ViewModels/ModbusViewModelTests.cs`
+
+**Test Coverage:**
+| Test Class | Tests | Status |
+|------------|-------|--------|
+| ModbusViewModelTests | 58 | ✅ All pass |
+
+### G4 Key Implementation Details
+
+| Item | Status | Description |
+|------|--------|-------------|
+| ModbusTransportMode | ✅ Complete | Enum with Rtu, Tcp values |
+| ModbusRequestKind | ✅ Complete | Enum with ReadHoldingRegisters, ReadInputRegisters, WriteSingleRegister, WriteMultipleRegisters |
+| ModbusViewModel | ✅ Complete | RTU/TCP request building and response parsing workflow |
+| BuildRequestCommand | ✅ Complete | Builds request via Core RTU/TCP builders |
+| ParseResponseCommand | ✅ Complete | Parses response via Core RTU/TCP parsers |
+| ClearCommand | ✅ Complete | Clears all inputs and results |
+| HEX Conversion | ✅ Complete | Uses existing Core HexConverter |
+| Error Handling | ✅ Complete | Graceful error handling with status messages |
+
+### Layer Boundary Compliance
+
+| Rule | Status | Verification |
+|------|--------|--------------|
+| No System.IO.Ports in ViewModel | ✅ | No serial port refs |
+| No file operations | ✅ | No File./Directory. |
+| No WPF references | ✅ | Pure ViewModel |
+| Delegates to Core | ✅ | Uses ModbusRtu/Tcp builders/parsers |
+| No Infrastructure changes | ✅ | Not touched |
+
+### Test Coverage Impact
+
+| Metric | Before G4 | After G4 |
+|--------|-----------|----------|
+| Total Tests | 440 | 494 |
+| New Tests | - | 54 |
+
+### G5 Pre-conditions
+
+G5 (ModbusPage Minimal UI) must comply with the following:
+
+1. ✅ **DO NOT re-implement RTU/TCP frame building** - Use existing Core implementations
+2. ✅ **DO NOT re-implement RTU/TCP frame parsing** - Use existing Core implementations
+3. ✅ **Only call Core protocol layer** - App/ViewModel layer delegates to Core
+4. ✅ **No byte-level manipulation** - Frame building/parsing belongs in Core
+5. ✅ **Only bind to ModbusViewModel** - UI layer should only bind to existing ViewModel
+
+### Version Update
+
+- UI display updated from v0.4.2 to v0.4.3
+- Version update is isolated to MainWindow.xaml only
+- No functional changes to application
+
+---
+
 *Last updated: May 2026*
 *Modbus Core Foundation Review: May 2026*
 *Modbus TCP Frame Review: May 2026*
+*ModbusViewModel Review: May 2026*

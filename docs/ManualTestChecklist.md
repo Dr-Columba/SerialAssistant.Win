@@ -382,6 +382,57 @@ This document provides a step-by-step manual testing guide for SerialAssistant.W
 - [ ] **Step G3.35** Verify `src/SerialAssistant.App/MainWindow.xaml.cs` unchanged
 - [ ] **Step G3.36** Verify `src/SerialAssistant.App/Views/TerminalPage.xaml.cs` unchanged
 
+### Feature G4: ModbusViewModel Minimal Workflow Verification
+
+#### G4.1 Core ModbusViewModel Files
+
+- [ ] **Step G4.1** Verify `src/SerialAssistant.App/ViewModels/ModbusTransportMode.cs` exists
+- [ ] **Step G4.2** Verify `src/SerialAssistant.App/ViewModels/ModbusRequestKind.cs` exists
+- [ ] **Step G4.3** Verify `src/SerialAssistant.App/ViewModels/ModbusViewModel.cs` exists
+- [ ] **Step G4.4** Verify `src/SerialAssistant.Tests/ViewModels/ModbusViewModelTests.cs` exists
+
+#### G4.2 Build and Test Verification
+
+- [ ] **Step G4.5** Run `dotnet build .\SerialAssistant.Win.sln -c Debug`
+- [ ] **Step G4.6** Verify build succeeds with 0 warnings, 0 errors
+- [ ] **Step G4.7** Run `dotnet test .\SerialAssistant.Win.sln -c Debug`
+- [ ] **Step G4.8** Verify test count shows 494 passed
+- [ ] **Step G4.9** Verify all tests pass
+
+#### G4.3 Request Building Tests
+
+- [ ] **Step G4.10** Run `dotnet test .\SerialAssistant.Win.sln -c Debug --filter ModbusViewModelTests`
+- [ ] **Step G4.11** Verify RTU request building tests pass
+- [ ] **Step G4.12** Verify TCP request building tests pass
+
+#### G4.4 Response Parsing Tests
+
+- [ ] **Step G4.13** Verify RTU response parsing tests pass
+- [ ] **Step G4.14** Verify TCP response parsing tests pass
+
+#### G4.5 ClearCommand Tests
+
+- [ ] **Step G4.15** Verify ClearCommand tests pass
+
+#### G4.6 Version Update Verification
+
+- [ ] **Step G4.16** Open `src/SerialAssistant.App/MainWindow.xaml`
+- [ ] **Step G4.17** Verify version text shows "v0.4.3"
+
+#### G4.7 Application Startup
+
+- [ ] **Step G4.18** Run application with `dotnet run --project src/SerialAssistant.App`
+- [ ] **Step G4.19** Verify application starts without errors
+- [ ] **Step G4.20** Verify UI displays version "v0.4.3"
+- [ ] **Step G4.21** Verify Terminal page still works correctly
+
+#### G4.8 Scope Control Verification
+
+- [ ] **Step G4.22** Verify no ModbusPage.xaml was added
+- [ ] **Step G4.23** Verify no changes to Infrastructure layer
+- [ ] **Step G4.24** Verify `src/SerialAssistant.App/MainWindow.xaml.cs` unchanged
+- [ ] **Step G4.25** Verify `src/SerialAssistant.App/Views/TerminalPage.xaml.cs` unchanged
+
 ### 2. Serial Port Scanning
 
 - [ ] **Step 2.1** Click "刷新" (Refresh) button

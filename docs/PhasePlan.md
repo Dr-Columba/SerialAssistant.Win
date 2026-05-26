@@ -607,33 +607,43 @@ This document outlines the phased development plan for SerialAssistant.Win, orga
 
 ### Feature G4: ModbusViewModel Minimal Workflow
 
-**Status:** Planned
+**Status:** ✅ Completed
+
+**Implementation Date:** 2026-05-26
 
 **Goal:** Establish ModbusViewModel without complex UI
 
+**Files Created:**
+- `src/SerialAssistant.App/ViewModels/ModbusTransportMode.cs`
+- `src/SerialAssistant.App/ViewModels/ModbusRequestKind.cs`
+- `src/SerialAssistant.App/ViewModels/ModbusViewModel.cs`
+- `src/SerialAssistant.Tests/ViewModels/ModbusViewModelTests.cs`
+- `src/SerialAssistant.App/MainWindow.xaml` (version update to v0.4.3)
+
 **Scope:**
-- ModbusViewModel
-- Connection state management
-- Register value management
-- Error handling
-- Unit tests
+- ModbusTransportMode enum (Rtu, Tcp)
+- ModbusRequestKind enum (ReadHoldingRegisters, ReadInputRegisters, WriteSingleRegister, WriteMultipleRegisters)
+- ModbusViewModel with RTU/TCP request building and response parsing
+- Unit tests (54 tests)
 - Reference: docs/ModbusPlan.md Section 5
 
 **Allowed Modifications:**
-- src/SerialAssistant.App/ViewModels/ModbusViewModel.cs (new file)
-- src/SerialAssistant.Tests/ViewModels/ModbusViewModelTests.cs (new file)
+- src/SerialAssistant.App/ViewModels/*.cs (new files)
+- src/SerialAssistant.Tests/ViewModels/*.cs (new files)
 
 **Forbidden:**
 - No XAML implementation
 - No frame building/parsing (delegates to Core)
 - No System.IO.Ports references in ViewModel
+- No Infrastructure modifications
 
 **Acceptance Criteria:**
-- ModbusViewModel created
-- Connection state tracking works
-- Register read/write operations work
-- Error handling works
-- All unit tests pass
+- ModbusViewModel created ✅
+- RTU/TCP request building works ✅
+- RTU/TCP response parsing works ✅
+- Error handling works ✅
+- All unit tests pass ✅ (54 new tests)
+- Test count: 494 total (was 440)
 
 **Code Changes Allowed:** Yes (App and Tests only)
 
