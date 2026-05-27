@@ -4,6 +4,10 @@
         xmlns:views="clr-namespace:SerialAssistant.App.Views"
         Title="SerialAssistant.Win - Engineering Communication Tool" Height="700" Width="1100">
 
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis" />
+    </Window.Resources>
+
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -30,7 +34,7 @@
                     <TextBlock Text="{Binding Terminal.SerialSettings.SelectedBaudRate}" VerticalAlignment="Center" />
                 </StackPanel>
 
-                <TextBlock Grid.Column="2" Text="v0.4.3" VerticalAlignment="Center" Foreground="Gray" />
+                <TextBlock Grid.Column="2" Text="v0.4.4" VerticalAlignment="Center" Foreground="Gray" />
             </Grid>
         </Border>
 
@@ -53,9 +57,9 @@
 
                     <StackPanel Grid.Row="1" Margin="5">
                         <Button Content="Terminal" Margin="5" Padding="10,8" HorizontalContentAlignment="Left"
-                                Background="LightBlue" FontWeight="Bold" />
+                                Command="{Binding DataContext.ShowTerminalCommand, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" />
                         <Button Content="Modbus" Margin="5" Padding="10,8" HorizontalContentAlignment="Left"
-                                IsEnabled="False" />
+                                Command="{Binding DataContext.ShowModbusCommand, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" />
                         <Button Content="Templates" Margin="5" Padding="10,8" HorizontalContentAlignment="Left"
                                 IsEnabled="False" />
                         <Button Content="Logs" Margin="5" Padding="10,8" HorizontalContentAlignment="Left"
@@ -66,8 +70,15 @@
                 </Grid>
             </Border>
 
-            <!-- Main Workspace - Terminal Page -->
-            <views:TerminalPage Grid.Column="1" DataContext="{Binding Terminal}" />
+            <!-- Main Workspace -->
+            <Grid Grid.Column="1">
+                <Grid Visibility="{Binding IsTerminalPageVisible, Converter={StaticResource BoolToVis}}">
+                    <views:TerminalPage DataContext="{Binding Terminal}" />
+                </Grid>
+                <Grid Visibility="{Binding IsModbusPageVisible, Converter={StaticResource BoolToVis}}">
+                    <views:ModbusPage DataContext="{Binding Modbus}" />
+                </Grid>
+            </Grid>
         </Grid>
 
         <!-- Bottom Status Bar -->
@@ -81,7 +92,7 @@
 
                 <TextBlock Grid.Column="0" Text="Ready" VerticalAlignment="Center" />
 
-                <TextBlock Grid.Column="1" Text="Feature F2B2: MainWindowViewModel Terminal Cleanup" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="Gray" />
+                <TextBlock Grid.Column="1" Text="Feature G5: ModbusPage Minimal UI" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="Gray" />
 
                 <TextBlock Grid.Column="2" Text="Engineering Communication Tool" VerticalAlignment="Center" Foreground="Gray" />
             </Grid>

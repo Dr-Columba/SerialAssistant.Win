@@ -715,6 +715,84 @@ This document provides a step-by-step manual testing guide for SerialAssistant.W
 - [ ] **Step 13.2** Exit application
 - [ ] **Step 13.3** (Optional) Delete test config file at %AppData%\SerialAssistant.Win\settings.json
 
+### Feature G5: ModbusPage Minimal UI Verification
+
+#### G5.1 ModbusPage Files
+
+- [ ] **Step G5.1** Verify `src/SerialAssistant.App/Views/ModbusPage.xaml` exists
+- [ ] **Step G5.2** Verify `src/SerialAssistant.App/Views/ModbusPage.xaml.cs` exists
+- [ ] **Step G5.3** Verify `src/SerialAssistant.App/ViewModels/MainWindowViewModel.cs` has navigation properties
+- [ ] **Step G5.4** Verify `src/SerialAssistant.App/ViewModels/ModbusViewModel.cs` has TransportModes and RequestKinds
+
+#### G5.2 Build and Test Verification
+
+- [ ] **Step G5.5** Run `dotnet build .\SerialAssistant.Win.sln -c Debug`
+- [ ] **Step G5.6** Verify build succeeds with 0 warnings, 0 errors
+- [ ] **Step G5.7** Run `dotnet test .\SerialAssistant.Win.sln -c Debug`
+- [ ] **Step G5.8** Verify test count shows 520 passed (494 + 26 new)
+- [ ] **Step G5.9** Verify all tests pass
+
+#### G5.3 Application Startup and Navigation
+
+- [ ] **Step G5.10** Run application with `dotnet run --project src/SerialAssistant.App`
+- [ ] **Step G5.11** Verify application starts without errors
+- [ ] **Step G5.12** Verify UI displays version "v0.4.4"
+- [ ] **Step G5.13** Verify Terminal page is visible by default
+- [ ] **Step G5.14** Verify "Modbus" button exists in left navigation
+- [ ] **Step G5.15** Click "Modbus" button
+- [ ] **Step G5.16** Verify ModbusPage becomes visible
+- [ ] **Step G5.17** Click "Terminal" button
+- [ ] **Step G5.18** Verify TerminalPage becomes visible again
+
+#### G5.4 ModbusPage UI Elements
+
+- [ ] **Step G5.19** Navigate to Modbus page
+- [ ] **Step G5.20** Verify "Modbus" header is visible
+- [ ] **Step G5.21** Verify TransportMode ComboBox exists (Rtu, Tcp)
+- [ ] **Step G5.22** Verify RequestKind ComboBox exists (03, 04, 06, 10)
+- [ ] **Step G5.23** Verify UnitId input exists
+- [ ] **Step G5.24** Verify TransactionId input exists
+- [ ] **Step G5.25** Verify StartAddress input exists
+- [ ] **Step G5.26** Verify Quantity input exists
+- [ ] **Step G5.27** Verify SingleWriteValue input exists
+- [ ] **Step G5.28** Verify MultipleWriteValuesText TextBox exists (multiline)
+- [ ] **Step G5.29** Verify "Build Request" button exists
+- [ ] **Step G5.30** Verify "Parse Response" button exists
+- [ ] **Step G5.31** Verify "Clear" button exists
+- [ ] **Step G5.32** Verify RequestHex TextBox exists (readonly)
+- [ ] **Step G5.33** Verify ResponseHex TextBox exists (input)
+- [ ] **Step G5.34** Verify ParsedSummary TextBox exists (readonly)
+
+#### G5.5 ModbusPage Functionality
+
+- [ ] **Step G5.35** Set UnitId=1, StartAddress=0, Quantity=1
+- [ ] **Step G5.36** Click "Build Request"
+- [ ] **Step G5.37** Verify RequestHex shows HEX string (RTU)
+- [ ] **Step G5.38** Enter valid response HEX in ResponseHex
+- [ ] **Step G5.39** Click "Parse Response"
+- [ ] **Step G5.40** Verify ParsedSummary shows result
+- [ ] **Step G5.41** Click "Clear"
+- [ ] **Step G5.42** Verify RequestHex, ResponseHex, ParsedSummary are cleared
+- [ ] **Step G5.43** Switch to Tcp mode
+- [ ] **Step G5.44** Click "Build Request"
+- [ ] **Step G5.45** Verify TCP request HEX is generated
+
+#### G5.6 Terminal Page Still Works
+
+- [ ] **Step G5.46** Navigate back to Terminal page
+- [ ] **Step G5.47** Verify Terminal page still loads correctly
+- [ ] **Step G5.48** Verify all Terminal UI elements are present and work
+
+#### G5.7 Scope Control Verification
+
+- [ ] **Step G5.49** Verify no changes to Infrastructure layer
+- [ ] **Step G5.50** Verify `src/SerialAssistant.App/MainWindow.xaml.cs` unchanged
+- [ ] **Step G5.51** Verify `src/SerialAssistant.App/Views/TerminalPage.xaml.cs` unchanged
+- [ ] **Step G5.52** Verify `src/SerialAssistant.App/ViewModels/TerminalViewModel.cs` unchanged
+- [ ] **Step G5.53** Verify ModbusPage.xaml.cs contains only InitializeComponent
+- [ ] **Step G5.54** Verify no business logic in ModbusPage.xaml.cs
+- [ ] **Step G5.55** Verify MainWindowViewModel only contains navigation, no Modbus business logic
+
 ## Test Results Summary
 
 | Category | Result | Notes |
@@ -734,6 +812,10 @@ This document provides a step-by-step manual testing guide for SerialAssistant.W
 | Config Corruption | ☐ Pass / ☐ Fail | |
 | Send History | ☐ Pass / ☐ Fail | |
 | Edge Cases | ☐ Pass / ☐ Fail | |
+| ModbusPage UI | ☐ Pass / ☐ Fail | |
+| ModbusPage Navigation | ☐ Pass / ☐ Fail | |
+| ModbusPage Functionality | ☐ Pass / ☐ Fail | |
+| Terminal Still Works | ☐ Pass / ☐ Fail | |
 
 ## Tester Information
 

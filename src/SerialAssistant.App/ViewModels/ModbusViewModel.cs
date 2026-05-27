@@ -2,7 +2,6 @@ using SerialAssistant.Core.Modbus.Rtu;
 using SerialAssistant.Core.Modbus.Tcp;
 using SerialAssistant.Core.Utilities;
 using SerialAssistant.App.Commands;
-using System.Collections.ObjectModel;
 using System.Windows.Input;
 
 namespace SerialAssistant.App.ViewModels
@@ -21,6 +20,20 @@ namespace SerialAssistant.App.ViewModels
         private string _responseHex = string.Empty;
         private string _parsedSummary = string.Empty;
         private string _statusMessage = "Ready";
+
+        private static readonly IReadOnlyList<ModbusTransportMode> _transportModes = new List<ModbusTransportMode>
+        {
+            ModbusTransportMode.Rtu,
+            ModbusTransportMode.Tcp
+        }.AsReadOnly();
+
+        private static readonly IReadOnlyList<ModbusRequestKind> _requestKinds = new List<ModbusRequestKind>
+        {
+            ModbusRequestKind.ReadHoldingRegisters,
+            ModbusRequestKind.ReadInputRegisters,
+            ModbusRequestKind.WriteSingleRegister,
+            ModbusRequestKind.WriteMultipleRegisters
+        }.AsReadOnly();
 
         public ModbusTransportMode SelectedTransportMode
         {
@@ -108,6 +121,10 @@ namespace SerialAssistant.App.ViewModels
         public bool HasRequest => !string.IsNullOrEmpty(RequestHex);
 
         public bool HasParsedResponse => !string.IsNullOrEmpty(ParsedSummary);
+
+        public IReadOnlyList<ModbusTransportMode> TransportModes => _transportModes;
+
+        public IReadOnlyList<ModbusRequestKind> RequestKinds => _requestKinds;
 
         public ICommand BuildRequestCommand { get; }
         public ICommand ParseResponseCommand { get; }

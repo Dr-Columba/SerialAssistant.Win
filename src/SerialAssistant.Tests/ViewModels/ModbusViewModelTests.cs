@@ -660,5 +660,61 @@ namespace SerialAssistant.Tests.ViewModels
 
             Assert.True(triggered);
         }
+
+        [Fact]
+        public void TransportModes_ContainsRtu()
+        {
+            var vm = new ModbusViewModel();
+            Assert.Contains(ModbusTransportMode.Rtu, vm.TransportModes);
+        }
+
+        [Fact]
+        public void TransportModes_ContainsTcp()
+        {
+            var vm = new ModbusViewModel();
+            Assert.Contains(ModbusTransportMode.Tcp, vm.TransportModes);
+        }
+
+        [Fact]
+        public void TransportModes_HasExpectedCount()
+        {
+            var vm = new ModbusViewModel();
+            Assert.Equal(2, vm.TransportModes.Count);
+        }
+
+        [Fact]
+        public void RequestKinds_ContainsReadHoldingRegisters()
+        {
+            var vm = new ModbusViewModel();
+            Assert.Contains(ModbusRequestKind.ReadHoldingRegisters, vm.RequestKinds);
+        }
+
+        [Fact]
+        public void RequestKinds_ContainsReadInputRegisters()
+        {
+            var vm = new ModbusViewModel();
+            Assert.Contains(ModbusRequestKind.ReadInputRegisters, vm.RequestKinds);
+        }
+
+        [Fact]
+        public void RequestKinds_ContainsWriteSingleRegister()
+        {
+            var vm = new ModbusViewModel();
+            Assert.Contains(ModbusRequestKind.WriteSingleRegister, vm.RequestKinds);
+        }
+
+        [Fact]
+        public void RequestKinds_ContainsWriteMultipleRegisters()
+        {
+            var vm = new ModbusViewModel();
+            Assert.Contains(ModbusRequestKind.WriteMultipleRegisters, vm.RequestKinds);
+        }
+
+        [Fact]
+        public void RequestKinds_HasExpectedCount()
+        {
+            var vm = new ModbusViewModel();
+            Assert.Equal(4, vm.RequestKinds.Count);
+        }
     }
 }
