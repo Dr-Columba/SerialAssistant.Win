@@ -740,8 +740,100 @@ G6 (Modbus Manual Test and Documentation Closure) must comply with the following
 
 ---
 
+## Modbus G1-G6 Final Review
+
+### Overview
+
+This section documents the completion of G6: Modbus Manual Test and Documentation Closure, including the full G1-G6 cycle.
+
+### Current State
+
+- **Version**: v0.4.4
+- **Tag**: v0.4.4 (on main branch)
+- **Total Tests**: 520 passed (494 + 26 new in G5)
+- **Current Phase**: G6 (Closure)
+
+### G1-G5 Implementation Summary
+
+| Phase | Name | Status | Key Deliverables |
+|-------|------|--------|------------------|
+| G1 | Modbus Core Foundation | ✅ Complete | ModbusCrc16, Models, Enums |
+| G2 | Modbus RTU Frame | ✅ Complete | RTU Request/Response Builder/Parser |
+| G3 | Modbus TCP Frame | ✅ Complete | MBAP Header, TCP Request/Response Builder/Parser |
+| G4 | ModbusViewModel | ✅ Complete | BuildRequest, ParseResponse, Clear commands |
+| G5 | ModbusPage Minimal UI | ✅ Complete | Shell navigation, ModbusPage, UI binding |
+
+### G6 Closure Summary
+
+**Files Created:**
+- `docs/FeatureReports/FeatureG6-ModbusClosure.md`
+
+**Files Updated:**
+- `docs/ModbusPlan.md` - Added G6 Closure Notes
+- `docs/PhasePlan.md` - Updated G6 status, added next phase recommendation
+- `docs/Architecture.md` - Added Modbus Closure Architecture Review
+- `docs/UIInformationArchitecture.md` - Added ModbusPage Current State
+- `docs/ManualTestChecklist.md` - Added G6 manual verification checklist
+
+### Current Available Capabilities
+
+- ✅ Modbus RTU frame building (03, 04, 06, 10 function codes)
+- ✅ Modbus RTU frame parsing (03, 04, 06, 10 function codes)
+- ✅ Modbus TCP frame building (03, 04, 06, 10 function codes)
+- ✅ Modbus TCP frame parsing (03, 04, 06, 10 function codes)
+- ✅ ModbusViewModel with BuildRequest, ParseResponse, Clear commands
+- ✅ Shell navigation between Terminal and Modbus pages
+- ✅ ModbusPage UI with parameter inputs, request/response display
+- ✅ Full test coverage at 520 tests
+- ✅ Layer boundaries respected
+
+### Current Not Available Capabilities
+
+- ❌ Real Modbus RTU communication (serial port)
+- ❌ Real Modbus TCP communication (TCP socket)
+- ❌ Auto-polling/continuous read
+- ❌ Register table view/editor
+- ❌ Batch operations/templates
+- ❌ Exception code descriptions (Chinese)
+- ❌ Final MQTTX-style visual design
+- ❌ Configuration persistence
+
+### Next Phase Recommendation
+
+**Primary Recommendation: G7 - Modbus Transport Integration Planning**
+
+**Rationale:**
+- G1-G5 have established the protocol foundation and UI
+- Real communication is the next logical functional step
+- Should design RTU/TCP transport before implementing
+- Should maintain layer boundaries (App → Infrastructure → External)
+
+**Alternative: H0 - UI Style Foundation Planning**
+
+**Rationale:**
+- UI is minimal but functional
+- Could benefit from unifying visual style
+- Should use MQTTX modern workbench as reference
+- Not recommended before functional communication is complete
+
+**Key Decision: Do NOT continue UI styling first.**
+
+### Merge Recommendation
+
+**Recommendation:** Merge `feature/modbus-closure-g6` into main after manual verification is complete
+
+**Merge Checklist:**
+- [ ] Manual testing passes (all G6 checklist items verified)
+- [ ] Automated tests still pass at 520
+- [ ] All documentation is complete and consistent
+- [ ] No code changes in this phase, only documentation
+- [ ] No version change (v0.4.4 remains)
+
+---
+
 *Last updated: May 2026*
 *Modbus Core Foundation Review: May 2026*
 *Modbus TCP Frame Review: May 2026*
 *ModbusViewModel Review: May 2026*
 *ModbusPage Review: May 2026*
+*G6 Modbus Closure Review: May 2026*

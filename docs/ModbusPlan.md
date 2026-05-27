@@ -932,6 +932,59 @@ public class ModbusParseError
 
 ---
 
+## G6 Closure Notes
+
+**Phase**: G6 - Modbus Manual Test and Documentation Closure
+
+**Status**: ✅ Completed
+
+**Completion Date**: 2026-05-27
+
+### Summary
+
+G1-G5 phases have been completed, establishing the Modbus foundation:
+
+- **G1**: Core foundation (CRC16, models, enums)
+- **G2**: RTU frame builder and parser
+- **G3**: TCP frame builder and parser
+- **G4**: ModbusViewModel minimal workflow
+- **G5**: ModbusPage minimal UI with shell navigation
+
+### Current State
+
+- **Test Count**: 520 passed (26 new tests added in G5)
+- **Version**: v0.4.4
+- **Tag**: v0.4.4 (on main branch)
+- **UI**: Minimal functional UI, not final visual style
+
+### What's Complete
+
+- ✅ Modbus RTU frame building and parsing
+- ✅ Modbus TCP frame building and parsing
+- ✅ Request/Response HEX display
+- ✅ Shell navigation between Terminal and Modbus pages
+- ✅ ModbusPage UI binding to ModbusViewModel
+
+### What's Not Complete
+
+- ❌ Real RTU serial port communication
+- ❌ Real TCP socket communication
+- ❌ Auto-polling functionality
+- ❌ Register table editing
+- ❌ Batch templates
+- ❌ Final UI styling
+
+### Next Phase Recommendation
+
+**Suggested**: G7 - Modbus Transport Integration Planning
+
+- Plan how to connect Modbus to real communication channels
+- Design RTU transport via Infrastructure SerialPortService
+- Design TCP transport via new ModbusTcpTransportService
+- Do NOT continue UI styling until communication is working
+
+---
+
 *Document created: 2026-05-26*
-*Last updated: 2026-05-26*
-*Phase: G5 - ModbusPage Minimal UI Complete*
+*Last updated: 2026-05-27*
+*Phase: G6 - Modbus Manual Test and Documentation Closure Complete*

@@ -1064,6 +1064,70 @@ UI display version updated from v0.4.3 to v0.4.4 in MainWindow.xaml.
 
 ---
 
+## Modbus Closure Architecture Review
+
+**Phase**: G6 - Modbus Manual Test and Documentation Closure
+
+**Status**: ✅ Completed
+
+### Architecture State
+
+#### Core Layer
+
+- ✅ Modbus RTU protocol (Frame, Builder, Parser)
+- ✅ Modbus TCP protocol (Frame, Builder, Parser, MbapHeader)
+- ✅ Common types (DataType, FunctionCode)
+- ✅ Models (RegisterValue)
+- ✅ Utilities (ModbusCrc16)
+
+#### App Layer
+
+- ✅ ModbusViewModel (BuildRequest, ParseResponse, Clear)
+- ✅ ModbusPage.xaml / ModbusPage.xaml.cs
+- ✅ MainWindowViewModel (navigation only)
+- ✅ Shell navigation (Terminal ↔ Modbus)
+
+#### Infrastructure Layer
+
+- ⏳ No Modbus transport yet
+- ⏳ SerialPortService exists for Terminal
+- ⏳ No ModbusTcpTransportService yet
+
+### Boundary Compliance
+
+| Rule | Status | Notes |
+|------|--------|-------|
+| Core: No WPF | ✅ | No System.Windows references |
+| Core: No file I/O | ✅ | No File/Directory operations |
+| App: No System.IO.Ports | ✅ | No direct serial port access |
+| App: No TcpClient/Socket | ✅ | No direct network access |
+| App: No protocol in UI | ✅ | All protocol work in Core |
+| Infrastructure: No WPF | ✅ | No UI framework references |
+
+### Future Communication Path
+
+When real Modbus communication is implemented:
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  App Layer                                                      │
+│  ModbusViewModel → calls Infrastructure services                │
+├─────────────────────────────────────────────────────────────────┤
+│  Infrastructure Layer                                           │
+│  ├── SerialPortService (existing) → for RTU                     │
+│  └── ModbusTcpTransportService (new) → for TCP                  │
+├─────────────────────────────────────────────────────────────────┤
+│  External                                                       │
+│  ├── Serial Port (RTU)                                          │
+│  └── TCP Socket (TCP)                                           │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+**Key Rule**: App layer must NEVER directly reference System.IO.Ports or TcpClient. All communication must go through Infrastructure services.
+
+---
+
 *Last updated: May 2026*
 *Modbus Architecture Planning: May 2026*
 *G5 ModbusPage UI Complete: May 2026*
+*G6 Modbus Closure Complete: May 2026*
