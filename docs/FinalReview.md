@@ -831,9 +831,100 @@ This section documents the completion of G6: Modbus Manual Test and Documentatio
 
 ---
 
+## G7: Modbus Transport Planning Review
+
+### Overview
+
+This section reviews the completion of G7: Modbus Transport Integration Planning, a pure documentation phase with no code changes.
+
+### G7 Status
+✅ **Completed** - May 2026
+
+### What Was Done in G7
+
+#### Documentation Created/Updated
+
+| Document | Status |
+|----------|--------|
+| docs/ModbusTransportPlan.md | ✅ Created/Updated |
+| docs/ModbusPlan.md | ✅ Updated |
+| docs/PhasePlan.md | ✅ Updated |
+| docs/Architecture.md | ✅ Updated |
+| docs/UIInformationArchitecture.md | ✅ Updated |
+| docs/ManualTestChecklist.md | ✅ Updated |
+| docs/FeatureReports/FeatureG7-ModbusTransportPlanning.md | ✅ Created |
+
+### What Was NOT Done in G7
+
+| Item | Status |
+|------|--------|
+| src/ modifications | ❌ None - NO changes |
+| tests/ modifications | ❌ None - NO changes |
+| UI modifications | ❌ None - NO changes |
+| Version number changes | ❌ v0.4.4 remains |
+| Third-party libraries | ❌ None added |
+
+### G7 Planning Content Verification
+
+| Planning Section | Status |
+|----------------|--------|
+| Purpose | ✅ |
+| Current State | ✅ |
+| Target Capability | ✅ |
+| Layer Boundary Design | ✅ |
+| Proposed Interfaces | ✅ |
+| RTU Transport Plan | ✅ |
+| TCP Transport Plan | ✅ |
+| ModbusViewModel Integration Plan | ✅ |
+| UI Change Plan | ✅ |
+| Concurrency and Ownership | ✅ |
+| Error Strategy | ✅ |
+| Test Strategy | ✅ |
+| Phase Breakdown (G8-G12) | ✅ |
+| Risks and Decisions | ✅ |
+| Final Recommendation | ✅ |
+
+### Key Architecture Decisions from G7
+
+| Decision | Rationale |
+|----------|-----------|
+| **G8 First** - Interfaces + Fake Tests first | Lock down architecture before real hardware |
+| **Single Ownership** model | Simple, safe for initial implementation |
+| **Core Only Protocol** | CRC, framing stays in Core layer |
+| **No App IO** - App layer NEVER sees System.IO.Ports/TcpClient | Strict layer boundaries |
+| **Defer UI Styling** | Function first, polish later |
+
+### Current State After G7
+
+- ✅ Test count: 520 passed (unchanged)
+- ✅ Version: v0.4.4 (unchanged)
+- ✅ No code changes
+- ✅ All planning documentation complete
+- ✅ G8-G12 phases clearly defined
+- ❌ Still no real Modbus communication
+
+### Next Phase Recommendation
+
+**Recommended**: G8 - Modbus Transport Interfaces and Fake Tests
+
+**Why G8 First**:
+- Lock down interface contracts
+- Prove ViewModel can work with transport via fakes
+- Reduce risk by validating architecture
+- Prevent App layer pollution
+- NO real hardware implementation yet
+
+**Do NOT Skip G8**:
+- ❌ Do NOT skip to G9/G10
+- ❌ Do NOT put real IO in ViewModel
+- ❌ Do NOT skip fake tests
+
+---
+
 *Last updated: May 2026*
 *Modbus Core Foundation Review: May 2026*
 *Modbus TCP Frame Review: May 2026*
 *ModbusViewModel Review: May 2026*
 *ModbusPage Review: May 2026*
 *G6 Modbus Closure Review: May 2026*
+*G7 Modbus Transport Planning Review: May 2026*

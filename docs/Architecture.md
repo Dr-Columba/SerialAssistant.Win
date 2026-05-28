@@ -1127,7 +1127,215 @@ When real Modbus communication is implemented:
 
 ---
 
+## Modbus Transport Architecture Planning (G7)
+
+### Overview
+
+This section defines the detailed architecture for Modbus RTU/TCP transport integration, planned in G7.
+
+### Current State (Before G7)
+- ✅ Modbus RTU/TCP frame building/parsing in Core layer
+- ✅ ModbusViewModel with BuildRequest/ParseResponse
+- ✅ ModbusPage minimal UI
+- ✅ SerialPortService exists for Terminal
+- ❌ No real Modbus communication yet
+
+### Future State (After G12)
+
+Real Modbus RTU/TCP communication implemented, with proper interface separation and single port ownership model.
+
+### Layer Boundary Rules (Non-Negotiable)
+
+| Layer | Allowed | Forbidden |
+|-------|---------|-----------|
+| **Core** | Protocol framing, CRC, parsing | System.IO.Ports, TcpClient, Socket, WPF, File I/O |
+| **App** | ViewModels, UI binding | Direct IO references |
+| **Infrastructure** | Serial/TCP IO, transport | WPF, Dispatcher, Window |
+
+### Proposed Interface Design
+
+#### Core Layer Interfaces Only
+
+All interfaces and DTOs are placed in Core layer. Core does NOT reference App layer.
+
+**Interface Location:** `src/SerialAssistant.Core/Modbus/Transport/` or `src/SerialAssistant.Core/Services/Modbus/`
+
+```csharp
+// Concept only - NOT implemented in G7
+public interface IModbusTransport
+{
+    Task<ModbusTransportResult> SendRequestAsync(
+        ModbusRequestContext context,
+        byte[] requestBytes,
+        CancellationToken cancellationToken = default);
+
+    Task<bool> ConnectAsync(CancellationToken cancellationToken = default);
+    Task DisconnectAsync();
+    bool IsConnected { get; }
+    ModbusTransportOptions Options { get; }
+}
+
+public interface IModbusRtuTransport : IModbusTransport
+{
+    // RTU-specific properties/methods
+}
+
+public interface IModbusTcpTransport : IModbusTransport
+{
+    string IpAddress { get; }
+    int Port { get; }
+}
+
+public class ModbusTransportResult
+{
+    public bool Success { get; set; }
+    public byte[]? ResponseBytes { get; set; }
+    public string? ErrorMessage { get; set; }
+    public TimeSpan Duration { get; set; }
+}
+
+public class ModbusTransportOptions
+{
+    public TimeSpan SendTimeout { get; set; } = TimeSpan.FromSeconds(5);
+    public TimeSpan ReceiveTimeout { get; set; } = TimeSpan.FromSeconds(5);
+}
+
+public class ModbusRequestContext
+{
+    // Mode NOT in Core DTO - use specific interfaces instead
+    public byte UnitId { get; set; }
+    public ushort TransactionId { get; set; } // For TCP only, optional for RTU
+}
+```
+
+### Infrastructure Layer Implementation
+
+#### RTU Transport
+
+```
+ModbusRtuTransport (Infrastructure)
+    ↓
+SerialPortService (existing Infrastructure)
+    ↓
+System.IO.Ports (Infrastructure only)
+```
+
+**Ownership Strategy**: Single Ownership Model
+- Terminal and Modbus RTU cannot use serial port exclusively
+- If Terminal is connected, Modbus RTU Connect is disabled
+- If Modbus RTU is connected, Terminal Open is disabled
+- MainWindowViewModel coordinates ownership state
+
+#### TCP Transport
+
+```
+ModbusTcpTransport (Infrastructure - NEW)
+    ↓
+TcpClient (Infrastructure only)
+    ↓
+NetworkStream (Infrastructure only)
+```
+
+**TCP Features**:
+- MBAP TransactionId matching
+- Length field reading strategy
+- Timeout handling
+- Half-open connection detection
+
+### ModbusViewModel Integration
+
+```
+ModbusViewModel (App)
+    ↓
+IModbusTransport interface (Core)
+    ↓
+ModbusRtuTransport/ModbusTcpTransport (Infrastructure)
+```
+
+**Key Rule**: ModbusViewModel NEVER sees SerialPort or TcpClient directly!
+
+### Data Flow (RTU Example)
+
+1. User configures RTU parameters → ModbusViewModel
+2. User clicks Connect → ModbusViewModel.ConnectAsync()
+3. ModbusViewModel calls IModbusRtuTransport.ConnectAsync()
+4. ModbusRtuTransport uses SerialPortService to open port
+5. User builds request → BuildRequest (Core layer)
+6. User clicks Send Request → ModbusViewModel.SendRequestAsync()
+7. ModbusRtuTransport sends bytes via SerialPortService
+8. ModbusRtuTransport receives response bytes
+9. ModbusViewModel calls Core parser to parse response
+10. UI displays RequestHex, ResponseHex, ParsedSummary
+
+### TCP Example
+
+1. User configures TCP IP/Port → ModbusViewModel
+2. User clicks Connect → ModbusViewModel.ConnectAsync()
+3. ModbusTcpTransport connects via TcpClient
+4. User builds request with TransactionId → BuildRequest (Core)
+5. User clicks Send Request → ModbusViewModel.SendRequestAsync()
+6. ModbusTcpTransport sends MBAP frame
+7. ModbusTcpTransport receives response, verifies TransactionId
+8. ModbusViewModel parses response via Core
+9. UI displays results
+
+### Serial Port Ownership Coordination
+
+```
+MainWindowViewModel tracks:
+- IsTerminalConnected: bool
+- IsModbusRtuConnected: bool
+
+When Terminal opens port:
+- Modbus RTU Connect button disabled
+
+When Modbus RTU connects:
+- Terminal Open button disabled
+
+Message: "Terminal is using the serial port. Please disconnect Terminal first."
+```
+
+### Error Strategy
+
+| Error Category | Examples |
+|---------------|----------|
+| Input Validation | No port selected, invalid IP, timeout ≤ 0 |
+| Connection | Open failed, connect failed, disconnected |
+| Communication | Send failed, receive failed, timeout |
+| Protocol | CRC invalid, TransactionId mismatch, invalid response |
+| Business | Unsupported function, permission denied |
+
+### Test Strategy
+
+| Test Type | Uses Real Hardware? |
+|-----------|---------------------|
+| Unit Tests | ❌ No |
+| Fake Transport Tests | ❌ No |
+| Integration-like Tests | ❌ No (fake serial/TCP) |
+| Manual Tests | ✅ Yes (optional) |
+
+### Phase Implementation Order (G8-G12)
+
+```
+G8: Interfaces + Fake Transport (NO REAL IO)
+G9: RTU Transport (real serial)
+G10: TCP Transport (real socket)
+G11: UI Integration
+G12: Manual Verification
+```
+
+### Key Architecture Decisions from G7
+
+1. **G8 First**: Interfaces and fake transport before real hardware
+2. **Single Ownership**: Simple and safe for initial implementation
+3. **Core Only Protocol**: CRC, framing stays in Core
+4. **No App IO**: App layer NEVER sees System.IO.Ports or TcpClient
+5. **Defer UI Styling**: Function first, polish later
+
+---
+
 *Last updated: May 2026*
 *Modbus Architecture Planning: May 2026*
 *G5 ModbusPage UI Complete: May 2026*
 *G6 Modbus Closure Complete: May 2026*
+*G7 Modbus Transport Planning Complete: May 2026*

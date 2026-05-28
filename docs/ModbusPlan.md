@@ -985,6 +985,56 @@ G1-G5 phases have been completed, establishing the Modbus foundation:
 
 ---
 
+## G7 Transport Planning Notes
+
+**Phase**: G7 - Modbus Transport Integration Planning
+
+**Status**: ✅ Completed
+
+**Completion Date**: 2026-05-27
+
+### Summary
+
+G7 is a pure documentation planning phase with NO code changes. This phase defines the architecture for integrating real Modbus RTU/TCP communication:
+
+### What G7 Accomplishes
+
+- ✅ **Architecture Planning**: Defines layer boundaries for transport integration
+- ✅ **Interface Design**: Proposes IModbusTransport, IModbusRtuTransport, IModbusTcpTransport interfaces
+- ✅ **RTU Strategy**: Plans RTU transport via existing SerialPortService with ownership management
+- ✅ **TCP Strategy**: Plans TCP transport via new Infrastructure service with TcpClient
+- ✅ **Error Strategy**: Defines comprehensive error handling approach
+- ✅ **Test Strategy**: Plans fake transport for automated testing without hardware
+- ✅ **Phase Breakdown**: Defines G8-G12 phases for incremental implementation
+
+### Key Decisions from G7
+
+1. **G8 First**: Start with interfaces and fake transport, NOT real hardware
+2. **Single Ownership**: Terminal and Modbus RTU cannot share serial port simultaneously
+3. **Core Only Protocol**: CRC, frame building/parsing stays in Core layer
+4. **Infrastructure Only IO**: App layer never directly references System.IO.Ports or TcpClient
+5. **Defer UI Styling**: No final MQTTX-style UI until functional communication is complete
+
+### Current State After G7
+
+- **Test Count**: 520 passed (unchanged from G6)
+- **Version**: v0.4.4 (unchanged)
+- **No Code Changes**: 100% documentation-only phase
+- **No src/ modifications**: All layers preserved as-is
+- **No tests/ modifications**: Test suite untouched
+
+### Next Phase Recommendation
+
+**Recommended**: G8 - Modbus Transport Interfaces and Fake Tests
+
+**Why G8 Next**:
+- Lock down interface contracts before real implementation
+- Prove ViewModel can work with transport via fakes
+- Reduce risk by validating architecture first
+- Prevent App layer pollution with IO references
+
+---
+
 *Document created: 2026-05-26*
 *Last updated: 2026-05-27*
-*Phase: G6 - Modbus Manual Test and Documentation Closure Complete*
+*Phase: G7 - Modbus Transport Integration Planning Complete*

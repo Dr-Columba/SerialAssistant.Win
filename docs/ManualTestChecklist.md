@@ -862,6 +862,62 @@ This document provides a step-by-step manual testing guide for SerialAssistant.W
 
 ---
 
+## G7: Modbus Transport Planning Verification
+
+### G7.1 Documentation Verification
+
+- [ ] **Step G7.1** Verify `docs/ModbusTransportPlan.md` exists and is complete
+- [ ] **Step G7.2** Verify `docs/ModbusPlan.md` contains G7 Transport Planning Notes
+- [ ] **Step G7.3** Verify `docs/PhasePlan.md` contains G7 status and G8-G12 phases
+- [ ] **Step G7.4** Verify `docs/Architecture.md` contains Modbus Transport Architecture Planning
+- [ ] **Step G7.5** Verify `docs/UIInformationArchitecture.md` contains Modbus Transport UI Planning
+- [ ] **Step G7.6** Verify `docs/FinalReview.md` contains G7 review
+- [ ] **Step G7.7** Verify `docs/FeatureReports/FeatureG7-ModbusTransportPlanning.md` exists
+
+### G7.2 Scope Control Verification
+
+- [ ] **Step G7.8** Verify NO modifications to `src/` directory
+- [ ] **Step G7.9** Verify NO modifications to `tests/` directory
+- [ ] **Step G7.10** Verify NO modifications to `*.csproj` or `*.sln`
+- [ ] **Step G7.11** Verify NO modifications to UI files
+- [ ] **Step G7.12** Verify NO version number changes
+- [ ] **Step G7.13** Verify NO third-party libraries added
+
+### G7.3 Build and Test Verification
+
+- [ ] **Step G7.14** Run `git diff --check` - Verify no trailing whitespace
+- [ ] **Step G7.15** Run `dotnet build .\SerialAssistant.Win.sln -c Debug` - Verify build passes with 0 errors, 0 warnings
+- [ ] **Step G7.16** Run `dotnet test .\SerialAssistant.Win.sln -c Debug` - Verify test count shows 520 passed (unchanged)
+
+### G7.4 Planning Content Verification
+
+- [ ] **Step G7.17** Verify ModbusTransportPlan.md contains Purpose section
+- [ ] **Step G7.18** Verify ModbusTransportPlan.md contains Current State section
+- [ ] **Step G7.19** Verify ModbusTransportPlan.md contains Target Capability section
+- [ ] **Step G7.20** Verify ModbusTransportPlan.md contains Layer Boundary Design section
+- [ ] **Step G7.21** Verify ModbusTransportPlan.md contains Proposed Interfaces section
+- [ ] **Step G7.22** Verify ModbusTransportPlan.md contains RTU Transport Plan section
+- [ ] **Step G7.23** Verify ModbusTransportPlan.md contains TCP Transport Plan section
+- [ ] **Step G7.24** Verify ModbusTransportPlan.md contains ModbusViewModel Integration Plan section
+- [ ] **Step G7.25** Verify ModbusTransportPlan.md contains UI Change Plan section
+- [ ] **Step G7.26** Verify ModbusTransportPlan.md contains Concurrency and Ownership section
+- [ ] **Step G7.27** Verify ModbusTransportPlan.md contains Error Strategy section
+- [ ] **Step G7.28** Verify ModbusTransportPlan.md contains Test Strategy section
+- [ ] **Step G7.29** Verify ModbusTransportPlan.md contains Phase Breakdown section (G8-G12)
+- [ ] **Step G7.30** Verify ModbusTransportPlan.md contains Risks and Decisions section
+- [ ] **Step G7.31** Verify ModbusTransportPlan.md contains Final Recommendation section (recommend G8 first)
+
+### G7.5 Architecture Boundary Verification
+
+- [ ] **Step G7.32** Verify planning clearly states App layer must NOT reference System.IO.Ports
+- [ ] **Step G7.33** Verify planning clearly states App layer must NOT reference TcpClient/Socket
+- [ ] **Step G7.34** Verify planning clearly states Core layer must NOT reference Infrastructure
+- [ ] **Step G7.35** Verify planning clearly states Infrastructure layer must NOT reference WPF
+- [ ] **Step G7.36** Verify planning defines serial port ownership strategy
+- [ ] **Step G7.37** Verify planning recommends G8 first (Interfaces + Fake Tests) before real hardware
+
+---
+
 ## Tester Information
 
 - **Tester Name**: _________________________

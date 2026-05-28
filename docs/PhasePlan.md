@@ -742,7 +742,7 @@ This document outlines the phased development plan for SerialAssistant.Win, orga
 
 ---
 
-### Feature G0-G6 Summary
+### Feature G0-G7 Summary
 
 | Phase | Type | Focus | Code Allowed |
 |-------|------|-------|--------------|
@@ -753,34 +753,273 @@ This document outlines the phased development plan for SerialAssistant.Win, orga
 | G4 | App | ModbusViewModel | App + Tests |
 | G5 | UI | ModbusPage | UI + minimal |
 | G6 | Closure | Testing + Docs | No |
+| G7 | Planning | Transport Integration | No |
+
+---
+
+### Feature G7: Modbus Transport Integration Planning
+
+**Status**: ✅ Completed
+
+**Goal**: Plan Modbus RTU/TCP real communication integration architecture
+
+**Scope**:
+- Define layer boundaries for transport integration
+- Propose IModbusTransport, IModbusRtuTransport, IModbusTcpTransport interfaces
+- Plan RTU transport via existing SerialPortService with ownership management
+- Plan TCP transport via new Infrastructure service with TcpClient
+- Define error strategy for communication failures
+- Plan fake transport for automated testing without hardware
+- Break down G8-G12 phases for incremental implementation
+
+**Allowed Modifications**:
+- docs/ModbusTransportPlan.md (new)
+- docs/ModbusPlan.md (update)
+- docs/PhasePlan.md (update)
+- docs/Architecture.md (update)
+- docs/UIInformationArchitecture.md (update)
+- docs/ManualTestChecklist.md (update)
+- docs/FinalReview.md (update)
+- docs/FeatureReports/FeatureG7-ModbusTransportPlanning.md (new)
+
+**Forbidden**:
+- No src/ modifications
+- No tests/ modifications
+- No UI changes
+- No version changes
+- No third-party libraries
+
+**Acceptance Criteria**:
+- All planning documentation complete
+- G8-G12 phases clearly defined
+- Layer boundaries preserved
+- No code changes made
+- Test count remains 520 passed
+
+**Code Changes Allowed**: No
+
+**Tests Required**: No (only verification that existing tests still pass)
+
+**Report Required**: Yes
 
 ---
 
 ### Next Phase Recommendation
 
-**Recommended**: G7 - Modbus Transport Integration Planning
+**Recommended**: G8 - Modbus Transport Interfaces and Fake Tests
 
 **Rationale:**
-- Modbus G1-G5 has established protocol and UI foundation
-- Real communication is needed before further UI work
-- Planning phase ensures proper architecture for transport integration
+- G7 planning complete, architecture defined
+- Lock down interfaces before real implementation
+- Prove ViewModel can work with transport via fakes
+- Reduce risk by validating architecture first
+- NO real hardware implementation yet
 
-**Options:**
-1. **G7 - Modbus Transport Integration Planning** (Recommended)
-   - Design RTU transport via Infrastructure SerialPortService
-   - Design TCP transport via new ModbusTcpTransportService
-   - Plan communication lifecycle and error handling
-
-2. **H0 - UI Style Foundation Planning** (Alternative)
-   - Design final visual style
-   - Create UI component library
-   - Unify Terminal and Modbus page appearance
+**Why NOT Skip to G9/G10**:
+- Risk of App layer pollution with IO references
+- Risk of incorrect architecture decisions
+- Fake transport allows testing without hardware
+- Interface contract validation is critical
 
 **Note**: Do NOT continue UI styling until communication is working. Functional completeness should precede visual polish.
 
 ---
 
-## Future Phases
+## Future Phases (G8-G12)
+
+### Feature G8: Modbus Transport Interfaces and Fake Tests
+
+**Status**: ⏳ Pending
+
+**Goal**: Define transport interfaces and implement fake transport for testing
+
+**Scope**:
+- Create IModbusTransport interface (Core or App layer)
+- Create IModbusRtuTransport interface
+- Create IModbusTcpTransport interface
+- Create ModbusTransportResult model
+- Create ModbusTransportOptions model
+- Create ModbusRequestContext model
+- Implement FakeModbusTransport for testing
+- Add tests verifying ViewModel can work with transport
+- NO real serial/TCP implementation yet
+
+**Allowed Modifications**:
+- src/SerialAssistant.Core/Services/ (interfaces and models)
+- src/SerialAssistant.Tests/ (fake transport tests)
+- src/SerialAssistant.App/ViewModels/ModbusViewModel.cs (minor updates for transport integration)
+
+**Forbidden**:
+- No System.IO.Ports reference in App layer
+- No TcpClient/Socket reference in App layer
+- No real serial/TCP implementation
+- No UI changes
+
+**Acceptance Criteria**:
+- Interfaces defined and documented
+- Fake transport implementation complete
+- Tests pass with fake transport
+- ViewModel can use transport without knowing implementation
+- Test count increases appropriately
+
+**Code Changes Allowed**: Yes (Core + Tests + minor App updates)
+
+**Tests Required**: Yes (new fake transport tests)
+
+**Report Required**: Yes
+
+---
+
+### Feature G9: Modbus RTU Transport Integration
+
+**Status**: ⏳ Pending
+
+**Goal**: Implement real RTU transport via SerialPortService
+
+**Scope**:
+- Implement ModbusRtuTransport in Infrastructure layer
+- Integrate with existing SerialPortService
+- Implement serial port ownership management
+- Implement Connect/Disconnect/SendRequestAsync
+- Handle RTU-specific error cases
+- Add timeout handling
+- Manual testing with real hardware (optional)
+
+**Allowed Modifications**:
+- src/SerialAssistant.Infrastructure/ (RTU transport)
+- No App layer IO references
+- No Core layer changes
+
+**Forbidden**:
+- App layer directly references System.IO.Ports
+- Core layer references Infrastructure
+- UI changes (except minimal status)
+
+**Acceptance Criteria**:
+- RTU transport works with serial port
+- Ownership model prevents Terminal/Modbus conflicts
+- Error handling implemented
+- Manual verification passes
+
+**Code Changes Allowed**: Yes (Infrastructure only)
+
+**Tests Required**: Yes (fake-based tests, no hardware required)
+
+**Report Required**: Yes
+
+---
+
+### Feature G10: Modbus TCP Transport Integration
+
+**Status**: ⏳ Pending
+
+**Goal**: Implement real TCP transport via TcpClient
+
+**Scope**:
+- Implement ModbusTcpTransport in Infrastructure layer
+- Use TcpClient (Infrastructure only)
+- Implement MBAP TransactionId matching
+- Handle TCP connect/disconnect
+- Handle TCP half-open connections
+- Add timeout handling
+- Manual testing with Modbus TCP simulator/device
+
+**Allowed Modifications**:
+- src/SerialAssistant.Infrastructure/ (TCP transport)
+- No App layer IO references
+
+**Forbidden**:
+- App layer directly references TcpClient/Socket
+- Core layer references Infrastructure
+
+**Acceptance Criteria**:
+- TCP transport works with Modbus TCP server
+- TransactionId matching works
+- Error handling implemented
+- Manual verification passes
+
+**Code Changes Allowed**: Yes (Infrastructure only)
+
+**Tests Required**: Yes (fake-based tests)
+
+**Report Required**: Yes
+
+---
+
+### Feature G11: Modbus Send Workflow UI Integration
+
+**Status**: ⏳ Pending
+
+**Goal**: Integrate transport with ModbusViewModel and update UI
+
+**Scope**:
+- Update ModbusViewModel with SendRequestCommand
+- Add Connect/Disconnect commands
+- Add RTU parameters UI (port, baud rate, etc.)
+- Add TCP parameters UI (IP, port)
+- Add Send Request button
+- Add connection status display
+- Add timeout configuration
+- NO final UI styling
+
+**Allowed Modifications**:
+- src/SerialAssistant.App/ViewModels/ModbusViewModel.cs
+- src/SerialAssistant.App/Views/ModbusPage.xaml (minimal additions)
+
+**Forbidden**:
+- Final MQTTX-style UI
+- Complex UI animations
+- Breaking existing functionality
+
+**Acceptance Criteria**:
+- User can connect RTU/TCP
+- User can send Modbus requests
+- Responses display correctly
+- Errors display in UI
+- All existing tests still pass
+
+**Code Changes Allowed**: Yes (App layer only)
+
+**Tests Required**: Yes
+
+**Report Required**: Yes
+
+---
+
+### Feature G12: Modbus Communication Manual Verification
+
+**Status**: ⏳ Pending
+
+**Goal**: Full manual testing and documentation closure
+
+**Scope**:
+- Full manual testing of RTU communication
+- Full manual testing of TCP communication
+- Edge case testing (timeouts, errors, disconnects)
+- Update manual test checklist
+- Final documentation review
+
+**Allowed Modifications**:
+- Documentation only
+
+**Forbidden**:
+- No new features
+- No code changes
+
+**Acceptance Criteria**:
+- All manual test checklist items pass
+- Documentation complete and consistent
+- Ready for next phase (H0 UI styling)
+
+**Code Changes Allowed**: No
+
+**Tests Required**: No (only manual verification)
+
+**Report Required**: Yes
+
+---
+
+## Future Phases (J1-N1)
 
 ### Feature J1: Message Templates and Periodic Sending
 
