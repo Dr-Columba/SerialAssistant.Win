@@ -827,11 +827,11 @@ This document provides a step-by-step manual testing guide for SerialAssistant.W
 - [ ] **Step G6.2** Run `dotnet build .\SerialAssistant.Win.sln -c Debug` - Verify build passes with 0 warnings, 0 errors
 - [ ] **Step G6.3** Run `dotnet test .\SerialAssistant.Win.sln -c Debug` - Verify test count shows 520 passed (494 + 26 new)
 - [ ] **Step G6.4** Check `git status` - Verify working tree is clean
-- [ ] **Step G6.5** Verify no `g5-navigation-debug.txt` file does not exist
+- [ ] **Step G6.5** Verify `g5-navigation-debug.txt` does not exist
 
 ### G6.2 Terminal Page Verification
 
-- [ ] **Step G6.6** Start app with `dotnet run --project src/SerialAssistant.App
+- [ ] **Step G6.6** Start app with `dotnet run --project src/SerialAssistant.App`
 - [ ] **Step G6.7** Verify app starts without errors
 - [ ] **Step G6.8** Verify Terminal page is visible by default
 - [ ] **Step G6.9** Verify Terminal page shows serial port settings area
