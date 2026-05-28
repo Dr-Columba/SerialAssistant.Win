@@ -974,5 +974,108 @@ These are out of scope for G5 minimal UI.
 
 ---
 
+## 22. ModbusPage Current State (G6 Closure)
+
+### 22.1 Current UI State
+
+**Status:** ✅ G5 ModbusPage minimal UI complete
+
+**Current UI Elements:**
+- ✅ Terminal / Modbus page switching works
+- ✅ ModbusPage with parameter area (Transport Mode, Request Kind, UnitId, TransactionId, StartAddress, Quantity)
+- ✅ ModbusPage with request area (Build Request button, RequestHex display)
+- ✅ ModbusPage with response area (ResponseHex input, Parse Response button, ParsedSummary display)
+- ✅ ModbusPage with clear button
+- ✅ Minimal, functional UI (not final visual style)
+
+**Key Characteristics:**
+1. **Minimal UI:** Just enough to be usable, no complex styling
+2. **Direct Binding:** ModbusPage.xaml binds directly to ModbusViewModel
+3. **Shell Navigation:** Switching between Terminal and Modbus works correctly
+4. **No Communication:** Builds requests and parses responses only, no real serial/TCP communication
+5. **Version v0.4.4:** UI displays v0.4.4 in status bar
+
+### 22.2 ModbusPage UI Structure (Current)
+
+```
+ModbusPage.xaml
+├── Title ("Modbus")
+├── Parameter Area
+│   ├── Transport Mode (ComboBox: RTU/TCP)
+│   ├── Request Kind (ComboBox: Read Holding Registers, Read Input Registers, Write Single Register, Write Multiple Registers)
+│   ├── UnitId Input
+│   ├── TransactionId Input
+│   ├── StartAddress Input
+│   ├── Quantity Input
+│   ├── SingleWriteValue Input
+│   └── MultipleWriteValuesText TextBox
+├── Action Buttons
+│   ├── Build Request
+│   ├── Parse Response
+│   └── Clear
+├── Request Area
+│   └── RequestHex (read-only TextBox)
+├── Response Area
+│   ├── ResponseHex (input TextBox)
+│   └── ParsedSummary (read-only TextBox)
+└── Status Area
+    └── StatusMessage display
+```
+
+### 22.3 Visual Style Status
+
+**Current State:** Minimal, functional UI
+- No final MQTTX-style visual design
+- Basic Grid layout with spacing
+- Simple GroupBoxes for organization
+- Standard WPF controls (TextBox, Button, ComboBox)
+- White background on ModbusPage to prevent Terminal from showing through
+
+**Future Style Planning (H Phase):**
+- Should be done after functional completion
+- Should unify Terminal and Modbus page styles
+- Should follow MQTTX modern workbench direction
+- NOT recommended for G6 or immediate next phase
+
+### 22.4 Navigation Behavior
+
+**Verified:**
+- ✅ App starts with TerminalPage visible by default
+- ✅ Clicking Modbus button in left navigation shows ModbusPage
+- ✅ Clicking Terminal button returns to TerminalPage
+- ✅ Multiple round-trip switches work correctly
+- ✅ No TerminalPage background leaking through ModbusPage
+
+**MainWindowViewModel Navigation State:**
+```csharp
+public bool IsTerminalSelected { get; private set; } // Default: true
+public bool IsModbusSelected { get; private set; } // Default: false
+public ICommand ShowTerminalCommand { get; }
+public ICommand ShowModbusCommand { get; }
+```
+
+### 22.5 Page Visibility Implementation
+
+**MainWindow.xaml Current Structure:**
+```xml
+<Grid Grid.Column="1">
+    <Grid Visibility="{Binding IsTerminalPageVisible, Converter={StaticResource BoolToVis}}">
+        <views:TerminalPage DataContext="{Binding Terminal}" />
+    </Grid>
+    <Grid Visibility="{Binding IsModbusPageVisible, Converter={StaticResource BoolToVis}}">
+        <views:ModbusPage DataContext="{Binding Modbus}" />
+    </Grid>
+</Grid>
+```
+
+**Key Design:**
+- Outer Grid containers control Visibility
+- Outer Grid uses MainWindowViewModel DataContext
+- Inner UserControls set their own DataContext
+- Terminal and Modbus pages are mutually exclusive
+
+---
+
 *Last updated: May 2026*
 *Modbus UI Planning: May 2026*
+*G6 Modbus Closure: May 2026*

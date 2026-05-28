@@ -817,8 +817,53 @@ This document provides a step-by-step manual testing guide for SerialAssistant.W
 | ModbusPage Functionality | ☐ Pass / ☐ Fail | |
 | Terminal Still Works | ☐ Pass / ☐ Fail | |
 
+---
+
+## G6: Modbus Closure Manual Verification
+
+### G6.1 Automated Verification
+
+- [ ] **Step G6.1** Run `git diff --check` - Verify no trailing whitespace
+- [ ] **Step G6.2** Run `dotnet build .\SerialAssistant.Win.sln -c Debug` - Verify build passes with 0 warnings, 0 errors
+- [ ] **Step G6.3** Run `dotnet test .\SerialAssistant.Win.sln -c Debug` - Verify test count shows 520 passed (494 + 26 new)
+- [ ] **Step G6.4** Check `git status` - Verify working tree is clean
+- [ ] **Step G6.5** Verify `g5-navigation-debug.txt` does not exist
+
+### G6.2 Terminal Page Verification
+
+- [ ] **Step G6.6** Start app with `dotnet run --project src/SerialAssistant.App`
+- [ ] **Step G6.7** Verify app starts without errors
+- [ ] **Step G6.8** Verify Terminal page is visible by default
+- [ ] **Step G6.9** Verify Terminal page shows serial port settings area
+- [ ] **Step G6.10** Verify Terminal page shows receive area
+- [ ] **Step G6.11** Verify Terminal page shows send area
+- [ ] **Step G6.12** Verify Terminal page has no layout overlapping
+
+### G6.3 Modbus Page Verification
+
+- [ ] **Step G6.13** Click Modbus button in left navigation
+- [ ] **Step G6.14** Verify ModbusPage becomes visible
+- [ ] **Step G6.15** Click Terminal button in left navigation
+- [ ] **Step G6.16** Verify TerminalPage becomes visible again
+- [ ] **Step G6.17** Repeat Terminal → Modbus → Terminal multiple times - Verify all work correctly
+- [ ] **Step G6.18** Verify ModbusPage has no Terminal background leaking through
+- [ ] **Step G6.19** Verify ModbusPage parameter area displays correctly
+- [ ] **Step G6.20** Click Build Request - Verify RequestHex shows HEX string
+- [ ] **Step G6.21** Click Clear - Verify RequestHex, ResponseHex, ParsedSummary are cleared
+
+### G6.4 Boundary Check Verification
+
+- [ ] **Step G6.22** Verify `MainWindow.xaml.cs` contains only `InitializeComponent()` only
+- [ ] **Step G6.23** Verify `TerminalPage.xaml.cs` contains only `InitializeComponent()` only
+- [ ] **Step G6.24** Verify `ModbusPage.xaml.cs` contains only `InitializeComponent()` only
+- [ ] **Step G6.25** Verify App ViewModels do not reference System.IO.Ports, TcpClient, Socket, Registry, File, Directory
+- [ ] **Step G6.26** Verify Infrastructure does not reference System.Windows, Window, Dispatcher
+- [ ] **Step G6.27** Verify Core does not reference System.Windows, Window, Dispatcher, System.IO.Ports
+
+---
+
 ## Tester Information
 
 - **Tester Name**: _________________________
 - **Test Date**: _________________________
-- **Additional Notes**:
+- **Additional Notes**: _________________________

@@ -706,7 +706,7 @@ This document outlines the phased development plan for SerialAssistant.Win, orga
 
 ### Feature G6: Modbus Manual Test and Documentation Closure
 
-**Status:** Planned
+**Status:** Completed
 
 **Goal:** Complete manual testing and documentation
 
@@ -753,6 +753,30 @@ This document outlines the phased development plan for SerialAssistant.Win, orga
 | G4 | App | ModbusViewModel | App + Tests |
 | G5 | UI | ModbusPage | UI + minimal |
 | G6 | Closure | Testing + Docs | No |
+
+---
+
+### Next Phase Recommendation
+
+**Recommended**: G7 - Modbus Transport Integration Planning
+
+**Rationale:**
+- Modbus G1-G5 has established protocol and UI foundation
+- Real communication is needed before further UI work
+- Planning phase ensures proper architecture for transport integration
+
+**Options:**
+1. **G7 - Modbus Transport Integration Planning** (Recommended)
+   - Design RTU transport via Infrastructure SerialPortService
+   - Design TCP transport via new ModbusTcpTransportService
+   - Plan communication lifecycle and error handling
+
+2. **H0 - UI Style Foundation Planning** (Alternative)
+   - Design final visual style
+   - Create UI component library
+   - Unify Terminal and Modbus page appearance
+
+**Note**: Do NOT continue UI styling until communication is working. Functional completeness should precede visual polish.
 
 ---
 
