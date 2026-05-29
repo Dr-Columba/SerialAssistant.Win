@@ -1224,7 +1224,8 @@ System.IO.Ports (Infrastructure only)
 - Terminal and Modbus RTU cannot use serial port exclusively
 - If Terminal is connected, Modbus RTU Connect is disabled
 - If Modbus RTU is connected, Terminal Open is disabled
-- MainWindowViewModel coordinates ownership state
+> **⚠️ G9A Update**: Previous G7 sketch had MainWindowViewModel coordinating ownership state, but this is superseded by G9A.
+> Current plan: Core defines ISerialPortOwnershipCoordinator and SerialPortOwner in G9B; Infrastructure implements ownership coordination in G9C or later; App displays ownership state only.
 
 #### TCP Transport
 

@@ -432,6 +432,8 @@ Select-String -Path .\docs\ModbusTransportPlan.md,.\docs\Architecture.md,.\docs\
 - Updated Validation Results table to show ✅ Passed instead of ⏳ Pending
 - Confirmed ownership coordinator contract belongs to Core in G9B
 - Confirmed Infrastructure provides concrete ownership implementation later
+- Removed stale Architecture.md statement that implied MainWindowViewModel coordinates ownership state
+- Confirmed MainWindowViewModel is not ownership authority
 - Test count remains 586 passed
 - No src changes
 - No tests changes
