@@ -1,6 +1,6 @@
 using SerialAssistant.Core.Services;
 
-namespace SerialAssistant.Tests.Infrastructure;
+namespace SerialAssistant.Tests.Services;
 
 public class FakeSerialPortOwnershipCoordinator : ISerialPortOwnershipCoordinator
 {

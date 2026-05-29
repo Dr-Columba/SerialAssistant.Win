@@ -1,6 +1,5 @@
 using Xunit;
 using SerialAssistant.Core.Services;
-using SerialAssistant.Tests.Infrastructure;
 
 namespace SerialAssistant.Tests.Services;
 

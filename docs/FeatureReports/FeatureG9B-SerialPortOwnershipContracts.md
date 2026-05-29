@@ -43,7 +43,7 @@
 
 | File | Path | Purpose |
 |------|------|---------|
-| FakeSerialPortOwnershipCoordinator.cs | src/SerialAssistant.Tests/Infrastructure/FakeSerialPortOwnershipCoordinator.cs | Fake coordinator for testing |
+| FakeSerialPortOwnershipCoordinator.cs | src/SerialAssistant.Tests/Services/FakeSerialPortOwnershipCoordinator.cs | Fake coordinator for testing |
 | SerialPortOwnerTests.cs | src/SerialAssistant.Tests/Services/SerialPortOwnerTests.cs | Tests for SerialPortOwner |
 | SerialPortOwnershipChangedEventArgsTests.cs | src/SerialAssistant.Tests/Services/SerialPortOwnershipChangedEventArgsTests.cs | Tests for event args |
 | FakeSerialPortOwnershipCoordinatorTests.cs | src/SerialAssistant.Tests/Services/FakeSerialPortOwnershipCoordinatorTests.cs | Tests for fake coordinator |
@@ -262,7 +262,7 @@ git diff --name-only -- src/SerialAssistant.App/ViewModels/
 
 ```powershell
 Select-String -Path .\src\SerialAssistant.Core\Services\*.cs -Pattern "System.IO.Ports","TcpClient","Socket","System.Windows","File.","Directory.","Registry"
-Select-String -Path .\src\SerialAssistant.Infrastructure\*.cs -Pattern "SerialPortOwner","ISerialPortOwnershipCoordinator" -List
+Select-String -Path .\src\SerialAssistant.Infrastructure\**\*.cs -Pattern "SerialPortOwner","ISerialPortOwnershipCoordinator","OwnershipCoordinator"
 Select-String -Path .\src\SerialAssistant.App\ViewModels\*.cs -Pattern "ISerialPortOwnershipCoordinator","SerialPortOwner","System.IO.Ports","TcpClient","Socket"
 ```
 
@@ -294,12 +294,12 @@ Select-String -Path .\src\SerialAssistant.App\MainWindow.xaml -Pattern "v0.4.7"
 
 ### Key Reminders
 
-- App layer: NO System.IO.Ports - no
-- Infrastructure: YES - yes
-- Core: NO Infrastructure - yes
-- Ownership: MUST be explicit - yes
-- Still NO Terminal changes - no
-- Still NO ModbusViewModel changes - no
+- App layer must NOT reference System.IO.Ports.
+- Infrastructure may reference System.IO.Ports only in future concrete implementations, not in G9B.
+- Core must NOT reference Infrastructure.
+- Ownership must remain explicit through Core contracts.
+- Terminal behavior must remain unchanged.
+- ModbusViewModel must remain unchanged in G9B.
 
 ---
 
