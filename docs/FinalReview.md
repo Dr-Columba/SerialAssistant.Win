@@ -1040,6 +1040,107 @@ This section reviews the completion of G7: Modbus Transport Integration Planning
 
 ---
 
+## G8B ModbusViewModel Transport Injection Review (May 2026)
+
+### G8B Completion Status
+
+**G8B Phase**: ✅ Completed
+
+**Implementation Date**: 2026-05-29
+
+### What G8B Accomplished
+
+1. **Transport Injection**
+   - ModbusViewModel now accepts IModbusTransport via constructor
+   - Default constructor preserves backward compatibility
+   - Transport injection enables testing and DI
+
+2. **Async Methods**
+   - ConnectTransportAsync: Connects to transport
+   - DisconnectTransportAsync: Disconnects from transport
+   - SendRequestAsync: Sends request and processes response
+
+3. **State Management**
+   - IsTransportAvailable: Indicates if transport is injected
+   - IsConnected: Connection state from transport
+   - IsBusy: Indicates async operation in progress
+   - ConnectionStatus: Human-readable connection status
+   - LastTransportError: Stores last transport error
+
+4. **Test Coverage**
+   - 26 new tests for transport integration
+   - Tests cover: construction, connection, send, error handling
+   - All tests use FakeModbusTransport
+
+5. **Layer Boundaries**
+   - ModbusViewModel only references Core interfaces
+   - No System.IO.Ports, TcpClient, or Socket references
+   - Infrastructure layer unchanged
+
+### G8B Scope Control
+
+**In Scope**:
+- ✅ ModbusViewModel transport injection
+- ✅ Async methods and commands
+- ✅ State properties
+- ✅ Error handling
+- ✅ 26 new tests
+- ✅ Version update to v0.4.6
+
+**Out of Scope** (deferred):
+- ❌ Real SerialPort implementation
+- ❌ Real TcpClient implementation
+- ❌ ModbusPage UI changes
+- ❌ Infrastructure layer changes
+
+### Layer Boundary Compliance
+
+| Layer | Status | Notes |
+|-------|--------|-------|
+| **Core** | ✅ Compliant | No modifications |
+| **App** | ✅ Compliant | No IO references in ModbusViewModel |
+| **Infrastructure** | ✅ Unchanged | No modifications |
+| **Tests** | ✅ Compliant | Fake transport only |
+
+### G8B Test Results
+
+| Metric | Value |
+|--------|-------|
+| Total Tests | 586 passed |
+| New Tests | 26 |
+| Previous Tests | 560 |
+| Failed Tests | 0 |
+
+### What G8B Does NOT Include
+
+1. **No Real IO**: Still no System.IO.Ports or TcpClient usage
+2. **No Infrastructure**: Still no transport implementation
+3. **No ModbusPage UI**: Transport UI not yet added
+
+### Risk Assessment
+
+| Risk | Status | Mitigation |
+|------|--------|------------|
+| App layer IO pollution | ✅ Mitigated | Clear interfaces in Core |
+| Test coverage | ✅ Good | 26 comprehensive tests |
+| Layer boundary violation | ✅ Mitigated | All checks pass |
+
+### Next Phase Recommendation
+
+**Recommended**: G9 - Modbus RTU Transport Integration
+
+**Why G9 Next**:
+- G8A provides clean interface contracts
+- G8B integrates contracts into ViewModel
+- G9 implements real RTU transport via SerialPortService
+- Continue with proper layer separation
+
+**Do NOT Skip to G10**:
+- ❌ Do NOT skip G9 and go directly to TCP implementation
+- ❌ Do NOT implement Infrastructure without clear ownership model
+
+---
+
 *Last updated: May 2026*
 *Modbus Core Foundation Review: May 2026*
 *Modbus TCP Frame Review: May 2026*
@@ -1048,3 +1149,4 @@ This section reviews the completion of G7: Modbus Transport Integration Planning
 *G6 Modbus Closure Review: May 2026*
 *G7 Modbus Transport Planning Review: May 2026*
 *G8A Modbus Transport Contracts Review: May 2026*
+*G8B ModbusViewModel Transport Injection Review: May 2026*
