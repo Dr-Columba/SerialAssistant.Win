@@ -1178,18 +1178,121 @@ public async Task SendRequestAsync() { ... }
 - ❌ **ModbusPage UI**: Transport UI not yet added
 - ❌ **Infrastructure**: Still no transport implementation
 
+---
+
+## G9A RTU Transport Capability Review Notes
+
+**Phase**: G9A - Modbus RTU Transport Existing Serial Service Capability Review
+
+**Status**: ✅ Completed - 2026-05-29
+
+G9A is a **documentation-only phase** that reviews existing serial port service capabilities before implementing Modbus RTU transport.
+
+### What G9A Accomplishes
+
+1. **Serial Service Capability Review**
+   - Reviewed ISerialPortService interface capabilities
+   - Reviewed SerialPortService implementation details
+   - Reviewed TerminalViewModel serial usage patterns
+
+2. **Gap Analysis**
+   - No SendAndReceiveAsync method
+   - No per-request timeout control
+   - No CancellationToken support
+   - No port ownership tracking
+
+3. **Strategy Resolution**
+   - Resolved G7 Option 1 vs G9A Option C conflict
+   - Updated ModbusTransportPlan.md with Option C recommendation
+
+### Key Findings from G9A
+
+#### ISerialPortService Capabilities
+
+| Capability | Status | Notes |
+|------------|--------|-------|
+| Open/Close | ✅ Yes | Synchronous operations |
+| Send | ✅ Yes | Synchronous send |
+| DataReceived Event | ✅ Yes | Event-based receive |
+| SendAndReceiveAsync | ❌ No | Not available |
+| CancellationToken | ❌ No | Not supported |
+| Port Ownership | ❌ No | Not tracked |
+
+#### SerialPortService Gaps for Modbus RTU
+
+| Gap | Severity | Impact |
+|-----|----------|--------|
+| No SendAndReceiveAsync | 🔴 High | Cannot implement request-response |
+| No Per-Request Timeout | 🔴 High | Cannot wait with timeout |
+| No Cancellation | 🔴 High | Cannot cancel ongoing operation |
+| No Port Ownership | 🔴 High | Cannot prevent Terminal/Modbus conflict |
+| Event-Based Only | 🔴 High | Incompatible with request-response pattern |
+
+### Recommended Strategy: Option C
+
+**C. 新增 ModbusRtuTransport，内部组合现有低层串口能力 + 新增串口所有权协调服务**
+
+| Reason | Explanation |
+|--------|-------------|
+| No Terminal Breakage | Existing Terminal continues unchanged |
+| Clean Architecture | Modbus-specific logic isolated |
+| Testability | Fake serial adapter possible |
+| Layer Boundaries | App only references Core interfaces |
+| Ownership Control | Explicit ownership coordination |
+
+### Why Option C Instead of Option 1?
+
+| Concern | Option 1 | Option C |
+|---------|----------|----------|
+| Event-based only | ❌ Incompatible | ✅ Full control |
+| Terminal risk | ❌ High | ✅ None |
+| Timeout per request | ❌ Not supported | ✅ Full support |
+
+### G9B-G9D Phase Plan
+
+| Phase | Focus | Key Deliverables |
+|-------|-------|------------------|
+| **G9B** | Ownership Coordinator Contracts | ISerialPortOwnershipCoordinator in Core |
+| **G9C** | ModbusRtuTransport with Fake | ModbusRtuTransport + FakeSerialAdapter |
+| **G9D** | Manual Verification | Real hardware testing |
+
+### Current State After G9A
+
+- ✅ Test count: 586 passed (unchanged)
+- ✅ Version: v0.4.6 (unchanged)
+- ✅ No code changes
+- ✅ Serial service capability review complete
+- ✅ Strategy conflict resolved
+- ❌ Still no real Modbus RTU communication
+
+### Critical Boundary Rules (G9A Reinforcement)
+
+1. **App NEVER references System.IO.Ports**
+2. **Infrastructure CAN reference System.IO.Ports**
+3. **Core NEVER references Infrastructure**
+4. **Terminal and Modbus RTU port ownership MUST be explicitly managed**
+
+### What G9A Does NOT Include
+
+- ❌ No code implementation (documentation only)
+- ❌ No ModbusRtuTransport (deferred to G9C)
+- ❌ No Ownership Coordinator (deferred to G9B)
+
 ### Next Phase Recommendation
 
-**Recommended**: G9 - Modbus RTU Transport Integration
+**Recommended**: G9B - Serial Port Ownership Coordinator Contracts
 
-**Why G9 Next**:
-- G8A provides clean interface contracts
-- G8B integrates contracts into ViewModel
-- G9 implements real RTU transport via SerialPortService
-- Continue with proper layer separation
+**Why G9B Next**:
+- Ownership is critical for preventing Terminal/Modbus conflicts
+- Core contracts should be defined before Infrastructure implementation
+- Fake coordinator possible for testing
+
+**Do NOT Skip to G9C**:
+- ❌ Do NOT implement RTU without ownership coordinator
+- ❌ Do NOT modify Terminal serial behavior
 
 ---
 
 *Document created: 2026-05-26*
 *Last updated: 2026-05-29*
-*Phase: G8B - ModbusViewModel Transport Injection Complete*
+*Phase: G9A - Modbus RTU Transport Capability Review Complete*

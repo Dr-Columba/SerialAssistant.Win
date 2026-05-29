@@ -1376,6 +1376,164 @@ ModbusViewModel (App)
 
 ---
 
+## G9A: Modbus RTU Transport Capability Review (May 2026)
+
+### Overview
+
+This section documents the G9A review of existing serial port service capabilities for Modbus RTU transport implementation.
+
+### G9A Status
+✅ Completed - May 2026
+
+### Existing Serial Service Structure
+
+#### ISerialPortService Interface (Core Layer)
+
+```csharp
+public interface ISerialPortService
+{
+    SerialConnectionState ConnectionState { get; }
+    OperationResult Open(SerialPortSettings settings);
+    OperationResult Close();
+    OperationResult Send(byte[] data);
+    event EventHandler<SerialReceiveData>? DataReceived;
+    event EventHandler<Exception>? ErrorOccurred;
+    event EventHandler<SerialConnectionState>? ConnectionStateChanged;
+}
+```
+
+**Key Capabilities:**
+| Capability | Status |
+|------------|--------|
+| Open/Close | ✅ Yes |
+| Send | ✅ Yes |
+| DataReceived Event | ✅ Yes |
+| SendAndReceiveAsync | ❌ No |
+| CancellationToken | ❌ No |
+| Per-Request Timeout | ❌ No |
+| Port Ownership Tracking | ❌ No |
+
+#### SerialPortService Implementation (Infrastructure Layer)
+
+| Aspect | Status |
+|--------|--------|
+| **Receive Mechanism** | Fully event-based (DataReceived) |
+| **Internal Buffer** | ❌ No |
+| **Frame Boundary Detection** | ❌ No |
+| **Request-Response Matching** | ❌ No |
+| **Concurrency Control** | ❌ No |
+| **Timeout Per Request** | ❌ No |
+
+### Current Terminal Serial Data Flow
+
+```
+TerminalViewModel
+    │
+    ├── Open() → ISerialPortService.Open()
+    ├── Send() → ISerialPortService.Send()
+    │
+    └── DataReceived ← Event-based callback
+            │
+            └── All received bytes forwarded to UI
+```
+
+**Terminal Behavior:**
+- Opens serial port via ISerialPortService
+- Sends data via ISerialPortService.Send()
+- Receives data via DataReceived event
+- No request-response pattern
+- No timeout control
+- No ownership awareness
+
+### Modbus RTU Request-Response Requirements
+
+| Requirement | Current Support | Gap |
+|-------------|----------------|-----|
+| Open/Close | ✅ Yes | - |
+| Send Request | ✅ Yes | - |
+| Wait for Response | ❌ No | Event-based only |
+| Per-Request Timeout | ❌ No | No timeout per operation |
+| Cancellation | ❌ No | No CancellationToken |
+| Frame Boundary Detection | ❌ No | No frame matching |
+| Request-Response Correlation | ❌ No | Cannot match response to request |
+
+### Current Gaps for Modbus RTU
+
+| Gap | Severity | Impact |
+|-----|----------|--------|
+| No SendAndReceiveAsync | 🔴 High | Cannot implement request-response |
+| No Timeout Control | 🔴 High | Cannot wait with timeout |
+| No Cancellation | 🔴 High | Cannot cancel ongoing operation |
+| No Port Ownership | 🔴 High | Cannot prevent Terminal/Modbus conflict |
+| No Frame Matching | 🟡 Medium | Cannot detect frame boundaries |
+
+### Recommended Architecture (Option C)
+
+#### Layer Boundaries (Unchanged)
+
+| Layer | Allowed | Forbidden |
+|-------|---------|-----------|
+| **Core** | Protocol, interfaces | System.IO.Ports, TcpClient, WPF |
+| **App** | ViewModels, UI binding | Direct IO references |
+| **Infrastructure** | Serial/TCP IO, transport | WPF, Dispatcher |
+
+#### New Components for Option C
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  App Layer                                                      │
+│  ModbusViewModel → calls IModbusRtuTransport                   │
+├─────────────────────────────────────────────────────────────────┤
+│  Core Layer                                                     │
+│  IModbusRtuTransport (existing)                                 │
+│  ISerialPortOwnershipCoordinator (NEW - G9B)                   │
+│  SerialPortOwner enum (NEW - G9B)                              │
+├─────────────────────────────────────────────────────────────────┤
+│  Infrastructure Layer                                           │
+│  ModbusRtuTransport (NEW - G9C) → implements IModbusRtuTransport│
+│  ISerialPortOwnershipCoordinator (NEW - G9B)                   │
+│  SerialPortService (existing, NOT modified)                    │
+├─────────────────────────────────────────────────────────────────┤
+│  External                                                       │
+│  System.IO.Ports.SerialPort (Infrastructure only)              │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+**Key Design Decisions:**
+
+1. **Do NOT extend SerialPortService** - Event-based model incompatible with request-response
+2. **Do NOT modify Terminal behavior** - Keep ISerialPortService unchanged for Terminal
+3. **New ModbusRtuTransport** - Owns serial handling logic including timeout/cancellation
+4. **New Ownership Coordinator** - Prevents Terminal/Modbus port conflicts
+5. **App still forbidden System.IO.Ports** - All serial access via Infrastructure services
+
+### G9B-G9D Phase Plan
+
+| Phase | Focus | Key Deliverables |
+|-------|-------|------------------|
+| **G9B** | Ownership Coordinator Contracts | ISerialPortOwnershipCoordinator in Core |
+| **G9C** | ModbusRtuTransport with Fake | ModbusRtuTransport + FakeSerialAdapter |
+| **G9D** | Manual Verification | Real hardware testing |
+
+### Why Option C Instead of Extending SerialPortService?
+
+| Concern | Option A/B | Option C |
+|---------|-----------|----------|
+| Terminal behavior risk | ❌ High | ✅ None |
+| Modbus request-response | ⚠️ Complex | ✅ Clean |
+| Layer boundary | ⚠️ Violated | ✅ Preserved |
+| Testability | ⚠️ Difficult | ✅ Easy (fake) |
+| Code complexity | ⚠️ Mixed concerns | ✅ Separated |
+
+### Critical Boundary Rules (G9A Reinforcement)
+
+1. **App NEVER references System.IO.Ports**
+2. **Infrastructure CAN reference System.IO.Ports**
+3. **Core NEVER references Infrastructure**
+4. **Terminal and Modbus RTU port ownership MUST be explicitly managed**
+
+---
+
 *Last updated: May 2026*
 *Modbus Architecture Planning: May 2026*
 *G5 ModbusPage UI Complete: May 2026*
@@ -1383,3 +1541,4 @@ ModbusViewModel (App)
 *G7 Modbus Transport Planning Complete: May 2026*
 *G8A Modbus Transport Contracts Complete: May 2026*
 *G8B ModbusViewModel Transport Injection Complete: May 2026*
+*G9A Modbus RTU Transport Capability Review: May 2026*

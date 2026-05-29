@@ -929,9 +929,204 @@ This document outlines the phased development plan for SerialAssistant.Win, orga
 
 ---
 
-### Feature G9: Modbus RTU Transport Integration
+### Feature G9A: Modbus RTU Transport Existing Serial Service Capability Review
+
+**Status**: ✅ Completed
+
+**Implementation Date**: 2026-05-29
+
+**Scope**:
+- Review existing ISerialPortService
+- Review existing SerialPortService
+- Review TerminalViewModel serial usage
+- Gap analysis for Modbus RTU request-response
+- Recommend RTU transport implementation strategy
+- Plan G9B/G9C subsequent phases
+
+**Allowed Modifications**:
+- Documentation only
+- No src changes
+- No tests changes
+
+**Forbidden**:
+- Any code changes
+
+**Acceptance Criteria**:
+- G9A report created
+- Gaps documented
+- Recommendation made
+- G9B/G9C planned
+
+**Code Changes Allowed**: No
+
+**Tests Required**: No (existing tests pass, 586)
+
+**Report Required**: Yes
+
+---
+
+### Feature G9B: Serial Port Ownership Coordinator Contracts
 
 **Status**: ⏳ Pending
+
+**Goal**: Define port ownership coordination interfaces
+
+**Scope**:
+- Define ISerialPortOwnershipCoordinator in Core
+- Define SerialPortOwner enum
+- No Infrastructure changes yet
+- Fake-based tests for coordinator
+
+**Allowed Modifications**:
+- Core layer only (new interfaces/models)
+- Tests layer (fake coordinator tests)
+
+**Forbidden**:
+- No Infrastructure changes
+- No App layer changes
+- No Terminal changes
+
+**Acceptance Criteria**:
+- Interfaces defined in Core
+- No Infrastructure references in Core
+- Fake coordinator tests pass
+
+**Code Changes Allowed**: Yes (Core layer only)
+
+**Tests Required**: Yes (fake-based tests)
+
+**Report Required**: Yes
+
+---
+
+### Feature G9C: Modbus RTU Transport Implementation with Fake Serial Adapter
+
+**Status**: ⏳ Pending
+
+**Goal**: Implement ModbusRtuTransport with fake serial adapter
+
+**Scope**:
+- Implement ModbusRtuTransport in Infrastructure
+- Use fake serial adapter for testing
+- Implement Connect/Disconnect/SendRequestAsync
+- Integrate with ownership coordinator
+- No real System.IO.Ports yet
+
+**Allowed Modifications**:
+- Infrastructure layer (ModbusRtuTransport)
+- Tests layer (fake serial adapter tests)
+
+**Forbidden**:
+- No real System.IO.Ports usage yet
+- No App layer changes
+- No Terminal changes
+
+**Acceptance Criteria**:
+- ModbusRtuTransport implements IModbusRtuTransport
+- Ownership coordinator integration works
+- Fake-based tests pass
+- No real hardware required
+
+**Code Changes Allowed**: Yes (Infrastructure layer)
+
+**Tests Required**: Yes (fake-based tests)
+
+**Report Required**: Yes
+
+---
+
+### Feature G9D: Modbus RTU Transport Manual Verification
+
+**Status**: ⏳ Pending
+
+**Goal**: Manual verification with real hardware (optional)
+
+**Scope**:
+- Implement real System.IO.Ports in ModbusRtuTransport
+- Manual testing with real Modbus RTU device
+- Manual testing with Modbus RTU simulator
+- Verify Terminal/Modbus conflict prevention
+
+**Allowed Modifications**:
+- Infrastructure layer (add real serial)
+- Documentation only (manual test checklist)
+
+**Forbidden**:
+- No App layer changes
+- No Terminal changes
+
+**Acceptance Criteria**:
+- Real RTU communication works
+- Ownership conflict prevention verified
+- Manual tests pass
+
+**Code Changes Allowed**: Yes (Infrastructure layer only)
+
+**Tests Required**: Manual tests only
+
+**Report Required**: Yes
+
+---
+
+### Feature G10: Modbus TCP Transport Integration
+
+**Status**: ⏳ Pending
+
+**Goal**: Implement real TCP transport via TcpClient
+
+**Scope**:
+- Implement ModbusTcpTransport in Infrastructure layer
+- Use TcpClient (Infrastructure only)
+- Implement MBAP TransactionId matching
+- Handle TCP connect/disconnect
+- Handle TCP half-open connections
+- Add timeout handling
+- Manual testing with Modbus TCP simulator/device
+
+**Allowed Modifications**:
+- Infrastructure layer (TCP transport)
+- No App layer IO references
+
+**Forbidden**:
+- App layer directly references TcpClient/Socket
+- Core layer references Infrastructure
+
+**Acceptance Criteria**:
+- TCP transport works with Modbus TCP server
+- TransactionId matching works
+- Error handling implemented
+- Manual verification passes
+
+**Code Changes Allowed**: Yes (Infrastructure only)
+
+**Tests Required**: Yes (fake-based tests)
+
+**Report Required**: Yes
+
+---
+
+### Feature G11: Modbus Send Workflow UI Integration
+
+**Status**: ⏳ Pending
+
+**Goal**: Integrate transport with ModbusViewModel and update UI
+
+**Scope**:
+- Update ModbusViewModel with SendRequestCommand
+- Add Connect/Disconnect commands
+- Add RTU parameters UI (port, baud rate, etc.)
+- Add TCP parameters UI (IP, port)
+- Add Send Request button
+- Add connection status display
+- Add timeout configuration
+- NO final UI styling
+
+**Allowed Modifications**:
+- src/SerialAssistant.App/ViewModels/ModbusViewModel.cs
+- src/SerialAssistant.App/Views/ModbusPage.xaml (minimal additions)
+
+**Forbidden**:
+- Final MQTTX-style UI
 
 **Goal**: Implement real RTU transport via SerialPortService
 

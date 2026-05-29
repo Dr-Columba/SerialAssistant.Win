@@ -196,19 +196,42 @@ public class ModbusRequestContext
 
 ### Serial Port Service Strategy
 
-**Option 1: Reuse Existing SerialPortService (Recommended)**
+> **⚠️ G9A Review Update (2026-05-29): G7 assumption superseded by G9A review**
+
+**Option 1: Reuse Existing SerialPortService (Original G7 assumption - superseded)**
 
 - Terminal uses SerialPortService
 - Modbus RTU can also use SerialPortService
 - But need ownership coordination
+- **G9A finding: SerialPortService is event-based only, lacks SendAndReceiveAsync**
+- **Direct reuse NOT recommended for Modbus request-response pattern**
 
-**Option 2: ModbusRtuTransport Owns SerialPort**
+**Option 2: ModbusRtuTransport Owns SerialPort (Original G7 assumption - superseded)**
 
 - Modbus has its own SerialPort access
 - Duplicates some Terminal logic
 - More isolation
+- **G9A finding: Extending SerialPortService risks breaking Terminal behavior**
 
-**Recommendation: Start with Option 1 for G9, plan ownership model.**
+**Option C: New ModbusRtuTransport + Serial Port Ownership Coordinator (G9A Recommendation)**
+
+- New `ModbusRtuTransport` in Infrastructure layer
+- Internal composition of low-level serial capabilities
+- New `ISerialPortOwnershipCoordinator` for ownership coordination
+- **Does NOT extend existing SerialPortService**
+- **Does NOT modify Terminal behavior**
+- **Supports fake serial adapter for testing**
+- **Clear layer boundaries preserved**
+
+**G9A Review Summary:**
+- Existing ISerialPortService is event-based (DataReceived only)
+- No SendAndReceiveAsync method
+- No per-request timeout control
+- No request-response matching
+- No port ownership tracking
+- Option C avoids breaking Terminal while enabling Modbus RTU
+
+**Recommendation: Option C for G9B-G9D**
 
 ### Serial Port Ownership
 
@@ -725,4 +748,59 @@ public class FakeModbusTransport : IModbusTransport
 **DO NOT SKIP G8:**
 - Do NOT jump directly to G9 RTU
 - Do NOT put real IO in ViewModel
+
+---
+
+## G9A Review Notes
+
+### G9A Status: ✅ Completed
+
+**Review Date**: 2026-05-29
+
+### Key Findings
+
+1. **ISerialPortService Limitations**:
+   - Fully event-based receive only
+   - No SendAndReceiveAsync
+   - No CancellationToken support
+   - No per-request timeout control
+   - No port ownership tracking
+
+2. **SerialPortService Implementation**:
+   - No internal buffer
+   - No frame boundary detection
+   - No request-response matching
+   - No concurrency control
+
+3. **Terminal Usage**:
+   - Open/Close/Send synchronous
+   - DataReceived event for receive
+   - No ownership control
+
+### Recommended Strategy: Option C
+
+> **C. 新增 ModbusRtuTransport，内部组合现有低层串口能力 + 新增串口所有权协调服务**
+
+### Why Option C?
+
+| Reason | Explanation |
+|--------|-------------|
+| No Terminal Breakage | Existing Terminal continues unchanged |
+| Clean Architecture | Modbus-specific logic isolated |
+| Testability | Fake serial adapter possible |
+| Layer Boundaries | App only references Core interfaces |
+
+### Subsequent Phases Plan
+
+- G9B: Serial Port Ownership Coordinator Contracts
+- G9C: Modbus RTU Transport Implementation with Fake Serial Adapter
+- G9D: Modbus RTU Transport Manual Verification
+
+### Critical Decisions
+
+1. **Ownership First**: Must implement port ownership before real RTU
+2. **Core Contracts First**: Define ISerialPortOwnershipCoordinator in Core
+3. **No Terminal Changes**: Keep ISerialPortService as-is for Terminal
+4. **New ModbusRtuTransport**: Implement IModbusRtuTransport, own serial handling
+5. **Fake Adapter First**: Test with fake serial before real hardware
 - Do NOT skip fake tests
