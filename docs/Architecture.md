@@ -1314,23 +1314,40 @@ Message: "Terminal is using the serial port. Please disconnect Terminal first."
 | Integration-like Tests | ❌ No (fake serial/TCP) |
 | Manual Tests | ✅ Yes (optional) |
 
-### Phase Implementation Order (G8-G12)
+### Phase Implementation Order (G8A-G12)
 
 ```
-G8: Interfaces + Fake Transport (NO REAL IO)
-G9: RTU Transport (real serial)
+G8A: Transport Contracts + Fake Transport (COMPLETED)
+G8B: ViewModel Transport Injection
+G9:  RTU Transport (real serial)
 G10: TCP Transport (real socket)
 G11: UI Integration
 G12: Manual Verification
 ```
 
-### Key Architecture Decisions from G7
+### Key Architecture Decisions from G7/G8A
 
-1. **G8 First**: Interfaces and fake transport before real hardware
+1. **G8A First**: Transport contracts before real hardware
 2. **Single Ownership**: Simple and safe for initial implementation
 3. **Core Only Protocol**: CRC, framing stays in Core
-4. **No App IO**: App layer NEVER sees System.IO.Ports or TcpClient
-5. **Defer UI Styling**: Function first, polish later
+4. **Core Only Interfaces**: All IModbusTransport interfaces in Core layer
+5. **No App IO**: App layer NEVER sees System.IO.Ports or TcpClient
+6. **Defer UI Styling**: Function first, polish later
+
+### G8A Implementation Summary (May 2026)
+
+**Completed**:
+- Core/Modbus/Transport namespace created
+- IModbusTransport, IModbusRtuTransport, IModbusTcpTransport interfaces
+- ModbusTransportResult, ModbusTransportOptions, ModbusRequestContext, ModbusTransportErrorCode
+- FakeModbusTransport in Tests project
+- 40 new tests added (560 total)
+
+**Not Included** (deferred to G8B/G9/G10):
+- No real SerialPort usage
+- No real TcpClient usage
+- No ModbusViewModel integration
+- No ModbusPage UI changes
 
 ---
 
@@ -1339,3 +1356,4 @@ G12: Manual Verification
 *G5 ModbusPage UI Complete: May 2026*
 *G6 Modbus Closure Complete: May 2026*
 *G7 Modbus Transport Planning Complete: May 2026*
+*G8A Modbus Transport Contracts Complete: May 2026*

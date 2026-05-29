@@ -1035,6 +1035,86 @@ G7 is a pure documentation planning phase with NO code changes. This phase defin
 
 ---
 
+## G8A Transport Contracts Implementation Notes
+
+**Phase**: G8A - Modbus Transport Contracts and Fake Transport Foundation
+
+**Status**: ✅ Completed
+
+**Completion Date**: 2026-05-29
+
+### Summary
+
+G8A is a code implementation phase that creates the Core transport contracts and FakeModbusTransport for testing:
+
+### What G8A Accomplishes
+
+- ✅ **Core Transport Namespace**: Created `src/SerialAssistant.Core/Modbus/Transport/`
+- ✅ **Interface Definitions**: IModbusTransport, IModbusRtuTransport, IModbusTcpTransport
+- ✅ **DTO Models**: ModbusTransportResult, ModbusTransportOptions, ModbusRequestContext
+- ✅ **Error Codes**: ModbusTransportErrorCode enum with 16 error types
+- ✅ **Fake Implementation**: FakeModbusTransport for test-only usage
+- ✅ **Comprehensive Tests**: 40 new tests for all transport types
+- ✅ **Version Update**: Updated to v0.4.5
+
+### Key Architecture Decisions from G8A
+
+1. **Interfaces in Core**: All transport interfaces and DTOs placed in Core layer
+2. **No IO Dependencies**: Core transport files contain no System.IO.Ports, TcpClient, or Socket
+3. **Defensive Copies**: ResponseBytes are always copied to prevent external mutation
+4. **Async Pattern**: ConnectAsync, DisconnectAsync, SendRequestAsync all return Task
+5. **Fake Only in Tests**: FakeModbusTransport exists only in test project
+
+### Files Created
+
+| File | Purpose |
+|------|---------|
+| IModbusTransport.cs | Core transport interface |
+| IModbusRtuTransport.cs | RTU-specific transport interface |
+| IModbusTcpTransport.cs | TCP-specific transport interface |
+| ModbusTransportResult.cs | Result DTO with factory methods |
+| ModbusTransportOptions.cs | Configuration options |
+| ModbusRequestContext.cs | Request context data |
+| ModbusTransportErrorCode.cs | Error enumeration |
+| FakeModbusTransport.cs | Test fake implementation |
+
+### Test Coverage
+
+| Test Class | Tests | Purpose |
+|-----------|-------|---------|
+| ModbusTransportOptionsTests | 7 | Options validation |
+| ModbusRequestContextTests | 9 | Context validation |
+| ModbusTransportResultTests | 10 | Result factory and copy |
+| FakeModbusTransportTests | 14 | Fake transport behavior |
+
+### Current State After G8A
+
+- **Test Count**: 560 passed (was 520, +40 new tests)
+- **Version**: v0.4.5 (updated from v0.4.4)
+- **No Real IO**: Still no actual SerialPort or TcpClient usage
+- **Core Transport Complete**: Ready for Infrastructure implementation
+- **Fake Available**: Tests can use FakeModbusTransport
+
+### What G8A Does NOT Include
+
+- ❌ **Real SerialPort**: No System.IO.Ports usage
+- ❌ **Real TcpClient**: No System.Net.Sockets usage
+- ❌ **ModbusViewModel Changes**: Send workflow not yet integrated
+- ❌ **ModbusPage UI**: Transport UI not yet added
+
+### Next Phase Recommendation
+
+**Recommended**: G8B - ModbusViewModel Transport Injection with Fake Tests
+
+**Why G8B Next**:
+- G8A provides clean interface contracts
+- G8B integrates contracts into ViewModel
+- Fake transport enables testing without hardware
+- ViewModel can be tested in isolation
+- Maintains layer separation
+
+---
+
 *Document created: 2026-05-26*
-*Last updated: 2026-05-27*
-*Phase: G7 - Modbus Transport Integration Planning Complete*
+*Last updated: 2026-05-29*
+*Phase: G8A - Modbus Transport Contracts Complete*

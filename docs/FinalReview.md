@@ -921,6 +921,125 @@ This section reviews the completion of G7: Modbus Transport Integration Planning
 
 ---
 
+## G8A Modbus Transport Contracts Review (May 2026)
+
+### G8A Completion Status
+
+**G8A Phase**: ✅ Completed
+
+**Implementation Date**: 2026-05-29
+
+### What G8A Accomplished
+
+1. **Core Transport Namespace Created**
+   - Location: `src/SerialAssistant.Core/Modbus/Transport/`
+   - All transport interfaces and DTOs in Core layer
+   - No IO dependencies in Core
+
+2. **Interface Definitions**
+   - IModbusTransport: Base transport interface
+   - IModbusRtuTransport: RTU-specific transport interface
+   - IModbusTcpTransport: TCP-specific transport interface with Host/Port
+
+3. **DTO Models**
+   - ModbusTransportResult: Result with factory methods
+   - ModbusTransportOptions: Configuration options with validation
+   - ModbusRequestContext: Request context with validation
+   - ModbusTransportErrorCode: 16 transport-level error codes
+
+4. **Fake Implementation**
+   - FakeModbusTransport in Tests project only
+   - Supports Connect/Disconnect/SendRequest
+   - Supports response queuing and failure injection
+   - Records sent requests and contexts
+
+5. **Comprehensive Tests**
+   - 40 new tests added
+   - All transport types tested
+   - Fake transport behavior verified
+   - Boundary conditions covered
+
+6. **Version Update**
+   - Updated from v0.4.4 to v0.4.5
+   - Version displayed in MainWindow title bar
+
+### Layer Boundary Compliance
+
+| Layer | Status | Notes |
+|-------|--------|-------|
+| **Core** | ✅ Compliant | No System.IO.Ports, TcpClient, Socket |
+| **Tests** | ✅ Compliant | Fake transport only, no real IO |
+| **App** | ✅ Compliant | No direct IO references |
+| **Infrastructure** | ✅ Unchanged | No modifications |
+
+### G8A Scope Control
+
+**In Scope**:
+- ✅ Core transport interfaces and DTOs
+- ✅ FakeModbusTransport in Tests
+- ✅ 40 new tests
+- ✅ Version update to v0.4.5
+
+**Out of Scope** (deferred):
+- ❌ Real SerialPort implementation
+- ❌ Real TcpClient implementation
+- ❌ ModbusViewModel send workflow changes
+- ❌ ModbusPage UI changes
+
+### Current State After G8A
+
+- ✅ Test count: 560 passed (was 520, +40 new tests)
+- ✅ Version: v0.4.5 (updated from v0.4.4)
+- ✅ Transport contracts defined
+- ✅ Fake transport available
+- ✅ No real IO yet
+
+### Key Architectural Decisions from G8A
+
+| Decision | Rationale |
+|----------|-----------|
+| Interfaces in Core | Both App and Infrastructure can reference |
+| DTOs in Core | No dependencies on App layer |
+| No ModbusTransportMode in Core | Use specific interfaces (Rtu/Tcp) |
+| Fake in Tests only | No production fake |
+| Defensive copies | Prevent external mutation |
+| Async pattern | Consistent async/await |
+
+### Risk Assessment
+
+| Risk | Status | Mitigation |
+|------|--------|------------|
+| App layer IO pollution | ✅ Mitigated | Clear interfaces in Core |
+| Test coverage | ✅ Good | 40 comprehensive tests |
+| Layer boundary violation | ✅ Mitigated | All checks pass |
+| Architecture mismatch | ✅ None | Clean separation |
+
+### What G8A Does NOT Include
+
+1. **No Real IO**: Still no System.IO.Ports or TcpClient usage
+2. **No ViewModel Changes**: ModbusViewModel send workflow unchanged
+3. **No UI Changes**: ModbusPage still minimal UI
+4. **No Infrastructure**: Still no transport implementation
+
+### Next Phase Recommendation
+
+**Recommended**: G8B - ModbusViewModel Transport Injection with Fake Tests
+
+**Why G8B Next**:
+- G8A provides clean interface contracts
+- G8B integrates contracts into ViewModel
+- Fake transport enables testing without hardware
+- ViewModel can be tested in isolation
+- Maintains layer separation
+
+**Do NOT Skip to G9/G10**:
+- ❌ Do NOT skip G8B and go directly to real IO
+- ❌ Do NOT implement Infrastructure before ViewModel integration
+- ❌ Do NOT skip fake tests
+- ❌ Do NOT modify ModbusViewModel without tests
+
+---
+
 *Last updated: May 2026*
 *Modbus Core Foundation Review: May 2026*
 *Modbus TCP Frame Review: May 2026*
@@ -928,3 +1047,4 @@ This section reviews the completion of G7: Modbus Transport Integration Planning
 *ModbusPage Review: May 2026*
 *G6 Modbus Closure Review: May 2026*
 *G7 Modbus Transport Planning Review: May 2026*
+*G8A Modbus Transport Contracts Review: May 2026*

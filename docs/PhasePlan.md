@@ -825,13 +825,27 @@ This document outlines the phased development plan for SerialAssistant.Win, orga
 
 ---
 
-## Future Phases (G8-G12)
+## Future Phases (G8A-G12)
 
-### Feature G8: Modbus Transport Interfaces and Fake Tests
+### Feature G8A: Modbus Transport Contracts and Fake Transport Foundation
 
-**Status**: ⏳ Pending
+**Status**: ✅ Completed
 
-**Goal**: Define transport interfaces and implement fake transport for testing
+**Implementation Date**: 2026-05-29
+
+**Files Created**:
+- `src/SerialAssistant.Core/Modbus/Transport/IModbusTransport.cs`
+- `src/SerialAssistant.Core/Modbus/Transport/IModbusRtuTransport.cs`
+- `src/SerialAssistant.Core/Modbus/Transport/IModbusTcpTransport.cs`
+- `src/SerialAssistant.Core/Modbus/Transport/ModbusTransportResult.cs`
+- `src/SerialAssistant.Core/Modbus/Transport/ModbusTransportOptions.cs`
+- `src/SerialAssistant.Core/Modbus/Transport/ModbusRequestContext.cs`
+- `src/SerialAssistant.Core/Modbus/Transport/ModbusTransportErrorCode.cs`
+- `src/SerialAssistant.Tests/Modbus/Transport/FakeModbusTransport.cs`
+- `src/SerialAssistant.Tests/Modbus/Transport/ModbusTransportOptionsTests.cs`
+- `src/SerialAssistant.Tests/Modbus/Transport/ModbusRequestContextTests.cs`
+- `src/SerialAssistant.Tests/Modbus/Transport/ModbusTransportResultTests.cs`
+- `src/SerialAssistant.Tests/Modbus/Transport/FakeModbusTransportTests.cs`
 
 **Scope**:
 - Create IModbusTransport interface in Core layer
@@ -840,31 +854,68 @@ This document outlines the phased development plan for SerialAssistant.Win, orga
 - Create ModbusTransportResult model
 - Create ModbusTransportOptions model
 - Create ModbusRequestContext model
+- Create ModbusTransportErrorCode enum
 - Implement FakeModbusTransport for testing
-- Add tests verifying ViewModel can work with transport
-- NO real serial/TCP implementation yet
+- Add comprehensive tests for all new types
+- Update version display to v0.4.5
 
 **Allowed Modifications**:
-- src/SerialAssistant.Core/Services/ (interfaces and models)
-- src/SerialAssistant.Tests/ (fake transport tests)
-- src/SerialAssistant.App/ViewModels/ModbusViewModel.cs (minor updates for transport integration)
+- src/SerialAssistant.Core/Modbus/Transport/ (interfaces and models)
+- src/SerialAssistant.Tests/Modbus/Transport/ (fake transport and tests)
+- src/SerialAssistant.App/MainWindow.xaml (version only)
 
 **Forbidden**:
 - No System.IO.Ports reference in App layer
 - No TcpClient/Socket reference in App layer
 - No real serial/TCP implementation
-- No UI changes
+- No ModbusViewModel send workflow changes
+- No ModbusPage UI changes
 
 **Acceptance Criteria**:
-- Interfaces defined and documented
-- Fake transport implementation complete
-- Tests pass with fake transport
-- ViewModel can use transport without knowing implementation
-- Test count increases appropriately
+- All transport contracts defined in Core
+- FakeModbusTransport implemented
+- 40 new tests added
+- Test count: 560 total (was 520)
+- Layer boundaries preserved
+- Version updated to v0.4.5
 
-**Code Changes Allowed**: Yes (Core + Tests + minor App updates)
+**Code Changes Allowed**: Yes (Core + Tests + version update)
 
-**Tests Required**: Yes (new fake transport tests)
+**Tests Required**: Yes (40 new tests)
+
+**Report Required**: Yes
+
+---
+
+### Feature G8B: ModbusViewModel Transport Injection with Fake Tests
+
+**Status**: ⏳ Pending
+
+**Goal**: Integrate IModbusTransport into ModbusViewModel using fake transport
+
+**Scope**:
+- Inject IModbusTransport into ModbusViewModel
+- Add Connect/Disconnect/SendRequest commands
+- Add connection state management
+- Add transport error handling
+- Test with FakeModbusTransport
+
+**Allowed Modifications**:
+- src/SerialAssistant.App/ViewModels/ModbusViewModel.cs
+- src/SerialAssistant.Tests/Modbus/Transport/ (integration tests)
+
+**Forbidden**:
+- No real SerialPort/TcpClient/Socket implementation
+- No Infrastructure layer changes yet
+
+**Acceptance Criteria**:
+- ViewModel can use IModbusTransport
+- Tests pass with FakeModbusTransport
+- No IO references in App layer
+
+**Code Changes Allowed**: Yes (App layer integration)
+
+**Tests Required**: Yes
 
 **Report Required**: Yes
 

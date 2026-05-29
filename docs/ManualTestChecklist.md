@@ -918,6 +918,55 @@ This document provides a step-by-step manual testing guide for SerialAssistant.W
 
 ---
 
+## G8A: Modbus Transport Contracts Verification
+
+### G8A.1 Core Transport Files Verification
+
+- [ ] **Step G8A.1** Verify `src/SerialAssistant.Core/Modbus/Transport/IModbusTransport.cs` exists
+- [ ] **Step G8A.2** Verify `src/SerialAssistant.Core/Modbus/Transport/IModbusRtuTransport.cs` exists
+- [ ] **Step G8A.3** Verify `src/SerialAssistant.Core/Modbus/Transport/IModbusTcpTransport.cs` exists
+- [ ] **Step G8A.4** Verify `src/SerialAssistant.Core/Modbus/Transport/ModbusTransportResult.cs` exists
+- [ ] **Step G8A.5** Verify `src/SerialAssistant.Core/Modbus/Transport/ModbusTransportOptions.cs` exists
+- [ ] **Step G8A.6** Verify `src/SerialAssistant.Core/Modbus/Transport/ModbusRequestContext.cs` exists
+- [ ] **Step G8A.7** Verify `src/SerialAssistant.Core/Modbus/Transport/ModbusTransportErrorCode.cs` exists
+
+### G8A.2 Test Files Verification
+
+- [ ] **Step G8A.8** Verify `src/SerialAssistant.Tests/Modbus/Transport/FakeModbusTransport.cs` exists
+- [ ] **Step G8A.9** Verify `src/SerialAssistant.Tests/Modbus/Transport/ModbusTransportOptionsTests.cs` exists
+- [ ] **Step G8A.10** Verify `src/SerialAssistant.Tests/Modbus/Transport/ModbusRequestContextTests.cs` exists
+- [ ] **Step G8A.11** Verify `src/SerialAssistant.Tests/Modbus/Transport/ModbusTransportResultTests.cs` exists
+- [ ] **Step G8A.12** Verify `src/SerialAssistant.Tests/Modbus/Transport/FakeModbusTransportTests.cs` exists
+
+### G8A.3 Scope Control Verification
+
+- [ ] **Step G8A.13** Verify NO modifications to `src/SerialAssistant.Infrastructure/`
+- [ ] **Step G8A.14** Verify NO modifications to `src/SerialAssistant.App/ViewModels/ModbusViewModel.cs`
+- [ ] **Step G8A.15** Verify NO modifications to `src/SerialAssistant.App/Views/ModbusPage.xaml`
+- [ ] **Step G8A.16** Verify MainWindow.xaml version updated to v0.4.5
+
+### G8A.4 Layer Boundary Verification
+
+- [ ] **Step G8A.17** Verify Core transport files do NOT contain System.IO.Ports
+- [ ] **Step G8A.18** Verify Core transport files do NOT contain TcpClient
+- [ ] **Step G8A.19** Verify Core transport files do NOT contain Socket
+- [ ] **Step G8A.20** Verify Core transport files do NOT contain System.Windows
+- [ ] **Step G8A.21** Verify App ViewModels do NOT contain System.IO.Ports
+- [ ] **Step G8A.22** Verify App ViewModels do NOT contain TcpClient/Socket
+
+### G8A.5 Build and Test Verification
+
+- [ ] **Step G8A.23** Run `git diff --check` - Verify no trailing whitespace
+- [ ] **Step G8A.24** Run `dotnet build .\SerialAssistant.Win.sln -c Debug` - Verify build passes
+- [ ] **Step G8A.25** Run `dotnet test .\SerialAssistant.Win.sln -c Debug` - Verify test count shows 560 passed (40 new tests)
+
+### G8A.6 Application Verification
+
+- [ ] **Step G8A.26** Run application - Verify app starts normally
+- [ ] **Step G8A.27** Verify version display shows v0.4.5 in title bar
+
+---
+
 ## Tester Information
 
 - **Tester Name**: _________________________
