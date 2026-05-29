@@ -1076,6 +1076,122 @@ public ICommand ShowModbusCommand { get; }
 
 ---
 
+## Modbus Transport UI Planning (G7)
+
+### Overview
+
+This section defines the planned UI additions for Modbus transport integration, to be implemented in G11.
+
+### Current State (G7)
+
+- ✅ ModbusPage with parameter inputs (TransportMode, RequestKind, UnitId, TransactionId, StartAddress, Quantity, etc.)
+- ✅ Build Request button
+- ✅ Parse Response button
+- ✅ RequestHex, ResponseHex, ParsedSummary display
+- ❌ No Connect/Disconnect UI
+- ❌ No RTU/TCP specific connection parameters
+- ❌ No Send Request button
+- ❌ No connection status display
+
+### Planned UI Additions (G11)
+
+#### Connection Area (NEW)
+
+```
+┌───────────────────────────────────────────┐
+│ Connection Controls                     │
+│ [Connect] [Disconnect]          Status: Connected │
+└───────────────────────────────────────────┘
+```
+
+#### RTU Parameters (Conditional)
+
+```
+┌───────────────────────────────────────────┐
+│ RTU Settings                              │
+│ Port: [COM3▼]  Baud Rate: [9600▼]        │
+│ Data Bits: [8▼]  Parity: [None▼]         │
+│ Stop Bits: [1▼]  Timeout: [5s]           │
+└───────────────────────────────────────────┘
+```
+
+- Shown only when TransportMode = RTU
+- May reuse Terminal SerialSettingsViewModel or create Modbus-specific one
+
+#### TCP Parameters (Conditional)
+
+```
+┌───────────────────────────────────────────┐
+│ TCP Settings                              │
+│ IP Address: [192.168.1.100]               │
+│ Port: [502]  Timeout: [5s]                │
+└───────────────────────────────────────────┘
+```
+
+- Shown only when TransportMode = TCP
+
+#### Send Request Button (NEW)
+
+```
+[Send Request]
+```
+
+- Disabled when not connected
+- Shows busy indicator during send
+- Separate from Build Request (can still build without connecting)
+
+#### Status Display (Enhanced)
+
+```
+Status: Connected (192.168.1.100:502)
+- OR -
+Status: Error: Connection timed out
+```
+
+### UI Principles for G11
+
+1. **Minimal First**: No final MQTTX-style UI, just functional
+2. **Reuse Where Possible**: Consider reusing Terminal's SerialSettings UI
+3. **Conditional Display**: RTU/TCP parameters only show when relevant mode selected
+4. **Clear Feedback**: Connection status, send progress, error messages clearly visible
+5. **No IO in CodeBehind**: All communication goes through ViewModel → Infrastructure
+
+### UI Flow (Planned)
+
+1. User selects TransportMode (RTU or TCP)
+2. User configures connection parameters
+3. User clicks Connect
+4. UI shows connection status
+5. User configures request parameters
+6. User clicks Build Request (optional)
+7. User clicks Send Request
+8. UI shows RequestHex, ResponseHex, ParsedSummary
+9. User can disconnect or send another request
+
+### Serial Port Ownership UI
+
+When Terminal is connected:
+- Modbus RTU Connect button disabled
+- Tooltip: "Terminal is using the serial port. Please disconnect Terminal first.
+"
+
+When Modbus RTU is connected:
+- Terminal Open button disabled
+- Tooltip: "Modbus is using the serial port. Please disconnect Modbus first.
+"
+
+### Deferred UI (Post-G12)
+
+- ❌ Final MQTTX-style visual design
+- ❌ Register table view/editor
+- ❌ Auto-polling UI
+- ❌ Batch operations UI
+- ❌ Templates UI
+- ❌ Logs UI
+
+---
+
 *Last updated: May 2026*
 *Modbus UI Planning: May 2026*
 *G6 Modbus Closure: May 2026*
+*G7 Modbus Transport UI Planning: May 2026*
