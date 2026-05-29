@@ -18,7 +18,7 @@
 
 - ❌ **Modbus real communication** - 当前只能构建请求、解析响应，不执行真实发送/接收
 - ❌ **Modbus Transport layer** - 尚无 RTU/TCP 具体 Transport 实现
-- ❌ **App layer transport interface** - ModbusViewModel 尚未与真实 IO 层集成
+- ❌ **ModbusViewModel transport integration** - ModbusViewModel 尚未与真实 IO 层集成
 - ❌ **Serial port ownership model** - Terminal 和 Modbus 如何共享/隔离串口尚未规划
 
 ## Target Capability
@@ -272,9 +272,11 @@ public class ModbusRequestContext
 ```
 SerialAssistant.Infrastructure/
 ├── Modbus/
-│   ├── IModbusTcpTransport (if not in Core/App)
-│   └── ModbusTcpTransport (implementation)
+│   ├── ModbusRtuTransport
+│   └── ModbusTcpTransport
 ```
+
+Transport interfaces and DTOs are defined in Core. Infrastructure contains only concrete transport implementations.
 
 ### TCP Connection
 
@@ -612,7 +614,7 @@ public class FakeModbusTransport : IModbusTransport
 - App layer uses IModbusRtuTransport
 
 **Forbidden:**
-- App layer sees SerialPort
+- App layer must NOT see SerialPort
 - UI logic in Infrastructure
 
 **Validation:**
@@ -632,8 +634,8 @@ public class FakeModbusTransport : IModbusTransport
 - App layer uses IModbusTcpTransport
 
 **Forbidden:**
-- App layer sees TcpClient
-- App layer sees Socket
+- App layer must NOT see TcpClient
+- App layer must NOT see Socket
 
 **Validation:**
 - Manual test with Modbus simulator

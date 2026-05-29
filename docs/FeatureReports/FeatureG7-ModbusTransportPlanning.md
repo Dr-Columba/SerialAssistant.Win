@@ -207,7 +207,11 @@
 2. **Removed App Layer Reference from Core**: ModbusRequestContext no longer references App's ModbusTransportMode
 3. **Fixed Markdown Format**: Corrected missing closing tags, parentheses, and table formatting in Architecture.md
 4. **Updated Validation Commands**: Changed tests directory check from `tests/` to `src/SerialAssistant.Tests/`
-5. **No Code Changes**: Only documentation updates, no src/tests modifications
+5. **Removed remaining "Core/App" ambiguity**: Removed all "Core/App", "Core or App", "if not in Core/App" wording
+6. **Replaced "App layer sees ..." with explicit "App layer must NOT see ..."**: Updated Forbidden sections for clarity
+7. **Confirmed Infrastructure contains concrete implementations only**: Removed interface references from Infrastructure structure
+8. **No Code Changes**: Only documentation updates, no src/tests modifications
+9. **Test count remains 520 passed**: No changes to test code
 
 ## User Verification Commands
 

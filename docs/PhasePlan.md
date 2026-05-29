@@ -834,7 +834,7 @@ This document outlines the phased development plan for SerialAssistant.Win, orga
 **Goal**: Define transport interfaces and implement fake transport for testing
 
 **Scope**:
-- Create IModbusTransport interface (Core or App layer)
+- Create IModbusTransport interface in Core layer
 - Create IModbusRtuTransport interface
 - Create IModbusTcpTransport interface
 - Create ModbusTransportResult model
