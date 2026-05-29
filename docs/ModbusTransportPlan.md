@@ -196,19 +196,42 @@ public class ModbusRequestContext
 
 ### Serial Port Service Strategy
 
-**Option 1: Reuse Existing SerialPortService (Recommended)**
+> **⚠️ G9A Review Update (2026-05-29): G7 assumption superseded by G9A review**
+
+**Option 1: Reuse Existing SerialPortService (Original G7 assumption - superseded)**
 
 - Terminal uses SerialPortService
 - Modbus RTU can also use SerialPortService
 - But need ownership coordination
+- **G9A finding: SerialPortService is event-based only, lacks SendAndReceiveAsync**
+- **Direct reuse NOT recommended for Modbus request-response pattern**
 
-**Option 2: ModbusRtuTransport Owns SerialPort**
+**Option 2: ModbusRtuTransport Owns SerialPort (Original G7 assumption - superseded)**
 
 - Modbus has its own SerialPort access
 - Duplicates some Terminal logic
 - More isolation
+- **G9A finding: Extending SerialPortService risks breaking Terminal behavior**
 
-**Recommendation: Start with Option 1 for G9, plan ownership model.**
+**Option C: New ModbusRtuTransport + Serial Port Ownership Coordinator (G9A Recommendation)**
+
+- New `ModbusRtuTransport` in Infrastructure layer
+- Internal composition of low-level serial capabilities
+- New `ISerialPortOwnershipCoordinator` for ownership coordination
+- **Does NOT extend existing SerialPortService**
+- **Does NOT modify Terminal behavior**
+- **Supports fake serial adapter for testing**
+- **Clear layer boundaries preserved**
+
+**G9A Review Summary:**
+- Existing ISerialPortService is event-based (DataReceived only)
+- No SendAndReceiveAsync method
+- No per-request timeout control
+- No request-response matching
+- No port ownership tracking
+- Option C avoids breaking Terminal while enabling Modbus RTU
+
+**Recommendation: Option C for G9B-G9D**
 
 ### Serial Port Ownership
 
@@ -487,9 +510,18 @@ public class ModbusViewModel : BaseViewModel
 
 **How to Track Ownership:**
 
-- **Option 1:** MainWindowViewModel tracks active port user
-- **Option 2:** Shared service in Infrastructure tracks ownership
-- **Recommendation: Option 1** - Simple, App-layer coordination
+> **⚠️ G9A Update (2026-05-29): Earlier App-layer ownership idea superseded**
+
+- **Old Option 1 (superseded):** MainWindowViewModel tracks active port user
+- **Old Option 2 (superseded):** Shared service in Infrastructure tracks ownership
+- **Current Recommendation:** Core ownership coordinator contract first, then Infrastructure implementation
+
+**G9A Ownership Plan:**
+- **G9B:** Define `ISerialPortOwnershipCoordinator` and `SerialPortOwner` enum in Core
+- **Core layer** owns the ownership coordination contract (no Infrastructure reference)
+- **Infrastructure layer** will later provide concrete ownership implementation
+- **App layer** may display ownership state and bind UI enablement, but **must not become the ownership authority**
+- MainWindowViewModel must NOT be the ownership authority
 
 ### Future Shared Model (Optional, Post-G12)
 
@@ -707,22 +739,93 @@ public class FakeModbusTransport : IModbusTransport
 
 ## Final Recommendation
 
-**NEXT PHASE: G8 - Modbus Transport Interfaces and Fake Tests**
+**Historical Recommendation from G7 (superseded):**
+> NEXT PHASE: G8 - Modbus Transport Interfaces and Fake Tests
+>
+> G8 was previously recommended and has now been completed through G8A/G8B.
 
-**WHY G8 FIRST:**
+**Current Recommendation after G9A:**
+> NEXT PHASE: G9B - Serial Port Ownership Coordinator Contracts
 
-1. **Lock in the design** - Define interfaces before real implementation
-2. **Fake it early** - Prove ViewModel works without hardware
-3. **Reduce risk** - Fake tests give fast feedback
-4. **Prevent pollution** - Verify App layer stays clean
+**G9B Scope:**
+- Define SerialPortOwner enum in Core
+- Define ISerialPortOwnershipCoordinator in Core
+- Add fake-based tests for coordinator
+- **No Infrastructure changes in G9B**
+- **No ModbusRtuTransport in G9B**
 
-**WHAT G8 DELIVERS:**
-- Interfaces defined (IModbusTransport, etc.)
-- Fake transport implementation
-- Tests proving ViewModel can use transport
-- No real serial/TCP yet, but contract is locked
+**DO NOT SKIP G9B:**
+- ❌ Do NOT implement Infrastructure ownership coordination in G9B
+- ❌ Do NOT implement real ModbusRtuTransport in G9B
+- ❌ Do NOT modify Terminal serial behavior
 
-**DO NOT SKIP G8:**
-- Do NOT jump directly to G9 RTU
-- Do NOT put real IO in ViewModel
+**WHY G9B NEXT:**
+- Ownership is critical for preventing Terminal/Modbus conflicts
+- Core contracts should be defined before Infrastructure implementation
+- Clean architecture requires Core-first approach
+
+**WHAT G9B DELIVERS:**
+- SerialPortOwner enum (None, Terminal, ModbusRtu)
+- ISerialPortOwnershipCoordinator interface
+- FakeSerialPortOwnershipCoordinator for testing
+- Tests proving coordinator works
+
+**DO NOT SKIP G9C:**
+- ❌ Do NOT implement real ModbusRtuTransport without ownership coordinator
+- ❌ Do NOT skip G9B and go directly to real hardware
+
+---
+
+## G9A Review Notes
+
+### G9A Status: ✅ Completed
+
+**Review Date**: 2026-05-29
+
+### Key Findings
+
+1. **ISerialPortService Limitations**:
+   - Fully event-based receive only
+   - No SendAndReceiveAsync
+   - No CancellationToken support
+   - No per-request timeout control
+   - No port ownership tracking
+
+2. **SerialPortService Implementation**:
+   - No internal buffer
+   - No frame boundary detection
+   - No request-response matching
+   - No concurrency control
+
+3. **Terminal Usage**:
+   - Open/Close/Send synchronous
+   - DataReceived event for receive
+   - No ownership control
+
+### Recommended Strategy: Option C
+
+> **C. 新增 ModbusRtuTransport，内部组合现有低层串口能力 + 新增串口所有权协调服务**
+
+### Why Option C?
+
+| Reason | Explanation |
+|--------|-------------|
+| No Terminal Breakage | Existing Terminal continues unchanged |
+| Clean Architecture | Modbus-specific logic isolated |
+| Testability | Fake serial adapter possible |
+| Layer Boundaries | App only references Core interfaces |
+
+### Subsequent Phases Plan
+
+- G9B: Serial Port Ownership Coordinator Contracts
+- G9C: Modbus RTU Transport Implementation with Fake Serial Adapter
+- G9D: Modbus RTU Transport Manual Verification
+
+### Critical Decisions
+
+1. **Ownership First**: Must implement port ownership before real RTU
+2. **Core Contracts First**: Define ISerialPortOwnershipCoordinator in Core
+3. **No Terminal Changes**: Keep ISerialPortService as-is for Terminal
+4. **New ModbusRtuTransport**: Implement IModbusRtuTransport, own serial handling
+5. **Fake Adapter First**: Test with fake serial before real hardware
 - Do NOT skip fake tests

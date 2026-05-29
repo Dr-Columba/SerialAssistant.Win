@@ -1009,6 +1009,98 @@ This document provides a step-by-step manual testing guide for SerialAssistant.W
 
 ---
 
+## G9A: Modbus RTU Transport Capability Review Verification
+
+### G9A Overview
+
+G9A is a **documentation-only phase** for reviewing existing serial port service capabilities for Modbus RTU transport implementation. No code changes are made in this phase.
+
+### G9A.1 Phase Type Verification
+
+- [ ] **Step G9A.1** Verify G9A is documented as a documentation-only phase
+- [ ] **Step G9A.2** Verify no `src/` modifications occurred
+- [ ] **Step G9A.3** Verify no `src/SerialAssistant.Tests/` modifications occurred
+
+### G9A.2 Build and Test Verification
+
+- [ ] **Step G9A.4** Run `git diff --check` - Verify no trailing whitespace
+- [ ] **Step G9A.5** Run `dotnet build .\SerialAssistant.Win.sln -c Debug` - Verify build passes with 0 errors
+- [ ] **Step G9A.6** Run `dotnet test .\SerialAssistant.Win.sln -c Debug` - Verify test count shows **586 passed** (unchanged)
+- [ ] **Step G9A.7** Verify no new tests were added (G9A is documentation only)
+
+### G9A.3 Source Code Diff Verification
+
+- [ ] **Step G9A.8** Run `git diff --name-only -- src/` - Verify result is empty
+- [ ] **Step G9A.9** Run `git diff --name-only -- src/SerialAssistant.Tests/` - Verify result is empty
+
+### G9A.4 G9A Report Verification
+
+- [ ] **Step G9A.10** Verify `docs/FeatureReports/FeatureG9A-ModbusRtuTransportReview.md` exists
+- [ ] **Step G9A.11** Verify report documents existing ISerialPortService capabilities
+- [ ] **Step G9A.12** Verify report documents SerialPortService gaps:
+  - No SendAndReceiveAsync
+  - No per-request timeout control
+  - No CancellationToken support
+  - No port ownership tracking
+- [ ] **Step G9A.13** Verify report **explicitly recommends Option C** (not Option 1)
+- [ ] **Step G9A.14** Verify report plans G9B/G9C/G9D phases
+
+### G9A.5 Strategy Conflict Resolution Verification
+
+- [ ] **Step G9A.15** Verify `docs/ModbusTransportPlan.md` no longer recommends Option 1
+- [ ] **Step G9A.16** Verify ModbusTransportPlan.md marks Option 1 as "superseded"
+- [ ] **Step G9A.17** Verify ModbusTransportPlan.md documents Option C as current recommendation
+- [ ] **Step G9A.18** Verify ModbusTransportPlan.md does NOT contain "Start with Option 1 for G9"
+
+### G9A.6 Architecture Documentation Verification
+
+- [ ] **Step G9A.19** Verify `docs/Architecture.md` contains G9A capability review
+- [ ] **Step G9A.20** Verify Architecture.md documents:
+  - Current ISerialPortService limitations
+  - Why direct reuse is NOT recommended
+  - Option C architecture
+  - G9B/G9C/G9D phase plan
+  - Layer boundary rules (App forbidden System.IO.Ports)
+
+### G9A.7 PhasePlan Update Verification
+
+- [ ] **Step G9A.21** Verify `docs/PhasePlan.md` contains G9A section
+- [ ] **Step G9A.22** Verify PhasePlan.md marks G9A as "Completed"
+- [ ] **Step G9A.23** Verify PhasePlan.md contains G9B/G9C/G9D sections
+
+### G9A.8 FinalReview Update Verification
+
+- [ ] **Step G9A.24** Verify `docs/FinalReview.md` contains G9A review
+- [ ] **Step G9A.25** Verify FinalReview.md documents:
+  - Current still no real RTU communication
+  - SerialPortService review completed
+  - Option C recommended
+  - G9B recommended as next phase
+
+### G9A.9 Key Findings Documentation
+
+- [ ] **Step G9A.26** Verify G9A report documents ISerialPortService limitations:
+  - Event-based receive only (DataReceived)
+  - No SendAndReceiveAsync method
+  - No request-response pattern support
+  - No per-request timeout
+  - No CancellationToken support
+  - No port ownership tracking
+- [ ] **Step G9A.27** Verify G9A report documents recommendation rationale:
+  - Option C avoids breaking Terminal behavior
+  - New ModbusRtuTransport isolates Modbus logic
+  - New Ownership Coordinator enables conflict prevention
+  - Fake serial adapter enables testing
+
+### G9A.10 Boundary Rules Verification
+
+- [ ] **Step G9A.28** Verify all documentation states App layer is forbidden System.IO.Ports
+- [ ] **Step G9A.29** Verify all documentation states Infrastructure CAN use System.IO.Ports
+- [ ] **Step G9A.30** Verify all documentation states Core MUST NOT reference Infrastructure
+- [ ] **Step G9A.31** Verify all documentation states Terminal and Modbus ownership must be managed
+
+---
+
 ## Tester Information
 
 - **Tester Name**: _________________________
