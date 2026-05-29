@@ -829,3 +829,61 @@ public class FakeModbusTransport : IModbusTransport
 4. **New ModbusRtuTransport**: Implement IModbusRtuTransport, own serial handling
 5. **Fake Adapter First**: Test with fake serial before real hardware
 - Do NOT skip fake tests
+
+---
+
+## G9B Implementation Notes
+
+### G9B Status: ✅ Completed
+
+**Implementation Date**: 2026-05-29
+
+### What G9B Delivered
+
+1. **Core Contracts**:
+   - `SerialPortOwner` enum in Core (None, Terminal, ModbusRtu)
+   - `ISerialPortOwnershipCoordinator` interface in Core
+   - `SerialPortOwnershipChangedEventArgs` in Core
+
+2. **Testing Infrastructure**:
+   - `FakeSerialPortOwnershipCoordinator` in Tests
+   - Comprehensive test coverage for coordinator
+
+3. **Version Update**:
+   - Updated MainWindow.xaml version from v0.4.6 to v0.4.7
+
+### What G9B Did NOT Deliver
+
+1. **No Infrastructure Changes**:
+   - No real SerialPortOwnershipCoordinator implementation
+   - No ModbusRtuTransport implementation
+   - No changes to SerialPortService
+
+2. **No App Logic Changes**:
+   - No changes to MainWindowViewModel
+   - No changes to TerminalViewModel
+   - No changes to ModbusViewModel
+
+### G9B Test Coverage
+
+- 2 tests for SerialPortOwner
+- 8 tests for SerialPortOwnershipChangedEventArgs
+- 22 tests for FakeSerialPortOwnershipCoordinator
+- Total: 32 new tests added
+- Total tests: 618 (586 + 32)
+
+### Key G9B Decisions
+
+1. **Core Only**: All ownership contracts in Core, no Infrastructure changes
+2. **No App Logic**: App doesn't have ownership authority, just displays state
+3. **Fake First**: Test with FakeSerialPortOwnershipCoordinator before real implementation
+4. **No RTU Yet**: ModbusRtuTransport deferred to G9C
+
+### Next Phase: G9C
+
+**G9C Scope**:
+- Implement Infrastructure ownership coordinator
+- Implement ModbusRtuTransport with fake serial adapter
+- Keep Core contracts unchanged
+- Still no real hardware communication
+

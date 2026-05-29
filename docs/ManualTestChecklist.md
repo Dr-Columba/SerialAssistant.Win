@@ -1101,6 +1101,55 @@ G9A is a **documentation-only phase** for reviewing existing serial port service
 
 ---
 
+## G9B: Serial Port Ownership Coordinator Contracts
+
+### G9B Overview
+
+G9B is a code phase that adds Core ownership contracts and tests, with no Infrastructure or App logic changes.
+
+### G9B.1 Core Contracts Verification
+
+- [ ] **Step G9B.1** Verify `SerialPortOwner` enum exists in Core/Services
+- [ ] **Step G9B.2** Verify `SerialPortOwner` has values: None, Terminal, ModbusRtu
+- [ ] **Step G9B.3** Verify `ISerialPortOwnershipCoordinator` interface exists in Core/Services
+- [ ] **Step G9B.4** Verify `SerialPortOwnershipChangedEventArgs` exists in Core/Services
+- [ ] **Step G9B.5** Verify Core files have NO references to System.IO.Ports
+- [ ] **Step G9B.6** Verify Core files have NO references to Infrastructure
+- [ ] **Step G9B.7** Verify Core files have NO references to WPF
+
+### G9B.2 Tests Verification
+
+- [ ] **Step G9B.8** Verify `FakeSerialPortOwnershipCoordinator` exists in Tests/Infrastructure
+- [ ] **Step G9B.9** Verify `SerialPortOwnerTests` exists in Tests/Services
+- [ ] **Step G9B.10** Verify `SerialPortOwnershipChangedEventArgsTests` exists in Tests/Services
+- [ ] **Step G9B.11** Verify `FakeSerialPortOwnershipCoordinatorTests` exists in Tests/Services
+- [ ] **Step G9B.12** Verify test count increased from 586 to 618
+
+### G9B.3 No Infrastructure Changes
+
+- [ ] **Step G9B.13** Verify `src/SerialAssistant.Infrastructure/` has NO changes
+- [ ] **Step G9B.14** Verify NO real ownership coordinator implemented
+- [ ] **Step G9B.15** Verify NO ModbusRtuTransport implemented
+
+### G9B.4 No App Logic Changes
+
+- [ ] **Step G9B.16** Verify `MainWindowViewModel` has NO changes
+- [ ] **Step G9B.17** Verify `TerminalViewModel` has NO changes
+- [ ] **Step G9B.18** Verify `ModbusViewModel` has NO changes
+- [ ] **Step G9B.19** Verify NO ownership logic added to App layer
+
+### G9B.5 Version Verification
+
+- [ ] **Step G9B.20** Verify MainWindow.xaml version shows v0.4.7
+
+### G9B.6 Build and Test
+
+- [ ] **Step G9B.21** Run `git diff --check` - Verify no trailing whitespace
+- [ ] **Step G9B.22** Run `dotnet build` - Verify build passes with 0 warnings
+- [ ] **Step G9B.23** Run `dotnet test` - Verify all 618 tests pass
+
+---
+
 ## Tester Information
 
 - **Tester Name**: _________________________
