@@ -1119,7 +1119,7 @@ G9B is a code phase that adds Core ownership contracts and tests, with no Infras
 
 ### G9B.2 Tests Verification
 
-- [ ] **Step G9B.8** Verify `FakeSerialPortOwnershipCoordinator` exists in Tests/Infrastructure
+- [ ] **Step G9B.8** Verify `FakeSerialPortOwnershipCoordinator` exists in Tests/Services
 - [ ] **Step G9B.9** Verify `SerialPortOwnerTests` exists in Tests/Services
 - [ ] **Step G9B.10** Verify `SerialPortOwnershipChangedEventArgsTests` exists in Tests/Services
 - [ ] **Step G9B.11** Verify `FakeSerialPortOwnershipCoordinatorTests` exists in Tests/Services
