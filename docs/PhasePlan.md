@@ -1009,7 +1009,9 @@ This document outlines the phased development plan for SerialAssistant.Win, orga
 
 ### Feature G9C: Modbus RTU Transport Implementation with Fake Serial Adapter
 
-**Status**: ⏳ Pending
+**Status**: ✅ Completed
+
+**Implementation Date**: 2026-05-29
 
 **Goal**: Implement ModbusRtuTransport with fake serial adapter
 
@@ -1023,6 +1025,7 @@ This document outlines the phased development plan for SerialAssistant.Win, orga
 **Allowed Modifications**:
 - Infrastructure layer (ModbusRtuTransport)
 - Tests layer (fake serial adapter tests)
+- MainWindow.xaml (version only)
 
 **Forbidden**:
 - No real System.IO.Ports usage yet
@@ -1030,16 +1033,30 @@ This document outlines the phased development plan for SerialAssistant.Win, orga
 - No Terminal changes
 
 **Acceptance Criteria**:
-- ModbusRtuTransport implements IModbusRtuTransport
-- Ownership coordinator integration works
-- Fake-based tests pass
-- No real hardware required
+- ModbusRtuTransport implements IModbusRtuTransport ✅
+- Ownership coordinator integration works ✅
+- Fake-based tests pass ✅
+- No real hardware required ✅
 
 **Code Changes Allowed**: Yes (Infrastructure layer)
 
 **Tests Required**: Yes (fake-based tests)
 
 **Report Required**: Yes
+
+**Files Created**:
+- `src/SerialAssistant.Infrastructure/Modbus/Transport/IModbusRtuSerialAdapter.cs`
+- `src/SerialAssistant.Infrastructure/Modbus/Transport/ModbusRtuTransport.cs`
+- `src/SerialAssistant.Tests/Infrastructure/Modbus/FakeModbusRtuSerialAdapter.cs`
+- `src/SerialAssistant.Tests/Infrastructure/Modbus/ModbusRtuTransportTests.cs`
+
+**Test Count**:
+- Before G9C: 618 tests
+- After G9C: 647 tests
+- Added: 29 new tests
+
+**Version Update**:
+- Updated from v0.4.7 to v0.4.8
 
 ---
 

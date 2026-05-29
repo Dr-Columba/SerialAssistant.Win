@@ -1614,9 +1614,96 @@ public interface ISerialPortOwnershipCoordinator
 3. **No Infrastructure Changes**: Still no real ownership coordinator
 4. **No RTU Yet**: ModbusRtuTransport deferred to G9C
 
-### Next Phase: G9C
+---
 
-G9C will implement Infrastructure ownership coordinator and ModbusRtuTransport with fake serial.
+## G9C: Modbus RTU Transport with Fake Serial Adapter (May 2026)
+
+### G9C Status: ✅ Completed
+
+### What G9C Added
+
+1. **Infrastructure Layer Additions**:
+   - `IModbusRtuSerialAdapter` interface - serial adapter abstraction
+   - `ModbusRtuTransport` class - implements `IModbusRtuTransport`
+   - Location: `src/SerialAssistant.Infrastructure/Modbus/Transport/`
+
+2. **Test Layer Additions**:
+   - `FakeModbusRtuSerialAdapter` - test fake serial adapter
+   - `ModbusRtuTransportTests` - 30 comprehensive tests
+   - Location: `src/SerialAssistant.Tests/Infrastructure/Modbus/`
+
+3. **Version Update**:
+   - Updated from v0.4.7 to v0.4.8
+
+### G9C Architecture
+
+#### IModbusRtuSerialAdapter Interface
+
+```csharp
+namespace SerialAssistant.Infrastructure.Modbus.Transport;
+
+public interface IModbusRtuSerialAdapter
+{
+    bool IsOpen { get; }
+    Task<bool> OpenAsync(CancellationToken cancellationToken = default);
+    Task CloseAsync(CancellationToken cancellationToken = default);
+    Task<bool> WriteAsync(byte[] requestBytes, CancellationToken cancellationToken = default);
+    Task<byte[]> ReadAsync(int maxBytes, TimeSpan timeout, CancellationToken cancellationToken = default);
+}
+```
+
+#### ModbusRtuTransport Structure
+
+```
+ModbusRtuTransport (Infrastructure)
+    │
+    ├── IModbusRtuSerialAdapter (dependency)
+    │       └── FakeModbusRtuSerialAdapter (tests)
+    │
+    ├── ISerialPortOwnershipCoordinator (dependency)
+    │       └── FakeSerialPortOwnershipCoordinator (tests)
+    │
+    └── ModbusTransportOptions (configuration)
+```
+
+#### G9C Layer Boundary Compliance
+
+| Rule | Status | Notes |
+|------|--------|-------|
+| App: No System.IO.Ports | ✅ | No direct serial access |
+| App: No TcpClient/Socket | ✅ | No network references |
+| Infrastructure: No WPF | ✅ | Pure .NET code |
+| Core: No Infrastructure refs | ✅ | Contracts only |
+| No real hardware | ✅ | Fake adapter only |
+
+#### Current State After G9C
+
+| Layer | Status |
+|-------|--------|
+| **Core** | Ownership contracts + transport contracts |
+| **App** | Unchanged |
+| **Infrastructure** | ModbusRtuTransport + IModbusRtuSerialAdapter |
+| **Tests** | Fake adapters + comprehensive tests |
+
+### G9C Test Coverage
+
+| Test Class | Tests |
+|-----------|-------|
+| ModbusRtuTransportTests | 29 |
+
+**Total Tests**: 647 (was 618 after G9B)
+
+### Key G9C Decisions
+
+1. **Adapter Pattern**: Serial access abstracted via `IModbusRtuSerialAdapter`
+2. **Ownership Integration**: Transport claims/releases port ownership
+3. **CRC Validation**: Optional CRC validation in transport layer
+4. **Fake First**: All tests use fake adapter, no hardware required
+5. **No Real IO**: Defer real serial to G9D
+
+### Next Phase: G9D
+
+G9D will add real System.IO.Ports serial adapter and perform manual hardware verification.
 
 ---
 
@@ -1629,3 +1716,4 @@ G9C will implement Infrastructure ownership coordinator and ModbusRtuTransport w
 *G8B ModbusViewModel Transport Injection Complete: May 2026*
 *G9A Modbus RTU Transport Capability Review: May 2026*
 *G9B Serial Port Ownership Coordinator Contracts: May 2026*
+*G9C Modbus RTU Transport with Fake Serial: May 2026*

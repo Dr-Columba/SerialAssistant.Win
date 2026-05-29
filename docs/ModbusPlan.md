@@ -1327,23 +1327,72 @@ G9A is a **documentation-only phase** that reviews existing serial port service 
 - **After G9B**: 618 tests
 - **Added**: 32 new tests
 
+---
+
+## G9C Modbus RTU Transport with Fake Serial Adapter
+
+**Phase**: G9C - Modbus RTU Transport Implementation with Fake Serial Adapter
+
+**Status**: ✅ Completed - 2026-05-29
+
+### What G9C Delivered
+
+1. **Infrastructure Interfaces**:
+   - `IModbusRtuSerialAdapter` - Serial adapter abstraction
+   - Located at: `src/SerialAssistant.Infrastructure/Modbus/Transport/`
+
+2. **Infrastructure Implementation**:
+   - `ModbusRtuTransport` - Implements `IModbusRtuTransport`
+   - Integrates with `ISerialPortOwnershipCoordinator`
+   - Supports CRC validation when enabled
+   - No System.IO.Ports references
+
+3. **Testing Infrastructure**:
+   - `FakeModbusRtuSerialAdapter` - Test fake adapter
+   - `ModbusRtuTransportTests` - 30 comprehensive tests
+   - Uses `FakeSerialPortOwnershipCoordinator` from G9B
+
+4. **Version Update**:
+   - Updated from v0.4.7 to v0.4.8
+
+### What G9C Did NOT Deliver
+
+- No real System.IO.Ports usage
+- No real hardware communication
+- No App layer changes
+- No Terminal changes
+- No UI changes (except version display)
+
+### Test Count Update
+
+- **Before G9C**: 618 tests
+- **After G9C**: 647 tests
+- **Added**: 29 new tests
+
+### Key Architecture Decisions
+
+1. **Adapter Pattern**: Serial access is abstracted via `IModbusRtuSerialAdapter`
+2. **Ownership Integration**: Transport claims/releases port ownership
+3. **CRC Validation**: Optional CRC validation in transport layer
+4. **Fake First**: All tests use fake adapter, no hardware required
+
 ### Next Phase Recommendation
 
-**Recommended**: G9C - Modbus RTU Transport with Fake Serial
+**Recommended**: G9D - Modbus RTU Transport Manual Verification
 
-**Why G9C Next**:
-- Core ownership contracts are ready
-- Test infrastructure is ready
-- Can now implement ModbusRtuTransport with fake serial
-- Still no real hardware needed
+**Why G9D Next**:
+- G9C provides fake-based transport implementation
+- G9D will add real System.IO.Ports adapter
+- Manual verification with real hardware required
+- Ownership conflict prevention needs hardware testing
 
-**Do NOT Skip G9C**:
-- ❌ Do NOT go directly to real hardware
-- ❌ Do NOT skip fake serial adapter implementation
-- ❌ Do NOT modify Core contracts
+**Do NOT Skip G9D**:
+- ❌ Do NOT proceed to TCP without verifying RTU
+- ❌ Do NOT skip hardware verification
+- ❌ Do NOT implement App layer changes before verification
 
 ---
 
 *Document created: 2026-05-26*
 *Last updated: 2026-05-29*
-*Phase: G9B - Serial Port Ownership Coordinator Contracts Complete*
+*Phase: G9C - Modbus RTU Transport with Fake Serial Adapter Complete*

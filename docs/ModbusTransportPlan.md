@@ -887,3 +887,70 @@ public class FakeModbusTransport : IModbusTransport
 - Keep Core contracts unchanged
 - Still no real hardware communication
 
+---
+
+## G9C Implementation Notes
+
+### G9C Status: ✅ Completed
+
+**Implementation Date**: 2026-05-29
+
+### What G9C Delivered
+
+1. **Infrastructure Interfaces**:
+   - `IModbusRtuSerialAdapter` in Infrastructure layer
+   - Abstract serial adapter for RTU transport
+
+2. **Infrastructure Implementation**:
+   - `ModbusRtuTransport` implementing `IModbusRtuTransport`
+   - Uses `IModbusRtuSerialAdapter` for serial abstraction
+   - Integrates with `ISerialPortOwnershipCoordinator`
+   - Implements ConnectAsync, DisconnectAsync, SendRequestAsync
+   - Supports CRC validation when enabled
+
+3. **Testing Infrastructure**:
+   - `FakeModbusRtuSerialAdapter` in Tests
+   - `ModbusRtuTransportTests` with comprehensive test coverage
+   - Uses `FakeSerialPortOwnershipCoordinator` from G9B
+
+4. **Version Update**:
+   - Updated MainWindow.xaml version from v0.4.7 to v0.4.8
+
+### What G9C Did NOT Deliver
+
+1. **No Real Hardware**:
+   - No System.IO.Ports usage
+   - No real serial port implementation
+   - No TcpClient/Socket usage
+
+2. **No App Logic Changes**:
+   - No changes to ModbusViewModel
+   - No changes to TerminalViewModel
+   - No changes to MainWindowViewModel
+
+3. **No UI Changes**:
+   - No changes to ModbusPage
+   - No changes to TerminalPage
+   - Only version display updated
+
+### G9C Test Coverage
+
+- 29 new tests added to `ModbusRtuTransportTests`
+- Total tests: 647 (618 + 29)
+
+### Key G9C Decisions
+
+1. **Adapter Pattern**: Use `IModbusRtuSerialAdapter` to abstract serial access
+2. **Fake First**: Test with fake adapter before real hardware
+3. **Ownership Integration**: ModbusRtuTransport uses ISerialPortOwnershipCoordinator
+4. **CRC Validation**: CRC validation in transport layer when enabled
+5. **No Real IO**: Defer real serial to G9D
+
+### Next Phase: G9D
+
+**G9D Scope**:
+- Implement real System.IO.Ports serial adapter
+- Manual verification with real hardware
+- No App layer changes
+- No Terminal changes
+
