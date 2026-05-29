@@ -1115,6 +1115,81 @@ G8A is a code implementation phase that creates the Core transport contracts and
 
 ---
 
+## G8B ViewModel Transport Injection Implementation Notes
+
+**Phase**: G8B - ModbusViewModel Transport Injection with Fake Tests
+
+**Status**: ✅ Completed
+
+**Completion Date**: 2026-05-29
+
+### Summary
+
+G8B integrates IModbusTransport into ModbusViewModel with async methods and comprehensive tests.
+
+### What G8B Accomplishes
+
+- ✅ **Transport Injection**: ModbusViewModel can now receive IModbusTransport via constructor
+- ✅ **Async Methods**: ConnectTransportAsync, DisconnectTransportAsync, SendRequestAsync
+- ✅ **State Management**: IsConnected, IsBusy, ConnectionStatus, LastTransportError
+- ✅ **Error Handling**: Comprehensive error capture and status reporting
+- ✅ **Test Coverage**: 26 new tests for transport integration
+- ✅ **Version Update**: Updated to v0.4.6
+
+### Key Changes to ModbusViewModel
+
+```csharp
+public ModbusViewModel() { /* No transport */ }
+public ModbusViewModel(IModbusTransport transport) { /* With transport */ }
+
+public async Task ConnectTransportAsync() { ... }
+public async Task DisconnectTransportAsync() { ... }
+public async Task SendRequestAsync() { ... }
+```
+
+### New Properties
+
+| Property | Type | Purpose |
+|---------|------|---------|
+| IsTransportAvailable | bool | Indicates if transport is injected |
+| IsConnected | bool | Connection state from transport |
+| ConnectionStatus | string | Human-readable status |
+| CanSendRequest | bool | Determines if SendRequest can execute |
+| IsBusy | bool | Indicates async operation in progress |
+| LastTransportError | string | Stores last transport error |
+
+### Test Coverage
+
+| Test Class | Tests | Purpose |
+|-----------|-------|---------|
+| ModbusViewModelTransportTests | 26 | Transport integration tests |
+
+### Current State After G8B
+
+- **Test Count**: 586 passed (was 560, +26 new tests)
+- **Version**: v0.4.6 (updated from v0.4.5)
+- **Transport Integration**: ModbusViewModel can use IModbusTransport
+- **Fake Available**: All tests use FakeModbusTransport
+
+### What G8B Does NOT Include
+
+- ❌ **Real SerialPort**: No System.IO.Ports usage
+- ❌ **Real TcpClient**: No System.Net.Sockets usage
+- ❌ **ModbusPage UI**: Transport UI not yet added
+- ❌ **Infrastructure**: Still no transport implementation
+
+### Next Phase Recommendation
+
+**Recommended**: G9 - Modbus RTU Transport Integration
+
+**Why G9 Next**:
+- G8A provides clean interface contracts
+- G8B integrates contracts into ViewModel
+- G9 implements real RTU transport via SerialPortService
+- Continue with proper layer separation
+
+---
+
 *Document created: 2026-05-26*
 *Last updated: 2026-05-29*
-*Phase: G8A - Modbus Transport Contracts Complete*
+*Phase: G8B - ModbusViewModel Transport Injection Complete*

@@ -1,5 +1,6 @@
 using SerialAssistant.Core.Modbus.Rtu;
 using SerialAssistant.Core.Modbus.Tcp;
+using SerialAssistant.Core.Modbus.Transport;
 using SerialAssistant.Core.Utilities;
 using SerialAssistant.App.Commands;
 using System.Windows.Input;
@@ -8,6 +9,13 @@ namespace SerialAssistant.App.ViewModels
 {
     public class ModbusViewModel : BaseViewModel
     {
+        private readonly IModbusTransport? _transport;
+        private bool _isTransportAvailable;
+        private bool _isConnected;
+        private string _connectionStatus = "Not connected";
+        private bool _isBusy;
+        private string _lastTransportError = string.Empty;
+
         private ModbusTransportMode _selectedTransportMode = ModbusTransportMode.Rtu;
         private ModbusRequestKind _selectedRequestKind = ModbusRequestKind.ReadHoldingRegisters;
         private byte _unitId = 1;
@@ -126,15 +134,307 @@ namespace SerialAssistant.App.ViewModels
 
         public IReadOnlyList<ModbusRequestKind> RequestKinds => _requestKinds;
 
+        public bool IsTransportAvailable => _isTransportAvailable;
+
+        public bool IsConnected
+        {
+            get => _isConnected;
+            private set
+            {
+                if (SetProperty(ref _isConnected, value))
+                {
+                    OnPropertyChanged(nameof(CanSendRequest));
+                    OnPropertyChanged(nameof(ConnectionStatus));
+                }
+            }
+        }
+
+        public string ConnectionStatus
+        {
+            get => _connectionStatus;
+            private set => SetProperty(ref _connectionStatus, value);
+        }
+
+        public bool CanSendRequest => IsTransportAvailable && IsConnected && HasRequest && !IsBusy;
+
+        public bool IsBusy
+        {
+            get => _isBusy;
+            private set
+            {
+                if (SetProperty(ref _isBusy, value))
+                {
+                    OnPropertyChanged(nameof(CanSendRequest));
+                }
+            }
+        }
+
+        public string LastTransportError
+        {
+            get => _lastTransportError;
+            private set => SetProperty(ref _lastTransportError, value);
+        }
+
         public ICommand BuildRequestCommand { get; }
         public ICommand ParseResponseCommand { get; }
         public ICommand ClearCommand { get; }
+        public ICommand ConnectTransportCommand { get; }
+        public ICommand DisconnectTransportCommand { get; }
+        public ICommand SendRequestCommand { get; }
 
         public ModbusViewModel()
         {
+            _isTransportAvailable = false;
             BuildRequestCommand = new RelayCommand(BuildRequest);
             ParseResponseCommand = new RelayCommand(ParseResponse);
             ClearCommand = new RelayCommand(Clear);
+            ConnectTransportCommand = new RelayCommand(async _ => await ConnectTransportAsync(), _ => CanExecuteConnect());
+            DisconnectTransportCommand = new RelayCommand(async _ => await DisconnectTransportAsync(), _ => CanExecuteDisconnect());
+            SendRequestCommand = new RelayCommand(async _ => await SendRequestAsync(), _ => CanSendRequest);
+        }
+
+        public ModbusViewModel(IModbusTransport transport)
+        {
+            _transport = transport ?? throw new ArgumentNullException(nameof(transport));
+            _isTransportAvailable = true;
+            _isConnected = transport.IsConnected;
+            UpdateConnectionStatus();
+
+            BuildRequestCommand = new RelayCommand(BuildRequest);
+            ParseResponseCommand = new RelayCommand(ParseResponse);
+            ClearCommand = new RelayCommand(Clear);
+            ConnectTransportCommand = new RelayCommand(async _ => await ConnectTransportAsync(), _ => CanExecuteConnect());
+            DisconnectTransportCommand = new RelayCommand(async _ => await DisconnectTransportAsync(), _ => CanExecuteDisconnect());
+            SendRequestCommand = new RelayCommand(async _ => await SendRequestAsync(), _ => CanSendRequest);
+        }
+
+        private bool CanExecuteConnect()
+        {
+            return IsTransportAvailable && !IsConnected && !IsBusy;
+        }
+
+        private bool CanExecuteDisconnect()
+        {
+            return IsTransportAvailable && IsConnected && !IsBusy;
+        }
+
+        public async Task ConnectTransportAsync()
+        {
+            if (!IsTransportAvailable)
+            {
+                StatusMessage = "Error: No transport available";
+                return;
+            }
+
+            if (IsConnected)
+            {
+                StatusMessage = "Already connected";
+                return;
+            }
+
+            try
+            {
+                IsBusy = true;
+                LastTransportError = string.Empty;
+                StatusMessage = "Connecting...";
+
+                var success = await _transport!.ConnectAsync();
+
+                if (success)
+                {
+                    IsConnected = true;
+                    UpdateConnectionStatus();
+                    StatusMessage = "Connected successfully";
+                }
+                else
+                {
+                    IsConnected = false;
+                    UpdateConnectionStatus();
+                    LastTransportError = "Connection failed";
+                    StatusMessage = "Error: Connection failed";
+                }
+            }
+            catch (Exception ex)
+            {
+                IsConnected = false;
+                UpdateConnectionStatus();
+                LastTransportError = ex.Message;
+                StatusMessage = $"Error: {ex.Message}";
+            }
+            finally
+            {
+                IsBusy = false;
+            }
+        }
+
+        public async Task DisconnectTransportAsync()
+        {
+            if (!IsTransportAvailable)
+            {
+                return;
+            }
+
+            if (!IsConnected)
+            {
+                return;
+            }
+
+            try
+            {
+                IsBusy = true;
+                StatusMessage = "Disconnecting...";
+
+                await _transport!.DisconnectAsync();
+
+                IsConnected = false;
+                UpdateConnectionStatus();
+                StatusMessage = "Disconnected";
+            }
+            catch (Exception ex)
+            {
+                LastTransportError = ex.Message;
+                StatusMessage = $"Error during disconnect: {ex.Message}";
+            }
+            finally
+            {
+                IsBusy = false;
+            }
+        }
+
+        public async Task SendRequestAsync()
+        {
+            if (!IsTransportAvailable)
+            {
+                StatusMessage = "Error: No transport available";
+                LastTransportError = "Transport not available";
+                return;
+            }
+
+            if (!IsConnected)
+            {
+                StatusMessage = "Error: Not connected";
+                LastTransportError = "Not connected";
+                return;
+            }
+
+            if (string.IsNullOrEmpty(RequestHex))
+            {
+                StatusMessage = "Error: Request HEX is empty. Please build a request first.";
+                LastTransportError = "Request empty";
+                return;
+            }
+
+            var parseResult = HexConverter.FromHexString(RequestHex);
+            if (!parseResult.IsSuccess || parseResult.Value == null)
+            {
+                StatusMessage = "Error: Invalid request HEX";
+                LastTransportError = "Invalid request HEX";
+                return;
+            }
+
+            byte[] requestBytes = parseResult.Value;
+
+            var context = CreateRequestContext();
+            if (!context.IsValid())
+            {
+                StatusMessage = "Error: Invalid request context";
+                LastTransportError = "Invalid context";
+                return;
+            }
+
+            try
+            {
+                IsBusy = true;
+                LastTransportError = string.Empty;
+                StatusMessage = "Sending request...";
+
+                var result = await _transport!.SendRequestAsync(context, requestBytes);
+
+                if (result.Success && result.ResponseBytes != null && result.ResponseBytes.Length > 0)
+                {
+                    ResponseHex = HexConverter.ToHexString(result.ResponseBytes);
+                    OnPropertyChanged(nameof(ResponseHex));
+
+                    StatusMessage = $"Success in {result.Duration.TotalMilliseconds:F0}ms";
+
+                    ParseResponse();
+                }
+                else
+                {
+                    IsConnected = _transport.IsConnected;
+                    UpdateConnectionStatus();
+
+                    string errorMessage = result.ErrorMessage ?? $"Error: {result.ErrorCode}";
+                    LastTransportError = $"{result.ErrorCode} - {errorMessage}";
+                    StatusMessage = $"Error: {errorMessage}";
+
+                    if (result.ErrorCode == ModbusTransportErrorCode.NotConnected)
+                    {
+                        IsConnected = false;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LastTransportError = ex.Message;
+                StatusMessage = $"Error: {ex.Message}";
+            }
+            finally
+            {
+                IsBusy = false;
+            }
+        }
+
+        private ModbusRequestContext CreateRequestContext()
+        {
+            var context = new ModbusRequestContext
+            {
+                UnitId = UnitId,
+                TransactionId = TransactionId,
+                FunctionCode = GetFunctionCode(),
+                StartAddress = StartAddress,
+                Quantity = GetQuantity()
+            };
+
+            return context;
+        }
+
+        private byte GetFunctionCode()
+        {
+            return SelectedRequestKind switch
+            {
+                ModbusRequestKind.ReadHoldingRegisters => 0x03,
+                ModbusRequestKind.ReadInputRegisters => 0x04,
+                ModbusRequestKind.WriteSingleRegister => 0x06,
+                ModbusRequestKind.WriteMultipleRegisters => 0x10,
+                _ => 0x00
+            };
+        }
+
+        private ushort GetQuantity()
+        {
+            if (SelectedRequestKind == ModbusRequestKind.WriteSingleRegister)
+            {
+                return 1;
+            }
+
+            return Quantity > 0 ? Quantity : (ushort)1;
+        }
+
+        private void UpdateConnectionStatus()
+        {
+            if (!IsTransportAvailable)
+            {
+                ConnectionStatus = "No transport";
+            }
+            else if (IsConnected)
+            {
+                ConnectionStatus = "Connected";
+            }
+            else
+            {
+                ConnectionStatus = "Disconnected";
+            }
         }
 
         private void BuildRequest()
@@ -152,12 +452,14 @@ namespace SerialAssistant.App.ViewModels
 
                 StatusMessage = "Request built successfully";
                 OnPropertyChanged(nameof(HasRequest));
+                OnPropertyChanged(nameof(CanSendRequest));
             }
             catch (Exception ex)
             {
                 RequestHex = string.Empty;
                 StatusMessage = $"Error: Build failed - {ex.Message}";
                 OnPropertyChanged(nameof(HasRequest));
+                OnPropertyChanged(nameof(CanSendRequest));
             }
         }
 
@@ -165,13 +467,13 @@ namespace SerialAssistant.App.ViewModels
         {
             ModbusRtuFrame frame = SelectedRequestKind switch
             {
-                ModbusRequestKind.ReadHoldingRegisters => 
+                ModbusRequestKind.ReadHoldingRegisters =>
                     ModbusRtuRequestBuilder.BuildReadHoldingRegisters(UnitId, StartAddress, Quantity),
-                ModbusRequestKind.ReadInputRegisters => 
+                ModbusRequestKind.ReadInputRegisters =>
                     ModbusRtuRequestBuilder.BuildReadInputRegisters(UnitId, StartAddress, Quantity),
-                ModbusRequestKind.WriteSingleRegister => 
+                ModbusRequestKind.WriteSingleRegister =>
                     ModbusRtuRequestBuilder.BuildWriteSingleRegister(UnitId, StartAddress, SingleWriteValue),
-                ModbusRequestKind.WriteMultipleRegisters => 
+                ModbusRequestKind.WriteMultipleRegisters =>
                     ModbusRtuRequestBuilder.BuildWriteMultipleRegisters(UnitId, StartAddress, ParseMultipleValues()),
                 _ => throw new ArgumentOutOfRangeException(nameof(SelectedRequestKind))
             };
@@ -183,13 +485,13 @@ namespace SerialAssistant.App.ViewModels
         {
             ModbusTcpFrame frame = SelectedRequestKind switch
             {
-                ModbusRequestKind.ReadHoldingRegisters => 
+                ModbusRequestKind.ReadHoldingRegisters =>
                     ModbusTcpRequestBuilder.BuildReadHoldingRegisters(TransactionId, UnitId, StartAddress, Quantity),
-                ModbusRequestKind.ReadInputRegisters => 
+                ModbusRequestKind.ReadInputRegisters =>
                     ModbusTcpRequestBuilder.BuildReadInputRegisters(TransactionId, UnitId, StartAddress, Quantity),
-                ModbusRequestKind.WriteSingleRegister => 
+                ModbusRequestKind.WriteSingleRegister =>
                     ModbusTcpRequestBuilder.BuildWriteSingleRegister(TransactionId, UnitId, StartAddress, SingleWriteValue),
-                ModbusRequestKind.WriteMultipleRegisters => 
+                ModbusRequestKind.WriteMultipleRegisters =>
                     ModbusTcpRequestBuilder.BuildWriteMultipleRegisters(TransactionId, UnitId, StartAddress, ParseMultipleValues()),
                 _ => throw new ArgumentOutOfRangeException(nameof(SelectedRequestKind))
             };
@@ -218,7 +520,7 @@ namespace SerialAssistant.App.ViewModels
             foreach (string part in parts)
             {
                 string trimmedPart = part.Trim();
-                
+
                 if (trimmedPart.StartsWith("0x", StringComparison.OrdinalIgnoreCase))
                 {
                     trimmedPart = trimmedPart.Substring(2);
@@ -348,16 +650,16 @@ namespace SerialAssistant.App.ViewModels
         private string FormatParseResult(byte? slaveOrUnitId, byte functionCode, ushort? address, ushort? quantity, ushort? value, IReadOnlyList<ushort>? registers)
         {
             string prefix = slaveOrUnitId.HasValue ? $"Unit/Slave: {slaveOrUnitId.Value}, " : string.Empty;
-            
+
             return functionCode switch
             {
-                0x03 or 0x04 => 
+                0x03 or 0x04 =>
                     $"{prefix}Function: 0x{functionCode:X2}, Quantity: {quantity}, Registers: {FormatRegisters(registers)}",
-                0x06 => 
+                0x06 =>
                     $"{prefix}Function: 0x{functionCode:X2}, Address: 0x{address:X4}, Value: 0x{value:X4}",
-                0x10 => 
+                0x10 =>
                     $"{prefix}Function: 0x{functionCode:X2}, Address: 0x{address:X4}, Quantity: {quantity}",
-                _ => 
+                _ =>
                     $"{prefix}Function: 0x{functionCode:X2}"
             };
         }
@@ -380,6 +682,7 @@ namespace SerialAssistant.App.ViewModels
             StatusMessage = "Cleared";
             OnPropertyChanged(nameof(HasRequest));
             OnPropertyChanged(nameof(HasParsedResponse));
+            OnPropertyChanged(nameof(CanSendRequest));
         }
     }
 }

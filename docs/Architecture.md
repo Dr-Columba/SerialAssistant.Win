@@ -1349,6 +1349,31 @@ G12: Manual Verification
 - No ModbusViewModel integration
 - No ModbusPage UI changes
 
+### G8B Implementation Summary (May 2026)
+
+**Completed**:
+- ModbusViewModel transport injection
+- ConnectTransportAsync, DisconnectTransportAsync, SendRequestAsync methods
+- Connection state properties (IsConnected, IsBusy, ConnectionStatus)
+- Error handling (LastTransportError)
+- 26 new tests added (586 total)
+- Version updated to v0.4.6
+
+**Architecture**:
+```
+ModbusViewModel (App)
+    │
+    ├── IModbusTransport (Core interface)
+    │
+    └── FakeModbusTransport (Tests only)
+```
+
+**Not Included** (deferred to G9/G10):
+- No real SerialPort usage
+- No real TcpClient usage
+- No Infrastructure layer changes
+- No ModbusPage UI changes
+
 ---
 
 *Last updated: May 2026*
@@ -1357,3 +1382,4 @@ G12: Manual Verification
 *G6 Modbus Closure Complete: May 2026*
 *G7 Modbus Transport Planning Complete: May 2026*
 *G8A Modbus Transport Contracts Complete: May 2026*
+*G8B ModbusViewModel Transport Injection Complete: May 2026*

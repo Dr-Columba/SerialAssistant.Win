@@ -889,33 +889,41 @@ This document outlines the phased development plan for SerialAssistant.Win, orga
 
 ### Feature G8B: ModbusViewModel Transport Injection with Fake Tests
 
-**Status**: ⏳ Pending
+**Status**: ✅ Completed
 
-**Goal**: Integrate IModbusTransport into ModbusViewModel using fake transport
+**Implementation Date**: 2026-05-29
+
+**Files Created/Modified**:
+- `src/SerialAssistant.App/ViewModels/ModbusViewModel.cs` (updated)
+- `src/SerialAssistant.Tests/ViewModels/ModbusViewModelTransportTests.cs` (new)
+- `src/SerialAssistant.App/MainWindow.xaml` (version updated to v0.4.6)
 
 **Scope**:
 - Inject IModbusTransport into ModbusViewModel
-- Add Connect/Disconnect/SendRequest commands
-- Add connection state management
+- Add Connect/Disconnect/SendRequest async methods
+- Add connection state management (IsConnected, IsBusy, etc.)
 - Add transport error handling
 - Test with FakeModbusTransport
 
 **Allowed Modifications**:
 - src/SerialAssistant.App/ViewModels/ModbusViewModel.cs
-- src/SerialAssistant.Tests/Modbus/Transport/ (integration tests)
+- src/SerialAssistant.Tests/ViewModels/ModbusViewModelTransportTests.cs
+- src/SerialAssistant.App/MainWindow.xaml (version only)
 
 **Forbidden**:
 - No real SerialPort/TcpClient/Socket implementation
-- No Infrastructure layer changes yet
+- No Infrastructure layer changes
+- No ModbusPage UI changes
 
 **Acceptance Criteria**:
 - ViewModel can use IModbusTransport
-- Tests pass with FakeModbusTransport
+- Tests pass with FakeModbusTransport (26 new tests)
 - No IO references in App layer
+- Test count: 586 passed (was 560)
 
-**Code Changes Allowed**: Yes (App layer integration)
+**Code Changes Allowed**: Yes (App layer integration + Tests)
 
-**Tests Required**: Yes
+**Tests Required**: Yes (26 new tests)
 
 **Report Required**: Yes
 

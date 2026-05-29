@@ -967,6 +967,48 @@ This document provides a step-by-step manual testing guide for SerialAssistant.W
 
 ---
 
+## G8B: ModbusViewModel Transport Injection Verification
+
+### G8B.1 ViewModel Changes Verification
+
+- [ ] **Step G8B.1** Verify ModbusViewModel.cs has constructor with IModbusTransport parameter
+- [ ] **Step G8B.2** Verify ModbusViewModel.cs has ConnectTransportAsync method
+- [ ] **Step G8B.3** Verify ModbusViewModel.cs has DisconnectTransportAsync method
+- [ ] **Step G8B.4** Verify ModbusViewModel.cs has SendRequestAsync method
+- [ ] **Step G8B.5** Verify ModbusViewModel.cs has IsConnected property
+- [ ] **Step G8B.6** Verify ModbusViewModel.cs has IsBusy property
+- [ ] **Step G8B.7** Verify ModbusViewModel.cs has LastTransportError property
+
+### G8B.2 Test Files Verification
+
+- [ ] **Step G8B.8** Verify `src/SerialAssistant.Tests/ViewModels/ModbusViewModelTransportTests.cs` exists
+- [ ] **Step G8B.9** Verify test file contains Connect/Disconnect/SendRequest tests
+
+### G8B.3 Scope Control Verification
+
+- [ ] **Step G8B.10** Verify NO modifications to `src/SerialAssistant.Infrastructure/`
+- [ ] **Step G8B.11** Verify NO modifications to ModbusPage.xaml
+- [ ] **Step G8B.12** Verify MainWindow.xaml version updated to v0.4.6
+
+### G8B.4 Layer Boundary Verification
+
+- [ ] **Step G8B.13** Verify ModbusViewModel.cs does NOT contain System.IO.Ports
+- [ ] **Step G8B.14** Verify ModbusViewModel.cs does NOT contain TcpClient
+- [ ] **Step G8B.15** Verify ModbusViewModel.cs does NOT contain Socket
+
+### G8B.5 Build and Test Verification
+
+- [ ] **Step G8B.16** Run `git diff --check` - Verify no trailing whitespace
+- [ ] **Step G8B.17** Run `dotnet build .\SerialAssistant.Win.sln -c Debug` - Verify build passes
+- [ ] **Step G8B.18** Run `dotnet test .\SerialAssistant.Win.sln -c Debug` - Verify test count shows 586 passed
+
+### G8B.6 Application Verification
+
+- [ ] **Step G8B.19** Run application - Verify app starts normally
+- [ ] **Step G8B.20** Verify version display shows v0.4.6 in title bar
+
+---
+
 ## Tester Information
 
 - **Tester Name**: _________________________
