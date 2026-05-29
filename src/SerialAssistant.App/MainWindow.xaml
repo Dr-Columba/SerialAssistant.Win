@@ -34,7 +34,7 @@
                     <TextBlock Text="{Binding Terminal.SerialSettings.SelectedBaudRate}" VerticalAlignment="Center" />
                 </StackPanel>
 
-                <TextBlock Grid.Column="2" Text="v0.4.4" VerticalAlignment="Center" Foreground="Gray" />
+                <TextBlock Grid.Column="2" Text="v0.4.5" VerticalAlignment="Center" Foreground="Gray" />
             </Grid>
         </Border>
 
