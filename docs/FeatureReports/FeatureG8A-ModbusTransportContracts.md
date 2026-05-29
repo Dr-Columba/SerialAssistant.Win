@@ -246,7 +246,7 @@ Select-String -Path .\src\SerialAssistant.Core\Modbus\Transport\*.cs -Pattern "S
 
 Select-String -Path .\src\SerialAssistant.App\ViewModels\*.cs -Pattern "System.IO.Ports","TcpClient","Socket"
 
-Select-String -Path .\src\SerialAssistant.Infrastructure\*.cs -Pattern "ModbusTransport","IModbusTransport","TcpClient","Socket"
+Select-String -Path .\src\SerialAssistant.Infrastructure\**\*.cs -Pattern "ModbusTransport","IModbusTransport","TcpClient","Socket"
 
 dotnet run --project .\src\SerialAssistant.App\SerialAssistant.App.csproj -c Debug
 ```
@@ -292,7 +292,7 @@ dotnet run --project .\src\SerialAssistant.App\SerialAssistant.App.csproj -c Deb
 
 ### Fix Notes (May 29, 2026)
 
-1. **Corrected User Verification Commands**: Fixed PowerShell paths from `Transport*.cs` to `Transport\*.cs`, `ViewModels*.cs` to `ViewModels\*.cs`, and `Infrastructure***.cs` to `Infrastructure\*.cs`
+1. **Corrected User Verification Commands**: Fixed PowerShell paths from `Transport*.cs` to `Transport\*.cs`, `ViewModels*.cs` to `ViewModels\*.cs`, and `Infrastructure\*.cs` to `Infrastructure\**\*.cs`
 2. **Corrected "No src changes" wording**: Changed to "Allowed src changes only" to accurately reflect that G8A is a code phase allowing Core transport contracts, Tests fake/tests, and MainWindow version update
 3. **G8A is a code phase**: G8A allows new Core transport files, new Tests transport files, and MainWindow.xaml version update
 4. **Infrastructure remains unchanged**: Infrastructure layer was not modified in G8A
