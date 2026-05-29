@@ -1549,6 +1549,77 @@ TerminalViewModel
 
 ---
 
+## G9B: Serial Port Ownership Coordinator Contracts (May 2026)
+
+### G9B Status: ✅ Completed
+
+### What G9B Added
+
+1. **Core Layer Additions**:
+   - `SerialPortOwner` enum: None, Terminal, ModbusRtu
+   - `ISerialPortOwnershipCoordinator` interface
+   - `SerialPortOwnershipChangedEventArgs`
+
+2. **Test Layer Additions**:
+   - `FakeSerialPortOwnershipCoordinator`
+   - 32 new tests
+
+3. **Version Update**:
+   - Updated from v0.4.6 to v0.4.7
+
+### G9B Architecture
+
+#### SerialPortOwner Enum
+
+```csharp
+namespace SerialAssistant.Core.Services;
+
+public enum SerialPortOwner
+{
+    None,
+    Terminal,
+    ModbusRtu
+}
+```
+
+#### ISerialPortOwnershipCoordinator Interface
+
+```csharp
+namespace SerialAssistant.Core.Services;
+
+public interface ISerialPortOwnershipCoordinator
+{
+    SerialPortOwner GetCurrentOwner(string portName);
+    bool IsOwned(string portName);
+    bool IsOwnedBy(string portName, SerialPortOwner owner);
+    bool TryClaimOwnership(string portName, SerialPortOwner owner);
+    bool TryReleaseOwnership(string portName, SerialPortOwner owner);
+    event EventHandler<SerialPortOwnershipChangedEventArgs>? OwnershipChanged;
+}
+```
+
+#### Current State After G9B
+
+| Layer | Status |
+|-------|--------|
+| **Core** | New ownership contracts added |
+| **App** | Unchanged |
+| **Infrastructure** | Unchanged |
+| **Tests** | Fake coordinator + tests added |
+
+### Key G9B Decisions
+
+1. **Core Only**: All ownership contracts in Core
+2. **No App Logic**: App doesn't have ownership authority
+3. **No Infrastructure Changes**: Still no real ownership coordinator
+4. **No RTU Yet**: ModbusRtuTransport deferred to G9C
+
+### Next Phase: G9C
+
+G9C will implement Infrastructure ownership coordinator and ModbusRtuTransport with fake serial.
+
+---
+
 *Last updated: May 2026*
 *Modbus Architecture Planning: May 2026*
 *G5 ModbusPage UI Complete: May 2026*
@@ -1557,3 +1628,4 @@ TerminalViewModel
 *G8A Modbus Transport Contracts Complete: May 2026*
 *G8B ModbusViewModel Transport Injection Complete: May 2026*
 *G9A Modbus RTU Transport Capability Review: May 2026*
+*G9B Serial Port Ownership Coordinator Contracts: May 2026*

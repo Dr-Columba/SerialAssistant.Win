@@ -1324,6 +1324,94 @@ This section reviews the completion of G7: Modbus Transport Integration Planning
 
 ---
 
+## G9B: Serial Port Ownership Coordinator Contracts (May 2026)
+
+### G9B Status: ✅ Completed
+
+### What G9B Delivered
+
+1. **Core Contracts**:
+   - `SerialPortOwner` enum (None, Terminal, ModbusRtu)
+   - `ISerialPortOwnershipCoordinator` interface
+   - `SerialPortOwnershipChangedEventArgs`
+
+2. **Testing Infrastructure**:
+   - `FakeSerialPortOwnershipCoordinator`
+   - 32 new tests (2 + 8 + 22)
+
+3. **Version Update**:
+   - MainWindow.xaml updated from v0.4.6 to v0.4.7
+
+### What G9B Did NOT Deliver
+
+1. **No Infrastructure Changes**:
+   - No real SerialPortOwnershipCoordinator implementation
+   - No ModbusRtuTransport implementation
+   - No changes to SerialPortService
+
+2. **No App Logic Changes**:
+   - No changes to MainWindowViewModel
+   - No changes to TerminalViewModel
+   - No changes to ModbusViewModel
+   - No UI behavior changes
+
+3. **No Real Hardware**:
+   - Still no System.IO.Ports usage for RTU
+   - Still no real Modbus communication
+
+### G9B Test Coverage
+
+- **Before G9B**: 586 tests
+- **After G9B**: 618 tests
+- **New Tests**: 32
+  - 2 for SerialPortOwner
+  - 8 for SerialPortOwnershipChangedEventArgs
+  - 22 for FakeSerialPortOwnershipCoordinator
+
+### Key G9B Decisions
+
+1. **Core Only**: All ownership contracts in Core
+2. **No App Logic**: App doesn't have ownership authority
+3. **Fake First**: Test with FakeSerialPortOwnershipCoordinator
+4. **No RTU Yet**: ModbusRtuTransport deferred to G9C
+5. **No Terminal Changes**: Keep SerialPortService as-is
+
+### G9B Layer Boundary Compliance
+
+| Layer | Status | Notes |
+|-------|--------|-------|
+| **Core** | ✅ Compliant | New contracts, no IO/WPF references |
+| **App** | ✅ Compliant | No logic changes, version only |
+| **Infrastructure** | ✅ Compliant | No changes |
+| **Tests** | ✅ Compliant | New fake coordinator + tests |
+
+### Current State After G9B
+
+- ✅ Test count: 618 passed
+- ✅ Version: v0.4.7
+- ✅ Ownership contracts defined
+- ✅ Fake coordinator implemented
+- ❌ Still no real ownership coordinator in Infrastructure
+- ❌ Still no ModbusRtuTransport
+- ❌ Still no real RTU communication
+
+### Next Phase Recommendation
+
+**Recommended**: G9C - Modbus RTU Transport with Fake Serial
+
+**Why G9C Next**:
+- Core ownership contracts ready
+- Test infrastructure ready
+- Can now implement ModbusRtuTransport
+- Still use fake serial adapter, no real hardware
+
+**Do NOT Skip G9C**:
+- ❌ Do NOT go directly to real hardware
+- ❌ Do NOT skip fake serial adapter
+- ❌ Do NOT modify Core contracts
+
+---
+
 *Last updated: May 2026*
 *Modbus Core Foundation Review: May 2026*
 *Modbus TCP Frame Review: May 2026*
@@ -1334,3 +1422,4 @@ This section reviews the completion of G7: Modbus Transport Integration Planning
 *G8A Modbus Transport Contracts Review: May 2026*
 *G8B ModbusViewModel Transport Injection Review: May 2026*
 *G9A Modbus RTU Transport Capability Review: May 2026*
+*G9B Serial Port Ownership Coordinator Contracts Review: May 2026*

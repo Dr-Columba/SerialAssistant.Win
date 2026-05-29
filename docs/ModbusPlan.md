@@ -1293,6 +1293,57 @@ G9A is a **documentation-only phase** that reviews existing serial port service 
 
 ---
 
+## G9B Serial Port Ownership Coordinator Contracts
+
+**Phase**: G9B - Serial Port Ownership Coordinator Contracts
+
+**Status**: ✅ Completed - 2026-05-29
+
+### What G9B Delivered
+
+1. **Core Contracts**:
+   - `SerialPortOwner` enum in Core (None, Terminal, ModbusRtu)
+   - `ISerialPortOwnershipCoordinator` interface in Core
+   - `SerialPortOwnershipChangedEventArgs` in Core
+
+2. **Testing Infrastructure**:
+   - `FakeSerialPortOwnershipCoordinator` in Tests
+   - Comprehensive test coverage
+
+3. **Version Update**:
+   - Updated from v0.4.6 to v0.4.7
+
+### What G9B Did NOT Deliver
+
+- No Infrastructure ownership coordinator implementation
+- No ModbusRtuTransport implementation
+- No App logic changes
+- No Terminal changes
+- No ModbusViewModel changes
+
+### Test Count Update
+
+- **Before G9B**: 586 tests
+- **After G9B**: 618 tests
+- **Added**: 32 new tests
+
+### Next Phase Recommendation
+
+**Recommended**: G9C - Modbus RTU Transport with Fake Serial
+
+**Why G9C Next**:
+- Core ownership contracts are ready
+- Test infrastructure is ready
+- Can now implement ModbusRtuTransport with fake serial
+- Still no real hardware needed
+
+**Do NOT Skip G9C**:
+- ❌ Do NOT go directly to real hardware
+- ❌ Do NOT skip fake serial adapter implementation
+- ❌ Do NOT modify Core contracts
+
+---
+
 *Document created: 2026-05-26*
 *Last updated: 2026-05-29*
-*Phase: G9A - Modbus RTU Transport Capability Review Complete*
+*Phase: G9B - Serial Port Ownership Coordinator Contracts Complete*
