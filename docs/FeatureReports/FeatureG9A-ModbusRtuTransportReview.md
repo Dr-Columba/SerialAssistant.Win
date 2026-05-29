@@ -199,7 +199,7 @@ If both Terminal and Modbus try to use same COM port:
 ### Recommended Ownership Model
 
 1. **Single Port Ownership**: Only one owner (Terminal OR Modbus) at a time
-2. **Explicit Ownership**: ISerialPortOwner interface to identify owner
+2. **Explicit Ownership**: SerialPortOwner enum identifies the owner, and ISerialPortOwnershipCoordinator manages ownership
 3. **Ownership Coordinator**: New ISerialPortOwnershipCoordinator in Core
 4. **Owner Types**: "Terminal" and "ModbusRtu"
 

@@ -1494,18 +1494,24 @@ TerminalViewModel
 ├─────────────────────────────────────────────────────────────────┤
 │  Core Layer                                                     │
 │  IModbusRtuTransport (existing)                                 │
-│  ISerialPortOwnershipCoordinator (NEW - G9B)                   │
-│  SerialPortOwner enum (NEW - G9B)                              │
+│  ISerialPortOwnershipCoordinator (NEW - G9B)                    │
+│  SerialPortOwner enum (NEW - G9B)                               │
 ├─────────────────────────────────────────────────────────────────┤
 │  Infrastructure Layer                                           │
-│  ModbusRtuTransport (NEW - G9C) → implements IModbusRtuTransport│
-│  ISerialPortOwnershipCoordinator (NEW - G9B)                   │
-│  SerialPortService (existing, NOT modified)                    │
+│  ModbusRtuTransport (future - G9C or later)                   │
+│  SerialPortOwnershipCoordinator (future - G9C or later)        │
+│  SerialPortService (existing, NOT modified)                     │
 ├─────────────────────────────────────────────────────────────────┤
 │  External                                                       │
 │  System.IO.Ports.SerialPort (Infrastructure only)              │
 └─────────────────────────────────────────────────────────────────┘
 ```
+
+**Important Notes:**
+- G9B only adds Core contracts and tests (no Infrastructure changes)
+- ISerialPortOwnershipCoordinator belongs to Core
+- Infrastructure ownership implementation is deferred to G9C or later
+- App displays ownership state but is not ownership authority
 
 **Key Design Decisions:**
 

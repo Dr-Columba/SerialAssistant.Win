@@ -739,24 +739,40 @@ public class FakeModbusTransport : IModbusTransport
 
 ## Final Recommendation
 
-**NEXT PHASE: G8 - Modbus Transport Interfaces and Fake Tests**
+**Historical Recommendation from G7 (superseded):**
+> NEXT PHASE: G8 - Modbus Transport Interfaces and Fake Tests
+>
+> G8 was previously recommended and has now been completed through G8A/G8B.
 
-**WHY G8 FIRST:**
+**Current Recommendation after G9A:**
+> NEXT PHASE: G9B - Serial Port Ownership Coordinator Contracts
 
-1. **Lock in the design** - Define interfaces before real implementation
-2. **Fake it early** - Prove ViewModel works without hardware
-3. **Reduce risk** - Fake tests give fast feedback
-4. **Prevent pollution** - Verify App layer stays clean
+**G9B Scope:**
+- Define SerialPortOwner enum in Core
+- Define ISerialPortOwnershipCoordinator in Core
+- Add fake-based tests for coordinator
+- **No Infrastructure changes in G9B**
+- **No ModbusRtuTransport in G9B**
 
-**WHAT G8 DELIVERS:**
-- Interfaces defined (IModbusTransport, etc.)
-- Fake transport implementation
-- Tests proving ViewModel can use transport
-- No real serial/TCP yet, but contract is locked
+**DO NOT SKIP G9B:**
+- ❌ Do NOT implement Infrastructure ownership coordination in G9B
+- ❌ Do NOT implement real ModbusRtuTransport in G9B
+- ❌ Do NOT modify Terminal serial behavior
 
-**DO NOT SKIP G8:**
-- Do NOT jump directly to G9 RTU
-- Do NOT put real IO in ViewModel
+**WHY G9B NEXT:**
+- Ownership is critical for preventing Terminal/Modbus conflicts
+- Core contracts should be defined before Infrastructure implementation
+- Clean architecture requires Core-first approach
+
+**WHAT G9B DELIVERS:**
+- SerialPortOwner enum (None, Terminal, ModbusRtu)
+- ISerialPortOwnershipCoordinator interface
+- FakeSerialPortOwnershipCoordinator for testing
+- Tests proving coordinator works
+
+**DO NOT SKIP G9C:**
+- ❌ Do NOT implement real ModbusRtuTransport without ownership coordinator
+- ❌ Do NOT skip G9B and go directly to real hardware
 
 ---
 
