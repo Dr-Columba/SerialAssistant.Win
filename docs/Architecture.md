@@ -1281,16 +1281,24 @@ ModbusRtuTransport/ModbusTcpTransport (Infrastructure)
 
 ### Serial Port Ownership Coordination
 
+> **⚠️ G9A Update (2026-05-29): Earlier ownership sketch superseded**
+
+**G9A ownership plan:**
+- Core defines `ISerialPortOwnershipCoordinator` and `SerialPortOwner` enum
+- Infrastructure implements concrete ownership coordination
+- App displays ownership state and disables conflicting actions through bindings
+- MainWindowViewModel must NOT be the ownership authority
+
 ```
-MainWindowViewModel tracks:
-- IsTerminalConnected: bool
-- IsModbusRtuConnected: bool
+MainWindowViewModel (G7 sketch - superseded by G9A):
+- IsTerminalConnected: bool (superseded)
+- IsModbusRtuConnected: bool (superseded)
 
 When Terminal opens port:
-- Modbus RTU Connect button disabled
+- Modbus RTU Connect button disabled (superseded - now via ownership coordinator)
 
 When Modbus RTU connects:
-- Terminal Open button disabled
+- Terminal Open button disabled (superseded - now via ownership coordinator)
 
 Message: "Terminal is using the serial port. Please disconnect Terminal first."
 ```

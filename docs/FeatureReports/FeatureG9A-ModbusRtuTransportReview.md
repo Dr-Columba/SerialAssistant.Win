@@ -396,11 +396,11 @@ Select-String -Path .\docs\ModbusTransportPlan.md,.\docs\Architecture.md,.\docs\
 
 | Check | Command | Expected | Result |
 |-------|---------|----------|--------|
-| Git diff check | `git diff --check` | 0 errors | ⏳ Pending |
-| Build | `dotnet build` | 0 errors | ⏳ Pending |
-| Tests | `dotnet test` | 586 passed | ⏳ Pending |
-| src/ diff | `git diff --name-only -- src/` | Empty | ⏳ Pending |
-| tests/ diff | `git diff --name-only -- src/SerialAssistant.Tests/` | Empty | ⏳ Pending |
+| Git diff check | `git diff --check` | 0 errors | ✅ Passed |
+| Build | `dotnet build` | 0 errors | ✅ Passed |
+| Tests | `dotnet test` | 586 passed | ✅ Passed |
+| src/ diff | `git diff --name-only -- src/` | Empty | ✅ Empty |
+| tests/ diff | `git diff --name-only -- src/SerialAssistant.Tests/` | Empty | ✅ Empty |
 
 ### Strategy Summary After Fix
 
@@ -422,6 +422,19 @@ Select-String -Path .\docs\ModbusTransportPlan.md,.\docs\Architecture.md,.\docs\
 4. **Option C is the only recommended approach**
 5. **G9B must come before G9C**
 6. **App layer is still forbidden System.IO.Ports**
+7. **MainWindowViewModel must NOT be the ownership authority**
+8. **Core ownership coordinator contract first (G9B), then Infrastructure implementation**
+
+### Additional Fix Notes
+
+- Removed remaining App-layer ownership recommendation from ModbusTransportPlan.md
+- Marked MainWindowViewModel ownership tracking as superseded in Architecture.md
+- Updated Validation Results table to show ✅ Passed instead of ⏳ Pending
+- Confirmed ownership coordinator contract belongs to Core in G9B
+- Confirmed Infrastructure provides concrete ownership implementation later
+- Test count remains 586 passed
+- No src changes
+- No tests changes
 
 ---
 

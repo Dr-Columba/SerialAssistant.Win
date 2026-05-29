@@ -510,9 +510,18 @@ public class ModbusViewModel : BaseViewModel
 
 **How to Track Ownership:**
 
-- **Option 1:** MainWindowViewModel tracks active port user
-- **Option 2:** Shared service in Infrastructure tracks ownership
-- **Recommendation: Option 1** - Simple, App-layer coordination
+> **⚠️ G9A Update (2026-05-29): Earlier App-layer ownership idea superseded**
+
+- **Old Option 1 (superseded):** MainWindowViewModel tracks active port user
+- **Old Option 2 (superseded):** Shared service in Infrastructure tracks ownership
+- **Current Recommendation:** Core ownership coordinator contract first, then Infrastructure implementation
+
+**G9A Ownership Plan:**
+- **G9B:** Define `ISerialPortOwnershipCoordinator` and `SerialPortOwner` enum in Core
+- **Core layer** owns the ownership coordination contract (no Infrastructure reference)
+- **Infrastructure layer** will later provide concrete ownership implementation
+- **App layer** may display ownership state and bind UI enablement, but **must not become the ownership authority**
+- MainWindowViewModel must NOT be the ownership authority
 
 ### Future Shared Model (Optional, Post-G12)
 
