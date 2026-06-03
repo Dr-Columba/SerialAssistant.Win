@@ -1150,6 +1150,61 @@ G9B is a code phase that adds Core ownership contracts and tests, with no Infras
 
 ---
 
+## G9C: Modbus RTU Transport with Fake Serial Adapter Verification
+
+### G9C Overview
+
+G9C is a code phase that implements ModbusRtuTransport in Infrastructure layer using fake serial adapter for testing, without real hardware communication.
+
+### G9C.1 Infrastructure Verification
+
+- [ ] **Step G9C.1** Verify `IModbusRtuSerialAdapter` exists in `src/SerialAssistant.Infrastructure/Modbus/Transport/`
+- [ ] **Step G9C.2** Verify `ModbusRtuTransport` exists in `src/SerialAssistant.Infrastructure/Modbus/Transport/`
+- [ ] **Step G9C.3** Verify `IModbusRtuSerialAdapter` has required methods: IsOpen, OpenAsync, CloseAsync, WriteAsync, ReadAsync
+- [ ] **Step G9C.4** Verify `ModbusRtuTransport` implements `IModbusRtuTransport` interface
+- [ ] **Step G9C.5** Verify Infrastructure files have NO references to System.IO.Ports
+- [ ] **Step G9C.6** Verify Infrastructure files have NO references to TcpClient/Socket
+
+### G9C.2 Tests Verification
+
+- [ ] **Step G9C.7** Verify `FakeModbusRtuSerialAdapter` exists in `src/SerialAssistant.Tests/Infrastructure/Modbus/`
+- [ ] **Step G9C.8** Verify `ModbusRtuTransportTests` exists in `src/SerialAssistant.Tests/Infrastructure/Modbus/`
+- [ ] **Step G9C.9** Verify test count increased from 618 to 647
+- [ ] **Step G9C.10** Verify FakeModbusRtuSerialAdapter supports: QueueResponse, QueueReadFailure, WriteShouldFail
+
+### G9C.3 No App Logic Changes
+
+- [ ] **Step G9C.11** Verify `MainWindowViewModel` has NO changes
+- [ ] **Step G9C.12** Verify `TerminalViewModel` has NO changes
+- [ ] **Step G9C.13** Verify `ModbusViewModel` has NO changes
+- [ ] **Step G9C.14** Verify NO transport injection logic added to App layer
+
+### G9C.4 No View Changes
+
+- [ ] **Step G9C.15** Verify `ModbusPage.xaml` has NO changes
+- [ ] **Step G9C.16** Verify `TerminalPage.xaml` has NO changes
+
+### G9C.5 Version Verification
+
+- [ ] **Step G9C.17** Verify MainWindow.xaml version shows v0.4.8
+
+### G9C.6 Build and Test
+
+- [ ] **Step G9C.18** Run `git diff --check` - Verify no trailing whitespace
+- [ ] **Step G9C.19** Run `dotnet build` - Verify build passes
+- [ ] **Step G9C.20** Run `dotnet test` - Verify all 647 tests pass
+
+### G9C.7 Documentation Verification
+
+- [ ] **Step G9C.21** Verify `docs/ModbusTransportPlan.md` contains G9C Implementation Notes
+- [ ] **Step G9C.22** Verify `docs/ModbusPlan.md` contains G9C status and test count
+- [ ] **Step G9C.23** Verify `docs/PhasePlan.md` shows G9C as Completed
+- [ ] **Step G9C.24** Verify `docs/Architecture.md` contains G9C architecture documentation
+- [ ] **Step G9C.25** Verify `docs/FinalReview.md` contains G9C review
+- [ ] **Step G9C.26** Verify `docs/FeatureReports/FeatureG9C-ModbusRtuTransportFake.md` exists
+
+---
+
 ## Tester Information
 
 - **Tester Name**: _________________________
