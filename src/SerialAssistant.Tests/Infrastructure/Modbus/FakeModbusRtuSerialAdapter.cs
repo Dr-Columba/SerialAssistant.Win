@@ -52,7 +52,7 @@ public class FakeModbusRtuSerialAdapter : IModbusRtuSerialAdapter
         return Task.FromResult(true);
     }
 
-    public async Task<byte[]> ReadAsync(int maxBytes, TimeSpan timeout, CancellationToken cancellationToken = default)
+    public Task<byte[]> ReadAsync(int maxBytes, TimeSpan timeout, CancellationToken cancellationToken = default)
     {
         if (_readFailureQueue.Count > 0)
         {
@@ -62,7 +62,7 @@ public class FakeModbusRtuSerialAdapter : IModbusRtuSerialAdapter
 
         if (_responseQueue.Count == 0)
         {
-            return Array.Empty<byte>();
+            return Task.FromResult(Array.Empty<byte>());
         }
 
         var response = _responseQueue.Dequeue();
@@ -71,10 +71,10 @@ public class FakeModbusRtuSerialAdapter : IModbusRtuSerialAdapter
         {
             var truncated = new byte[maxBytes];
             Array.Copy(response, truncated, maxBytes);
-            return truncated;
+            return Task.FromResult(truncated);
         }
         
-        return response;
+        return Task.FromResult(response);
     }
 
     public void QueueResponse(byte[] responseBytes)
