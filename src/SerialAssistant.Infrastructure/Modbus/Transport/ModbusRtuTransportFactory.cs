@@ -7,7 +7,7 @@ namespace SerialAssistant.Infrastructure.Modbus.Transport;
  * Composes SystemIoPortsModbusRtuSerialAdapter, ModbusRtuTransport, and ownership coordinator.
  * Does NOT open serial port during creation.
  * Does NOT expose System.IO.Ports to App layer.
- * Does NOT reference WPF, TcpClient, Socket, or disk I/O APIs.
+ * Does not depend on UI framework, network client APIs, or disk I/O APIs.
  */
 public sealed class ModbusRtuTransportFactory
 {
