@@ -1184,31 +1184,50 @@ This document outlines the phased development plan for SerialAssistant.Win, orga
 
 ### Feature G9F: Infrastructure Serial Ownership Coordinator Implementation
 
-**Status**: ⏳ Pending
+**Status**: ✅ Completed
 
 **Goal**: Implement real ownership coordinator in Infrastructure
 
 **Scope**:
-- Create `SerialPortOwnershipCoordinatorImpl` in Infrastructure
+- Create `SerialPortOwnershipCoordinator` in Infrastructure
 - Implement `ISerialPortOwnershipCoordinator` interface
 - Track ownership per port name
 - Raise `OwnershipChanged` events
 - Add unit tests
 
-**Allowed Modifications**:
-- Infrastructure layer (ownership coordinator)
-- Tests layer (coordinator tests)
+**Files Created**:
+- `src/SerialAssistant.Infrastructure/Services/SerialPortOwnershipCoordinator.cs`
+- `src/SerialAssistant.Tests/Services/SerialPortOwnershipCoordinatorTests.cs`
 
-**Forbidden**:
-- No App layer changes
-- No UI changes
-- No ViewModel changes
-- No Core changes
+**Files Modified**:
+- `docs/ModbusTransportPlan.md`
+- `docs/ModbusPlan.md`
+- `docs/PhasePlan.md`
+- `docs/Architecture.md`
+- `docs/ManualTestChecklist.md`
+- `docs/FinalReview.md`
 
-**Acceptance Criteria**:
-- Coordinator implementation exists
-- Tests pass
-- No layer boundary violations
+**Test Count**:
+- Before G9F: 686 tests
+- After G9F: 717 tests
+- Added: 31 new tests
+
+**Version Status**:
+- Still v0.4.9 (no changes)
+
+**Key Decisions**:
+- Thread-safe implementation using lock
+- Case-insensitive port name comparison
+- No System.IO.Ports, TcpClient, Socket, WPF, File, Registry references
+- Idempotent claim for same owner
+- Event raised only on actual ownership change
+
+**Acceptance Criteria Met**:
+- ✅ Coordinator implementation exists
+- ✅ Tests pass (31 new tests)
+- ✅ No layer boundary violations
+- ✅ No App/Core changes
+- ✅ No UI changes
 
 ---
 

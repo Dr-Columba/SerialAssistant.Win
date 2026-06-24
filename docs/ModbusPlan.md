@@ -1512,6 +1512,61 @@ G9A is a **documentation-only phase** that reviews existing serial port service 
 
 ---
 
+## G9F Infrastructure Serial Ownership Coordinator (June 2026)
+
+**Phase**: G9F - Infrastructure Serial Ownership Coordinator Implementation
+
+**Status**: ✅ Completed
+
+### What G9F Delivered
+
+1. **Infrastructure Layer Implementation**:
+   - `SerialPortOwnershipCoordinator` - real ownership coordinator
+   - Implements `ISerialPortOwnershipCoordinator` interface
+   - Thread-safe ownership tracking per port name
+   - Case-insensitive port name comparison
+
+2. **Test Layer Additions**:
+   - `SerialPortOwnershipCoordinatorTests` - 31 comprehensive tests
+   - Tests cover: claim, release, ownership queries, edge cases, events
+
+3. **No Version Changes**:
+   - Version still v0.4.9
+
+### What G9F Did NOT Deliver
+
+- ❌ No integration with SerialPortService (Terminal)
+- ❌ No integration with ModbusRtuTransport
+- ❌ No App layer changes
+- ❌ No ViewModel changes
+- ❌ No UI changes
+
+### Test Count Update
+
+- **Before G9F**: 686 tests
+- **After G9F**: 717 tests
+- **Added**: 31 new tests
+
+### Version Update
+
+- **Version**: Still v0.4.9 (no changes)
+
+### Next Phase Recommendation
+
+**Recommended**: G9G - RTU Transport Factory Implementation
+
+**Why G9G Next**:
+- G9F provides real ownership coordinator
+- G9G will create factory that composes transport with adapter
+- Factory will inject coordinator into transport
+
+**Do NOT Skip G9G**:
+- ❌ Do NOT inject coordinator directly into ViewModel
+- ❌ Do NOT create adapter in App layer
+- ❌ Do NOT bypass factory pattern
+
+---
+
 *Document created: 2026-05-26*
-*Last updated: 2026-05-29*
-*Phase: G9E - RTU Composition Planning Complete*
+*Last updated: 2026-06-24*
+*Phase: G9F - Infrastructure Serial Ownership Coordinator Complete*

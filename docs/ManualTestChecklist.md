@@ -1323,6 +1323,63 @@ G9E is a documentation phase that plans RTU transport composition and UI integra
 
 ---
 
+## G9F: Infrastructure Serial Ownership Coordinator Verification
+
+### G9F Overview
+
+G9F is a code phase that implements the real `SerialPortOwnershipCoordinator` in Infrastructure layer.
+
+### G9F.1 Coordinator File Verification
+
+- [ ] **Step G9F.1** Verify `src/SerialAssistant.Infrastructure/Services/SerialPortOwnershipCoordinator.cs` exists
+- [ ] **Step G9F.2** Verify coordinator implements `ISerialPortOwnershipCoordinator` interface
+- [ ] **Step G9F.3** Verify coordinator has `TryClaimOwnership` method
+- [ ] **Step G9F.4** Verify coordinator has `TryReleaseOwnership` method
+- [ ] **Step G9F.5** Verify coordinator has `GetCurrentOwner` method
+- [ ] **Step G9F.6** Verify coordinator has `IsOwned` method
+- [ ] **Step G9F.7** Verify coordinator has `IsOwnedBy` method
+- [ ] **Step G9F.8** Verify coordinator has `OwnershipChanged` event
+
+### G9F.2 Test File Verification
+
+- [ ] **Step G9F.9** Verify `src/SerialAssistant.Tests/Services/SerialPortOwnershipCoordinatorTests.cs` exists
+- [ ] **Step G9F.10** Verify test count increased from 686 to 717
+
+### G9F.3 Scope Control Verification
+
+- [ ] **Step G9F.11** Run `git diff --name-only -- src/SerialAssistant.App/` - Verify NO changes
+- [ ] **Step G9F.12** Run `git diff --name-only -- src/SerialAssistant.Core/` - Verify NO changes
+- [ ] **Step G9F.13** Run `git diff --name-only -- src/SerialAssistant.Infrastructure/SerialPortService.cs` - Verify NO changes
+- [ ] **Step G9F.14** Run `git diff --name-only -- src/SerialAssistant.Infrastructure/Modbus/Transport/` - Verify NO changes
+- [ ] **Step G9F.15** Run `git diff --name-only -- MainWindow.xaml` - Verify NO changes
+
+### G9F.4 Layer Boundary Verification
+
+- [ ] **Step G9F.16** Run `Select-String -Path .\src\SerialAssistant.Infrastructure\Services\SerialPortOwnershipCoordinator.cs -Pattern "System.IO.Ports","TcpClient","Socket","System.Windows","File.","Directory.","Registry"` - Verify NO matches
+- [ ] **Step G9F.17** Run `Select-String -Path .\src\SerialAssistant.App\**\*.cs -Pattern "SerialPortOwnershipCoordinator"` - Verify NO matches (App should not reference coordinator directly)
+- [ ] **Step G9F.18** Verify coordinator does NOT reference WPF
+
+### G9F.5 Build and Test Verification
+
+- [ ] **Step G9F.19** Run `git diff --check` - Verify no trailing whitespace
+- [ ] **Step G9F.20** Run `dotnet build .\SerialAssistant.Win.sln -c Debug` - Verify build passes with 0 warnings, 0 errors
+- [ ] **Step G9F.21** Run `dotnet test .\SerialAssistant.Win.sln -c Debug` - Verify test count shows 717 passed
+
+### G9F.6 Version Verification
+
+- [ ] **Step G9F.22** Verify MainWindow.xaml version is still v0.4.9 (no changes)
+
+### G9F.7 Documentation Verification
+
+- [ ] **Step G9F.23** Verify `docs/ModbusTransportPlan.md` contains G9F Implementation Notes
+- [ ] **Step G9F.24** Verify `docs/ModbusPlan.md` contains G9F status
+- [ ] **Step G9F.25** Verify `docs/PhasePlan.md` shows G9F as Completed
+- [ ] **Step G9F.26** Verify `docs/Architecture.md` contains G9F architecture documentation
+- [ ] **Step G9F.27** Verify `docs/FinalReview.md` contains G9F review
+- [ ] **Step G9F.28** Verify `docs/FeatureReports/FeatureG9F-SerialOwnershipCoordinator.md` exists
+
+---
+
 ## Tester Information
 
 - **Tester Name**: _________________________
