@@ -1439,6 +1439,68 @@ G9G is a code phase that implements the `ModbusRtuTransportFactory` in Infrastru
 
 ---
 
+## G9H: RTU Transport Factory Core Contract Verification
+
+### G9H Overview
+
+G9H is a contract alignment phase that moves factory contract to Core layer.
+
+### G9H.1 Core Contract Files Verification
+
+- [ ] **Step G9H.1** Verify `src/SerialAssistant.Core/Modbus/Transport/IModbusRtuTransportFactory.cs` exists
+- [ ] **Step G9H.2** Verify `src/SerialAssistant.Core/Modbus/Transport/ModbusRtuTransportFactoryOptions.cs` exists
+- [ ] **Step G9H.3** Verify Core factory interface has `Create` method
+- [ ] **Step G9H.4** Verify Core options has all required properties
+- [ ] **Step G9H.5** Verify Core options has `Validate` method
+
+### G9H.2 Infrastructure Factory Alignment Verification
+
+- [ ] **Step G9H.6** Verify `src/SerialAssistant.Infrastructure/Modbus/Transport/ModbusRtuTransportFactory.cs` implements `IModbusRtuTransportFactory`
+- [ ] **Step G9H.7** Verify Infrastructure factory uses Core options as input
+- [ ] **Step G9H.8** Verify Infrastructure options file was DELETED
+
+### G9H.3 Test File Verification
+
+- [ ] **Step G9H.9** Verify test count increased from 742 to 750
+- [ ] **Step G9H.10** Verify tests include `Factory_ImplementsCoreInterface`
+- [ ] **Step G9H.11** Verify tests include `Options_IsInCoreNamespace`
+
+### G9H.4 Scope Control Verification
+
+- [ ] **Step G9H.12** Run `git diff --name-only -- src/SerialAssistant.App/` - Verify NO changes
+- [ ] **Step G9H.13** Run `git diff --name-only -- src/SerialAssistant.App/MainWindow.xaml` - Verify NO changes
+- [ ] **Step G9H.14** Run `git diff --name-only -- src/SerialAssistant.App/ViewModels/ModbusViewModel.cs` - Verify NO changes
+- [ ] **Step G9H.15** Run `git diff --name-only -- src/SerialAssistant.Infrastructure/SerialPortService.cs` - Verify NO changes
+- [ ] **Step G9H.16** Run `git diff --name-only -- src/SerialAssistant.Infrastructure/Services/SerialPortOwnershipCoordinator.cs` - Verify NO changes
+- [ ] **Step G9H.17** Run `git diff --name-only -- src/SerialAssistant.Infrastructure/Modbus/Transport/ModbusRtuTransport.cs` - Verify NO changes
+- [ ] **Step G9H.18** Run `git diff --name-only -- src/SerialAssistant.Infrastructure/Modbus/Transport/SystemIoPortsModbusRtuSerialAdapter.cs` - Verify NO changes
+
+### G9H.5 Layer Boundary Verification
+
+- [ ] **Step G9H.19** Run `Select-String -Path .\src\SerialAssistant.Core\Modbus\Transport\IModbusRtuTransportFactory.cs,.\src\SerialAssistant.Core\Modbus\Transport\ModbusRtuTransportFactoryOptions.cs -Pattern "System.IO.Ports","System.Windows","TcpClient","Socket","File.","Directory.","Registry","SerialAssistant.Infrastructure"` - Verify NO matches (Core should not reference Infrastructure)
+- [ ] **Step G9H.20** Run `Select-String -Path .\src\SerialAssistant.App\**\*.cs -Pattern "System.IO.Ports","TcpClient","Socket","SystemIoPortsModbusRtuSerialAdapter","ModbusRtuTransportFactory"` - Verify NO matches (App should not reference factory or adapter)
+
+### G9H.6 Build and Test Verification
+
+- [ ] **Step G9H.21** Run `git diff --check` - Verify no trailing whitespace
+- [ ] **Step G9H.22** Run `dotnet build .\SerialAssistant.Win.sln -c Debug` - Verify build passes with 0 warnings, 0 errors
+- [ ] **Step G9H.23** Run `dotnet test .\SerialAssistant.Win.sln -c Debug` - Verify test count shows 750 passed
+
+### G9H.7 Version Verification
+
+- [ ] **Step G9H.24** Verify MainWindow.xaml version is still v0.4.9 (no changes)
+
+### G9H.8 Documentation Verification
+
+- [ ] **Step G9H.25** Verify `docs/ModbusTransportPlan.md` contains G9H Contract Alignment Notes
+- [ ] **Step G9H.26** Verify `docs/ModbusPlan.md` contains G9H status
+- [ ] **Step G9H.27** Verify `docs/PhasePlan.md` shows G9H as Completed
+- [ ] **Step G9H.28** Verify `docs/Architecture.md` contains G9H contract architecture
+- [ ] **Step G9H.29** Verify `docs/FinalReview.md` contains G9H review
+- [ ] **Step G9H.30** Verify `docs/FeatureReports/FeatureG9H-RtuFactoryContract.md` exists
+
+---
+
 ## Tester Information
 
 - **Tester Name**: _________________________

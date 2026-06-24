@@ -1247,3 +1247,80 @@ ModbusRtuTransportFactory.Create(options)
 - ❌ Do NOT bypass ViewModel layer
 - ❌ Do NOT create factory in App startup yet
 
+---
+
+## G9H RTU Transport Factory Core Contract Alignment
+
+### G9H Status: ✅ Completed
+
+### What G9H Delivered
+
+1. **Core Layer Contract**:
+   - `IModbusRtuTransportFactory` - factory interface in Core
+   - `ModbusRtuTransportFactoryOptions` - options DTO in Core
+   - Factory contract now owned by Core layer
+
+2. **Infrastructure Layer Alignment**:
+   - `ModbusRtuTransportFactory` implements Core `IModbusRtuTransportFactory`
+   - Deleted Infrastructure version of options (avoid dual DTO)
+   - Factory uses Core options as input
+
+3. **Test Layer Additions**:
+   - 8 new tests verifying Core contract implementation
+   - Tests verify: interface implementation, namespace correctness
+
+4. **No Version Changes**:
+   - Version still v0.4.9
+
+### What G9H Did NOT Deliver
+
+- ❌ No integration with ModbusViewModel
+- ❌ No integration with ModbusPage
+- ❌ No App layer changes
+- ❌ No UI changes
+- ❌ No real serial port opening
+
+### G9H Test Coverage
+
+- **Before G9H**: 742 tests
+- **After G9H**: 750 tests
+- **Added**: 8 new tests
+
+### Key G9H Decisions
+
+1. **Core Owns Contract**: `IModbusRtuTransportFactory` in Core layer
+2. **Core Owns Options**: `ModbusRtuTransportFactoryOptions` in Core layer
+3. **Infrastructure Implements**: Factory implements Core interface
+4. **Delete Infrastructure Options**: Removed duplicate options to avoid confusion
+5. **ViewModel Can Depend on Core**: Future ViewModel can use Core contract only
+
+### Contract Alignment Flow
+
+```
+Core Layer:
+    IModbusRtuTransportFactory (interface)
+    ModbusRtuTransportFactoryOptions (DTO)
+
+Infrastructure Layer:
+    ModbusRtuTransportFactory : IModbusRtuTransportFactory
+
+Future ViewModel:
+    Depends on IModbusRtuTransportFactory (Core)
+    NOT on ModbusRtuTransportFactory (Infrastructure)
+```
+
+### Next Phase Recommendation
+
+**Recommended**: G9I - ModbusViewModel RTU Factory Injection
+
+**Why G9I Next**:
+- G9H provides Core factory contract
+- G9I can inject Core contract into ModbusViewModel
+- G9I will add Connect/Send commands using factory
+- G9I will NOT modify SerialPortService
+
+**Do NOT Skip G9I**:
+- ❌ Do NOT inject Infrastructure factory directly
+- ❌ Do NOT bypass Core contract
+- ❌ Do NOT create factory in ViewModel
+

@@ -9,16 +9,19 @@ namespace SerialAssistant.Tests.Infrastructure.Modbus;
 /* Tests for ModbusRtuTransportFactory.
  * All tests verify factory behavior without real hardware.
  * No real serial port is opened during tests.
+ * Tests verify factory implements Core IModbusRtuTransportFactory contract.
  */
 public class ModbusRtuTransportFactoryTests
 {
     private readonly ISerialPortOwnershipCoordinator _coordinator;
     private readonly ModbusRtuTransportFactory _factory;
+    private readonly IModbusRtuTransportFactory _factoryInterface;
 
     public ModbusRtuTransportFactoryTests()
     {
         _coordinator = new SerialPortOwnershipCoordinator();
         _factory = new ModbusRtuTransportFactory(_coordinator);
+        _factoryInterface = _factory;
     }
 
     /* Test 1: Constructor_NullCoordinator_ThrowsArgumentNullException */
@@ -378,5 +381,102 @@ public class ModbusRtuTransportFactoryTests
         };
 
         Assert.Throws<ArgumentException>(() => _factory.Create(options));
+    }
+
+    /* Test 26: Factory_ImplementsCoreInterface */
+    [Fact]
+    public void Factory_ImplementsCoreInterface()
+    {
+        Assert.IsAssignableFrom<IModbusRtuTransportFactory>(_factory);
+    }
+
+    /* Test 27: Interface_Create_ValidOptions_ReturnsTransport */
+    [Fact]
+    public void Interface_Create_ValidOptions_ReturnsTransport()
+    {
+        var options = new ModbusRtuTransportFactoryOptions
+        {
+            PortName = "COM1",
+            BaudRate = 9600,
+            DataBits = 8
+        };
+
+        var transport = _factoryInterface.Create(options);
+
+        Assert.NotNull(transport);
+        Assert.IsAssignableFrom<IModbusRtuTransport>(transport);
+    }
+
+    /* Test 28: Interface_Create_DoesNotOpenTransport */
+    [Fact]
+    public void Interface_Create_DoesNotOpenTransport()
+    {
+        var options = new ModbusRtuTransportFactoryOptions
+        {
+            PortName = "COM1",
+            BaudRate = 9600,
+            DataBits = 8
+        };
+
+        var transport = _factoryInterface.Create(options);
+
+        Assert.False(transport.IsConnected);
+    }
+
+    /* Test 29: Interface_Create_DoesNotClaimOwnership */
+    [Fact]
+    public void Interface_Create_DoesNotClaimOwnership()
+    {
+        var options = new ModbusRtuTransportFactoryOptions
+        {
+            PortName = "COM1",
+            BaudRate = 9600,
+            DataBits = 8
+        };
+
+        _factoryInterface.Create(options);
+
+        Assert.False(_coordinator.IsOwned("COM1"));
+    }
+
+    /* Test 30: Options_DataBits_DefaultsTo8 */
+    [Fact]
+    public void Options_DataBits_DefaultsTo8()
+    {
+        var options = new ModbusRtuTransportFactoryOptions();
+
+        Assert.Equal(8, options.DataBits);
+    }
+
+    /* Test 31: Options_Validate_ValidOptions_ReturnsTrue */
+    [Fact]
+    public void Options_Validate_ValidOptions_ReturnsTrue()
+    {
+        var options = new ModbusRtuTransportFactoryOptions
+        {
+            PortName = "COM1",
+            BaudRate = 9600,
+            DataBits = 8
+        };
+
+        var result = options.Validate();
+
+        Assert.Null(result);
+    }
+
+    /* Test 32: Options_IsInCoreNamespace */
+    [Fact]
+    public void Options_IsInCoreNamespace()
+    {
+        var options = new ModbusRtuTransportFactoryOptions();
+
+        Assert.Equal("SerialAssistant.Core.Modbus.Transport", options.GetType().Namespace);
+    }
+
+    /* Test 33: Interface_IsInCoreNamespace */
+    [Fact]
+    public void Interface_IsInCoreNamespace()
+    {
+        Assert.Equal("SerialAssistant.Core.Modbus.Transport", typeof(IModbusRtuTransportFactory).Namespace);
     }
 }

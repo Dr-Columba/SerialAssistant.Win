@@ -2212,6 +2212,117 @@ ModbusRtuTransportFactory.Create(options)
 
 ---
 
+## G9H: RTU Transport Factory Core Contract Architecture (June 2026)
+
+### G9H Overview
+
+G9H aligns the factory contract to Core layer, enabling ViewModel to depend on Core contract only, not Infrastructure concrete factory.
+
+### Architecture Position
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                        App Layer                                │
+│  ┌─────────────────────────────────────────────────────────┐   │
+│  │  MainWindowViewModel                                     │   │
+│  │  TerminalViewModel                                       │   │
+│  │  ModbusViewModel                                         │   │
+│  │                                                          │   │
+│  │  NOTE: ViewModel will depend on Core factory contract    │   │
+│  │        ViewModel will NOT reference Infrastructure       │   │
+│  │        ViewModel will NOT reference System.IO.Ports      │   │
+│  │                                                          │   │
+│  │  (G9H does NOT modify ViewModel yet)                     │   │
+│  └─────────────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────────┘
+                              │
+                              │ Will use Core contract (G9I)
+                              ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                        Core Layer                               │
+│  ┌─────────────────────────────────────────────────────────┐   │
+│  │  IModbusRtuTransportFactory ✅ NEW                       │   │
+│  │  ModbusRtuTransportFactoryOptions ✅ NEW                 │   │
+│  │  IModbusRtuTransport ✅                                  │   │
+│  │  ModbusTransportOptions ✅                               │   │
+│  │                                                          │   │
+│  │  NOTE: Core now owns factory contract                    │   │
+│  │        Core now owns options DTO                         │   │
+│  └─────────────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────────┘
+                              │
+                              │ Implements
+                              ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                    Infrastructure Layer                         │
+│  ┌─────────────────────────────────────────────────────────┐   │
+│  │  ModbusRtuTransportFactory : IModbusRtuTransportFactory  │   │
+│  │                                                          │   │
+│  │  - Implements Core factory interface                     │   │
+│  │  - Uses Core options as input                            │   │
+│  │  - Creates SystemIoPortsModbusRtuSerialAdapter           │   │
+│  │  - Creates ModbusRtuTransport                            │   │
+│  │  - Injects ownership coordinator                         │   │
+│  │                                                          │   │
+│  │  NOTE: Infrastructure options DELETED                    │   │
+│  │        Only Core options exist now                       │   │
+│  └─────────────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Key Architecture Decisions
+
+1. **Core Owns Contract**: `IModbusRtuTransportFactory` in Core layer
+2. **Core Owns Options**: `ModbusRtuTransportFactoryOptions` in Core layer
+3. **Infrastructure Implements**: Factory implements Core interface
+4. **Delete Infrastructure Options**: Removed duplicate options to avoid confusion
+5. **ViewModel Can Depend on Core**: Future ViewModel can use Core contract only
+
+### Contract Alignment Benefits
+
+| Before G9H | After G9H |
+|------------|-----------|
+| Factory contract in Infrastructure | Factory contract in Core |
+| Options in Infrastructure | Options in Core |
+| ViewModel would depend on Infrastructure | ViewModel can depend on Core only |
+| Dual DTO confusion | Single DTO in Core |
+
+### Current Integration Status
+
+| Component | Integration Status |
+|-----------|-------------------|
+| Core Factory Contract | ✅ Implemented |
+| Core Options DTO | ✅ Implemented |
+| Infrastructure Factory | ✅ Implements Core contract |
+| ModbusViewModel | ❌ Not integrated (G9I) |
+| ModbusPage | ❌ Not integrated (G9J) |
+
+### G9H Scope Control
+
+**In Scope**:
+- ✅ Core factory interface
+- ✅ Core options DTO
+- ✅ Infrastructure factory alignment
+- ✅ 8 unit tests
+- ✅ Documentation updates
+
+**Out of Scope**:
+- ❌ ModbusViewModel integration
+- ❌ ModbusPage integration
+- ❌ App layer changes
+- ❌ UI changes
+
+### Next Phase Architecture
+
+**G9I**: ModbusViewModel RTU Factory Injection
+- ViewModel will receive Core factory contract via injection
+- ViewModel will create transport using factory
+- ViewModel will NOT reference Infrastructure factory
+- ViewModel will NOT reference System.IO.Ports
+
+---
+
 *G9E RTU Composition Planning: May 2026*
 *G9F Infrastructure Serial Ownership Coordinator: June 2026*
 *G9G RTU Transport Factory: June 2026*
+*G9H RTU Transport Factory Core Contract: June 2026*

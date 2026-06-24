@@ -1622,6 +1622,68 @@ G9A is a **documentation-only phase** that reviews existing serial port service 
 
 ---
 
+## G9H RTU Transport Factory Core Contract Alignment (June 2026)
+
+**Phase**: G9H - RTU Transport Factory Core Contract Alignment
+
+**Status**: ✅ Completed
+
+### What G9H Delivered
+
+1. **Core Layer Contract**:
+   - `IModbusRtuTransportFactory` - factory interface in Core
+   - `ModbusRtuTransportFactoryOptions` - options DTO in Core
+   - Factory contract now owned by Core layer
+
+2. **Infrastructure Layer Alignment**:
+   - `ModbusRtuTransportFactory` implements Core `IModbusRtuTransportFactory`
+   - Deleted Infrastructure version of options (avoid dual DTO)
+   - Factory uses Core options as input
+
+3. **Test Layer Additions**:
+   - 8 new tests verifying Core contract implementation
+
+4. **No Version Changes**:
+   - Version still v0.4.9
+
+### What G9H Did NOT Deliver
+
+- ❌ No integration with ModbusViewModel
+- ❌ No integration with ModbusPage
+- ❌ No App layer changes
+- ❌ No UI changes
+- ❌ No real serial port opening
+
+### Test Count Update
+
+- **Before G9H**: 742 tests
+- **After G9H**: 750 tests
+- **Added**: 8 new tests
+
+### Version Update
+
+- **Version**: Still v0.4.9 (no changes)
+
+### Key Decision
+
+- **Deleted Infrastructure Options**: Removed duplicate `ModbusRtuTransportFactoryOptions` from Infrastructure to avoid dual DTO confusion
+
+### Next Phase Recommendation
+
+**Recommended**: G9I - ModbusViewModel RTU Factory Injection
+
+**Why G9I Next**:
+- G9H provides Core factory contract
+- G9I can inject Core contract into ModbusViewModel
+- G9I will add Connect/Send commands using factory
+
+**Do NOT Skip G9I**:
+- ❌ Do NOT inject Infrastructure factory directly
+- ❌ Do NOT bypass Core contract
+- ❌ Do NOT create factory in ViewModel
+
+---
+
 *Document created: 2026-05-26*
 *Last updated: 2026-06-24*
-*Phase: G9G - RTU Transport Factory Implementation Complete*
+*Phase: G9H - RTU Transport Factory Core Contract Alignment Complete*

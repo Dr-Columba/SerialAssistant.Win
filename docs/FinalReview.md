@@ -1892,6 +1892,110 @@ ModbusRtuTransport (Infrastructure)
 
 ---
 
+## G9H: RTU Transport Factory Core Contract Review (June 2026)
+
+### G9H Completion Status
+
+**G9H Phase**: ✅ Completed
+
+**Implementation Date**: 2026-06-24
+
+### What G9H Accomplished
+
+1. **Core Layer Contract**
+   - Created `IModbusRtuTransportFactory` in Core
+   - Created `ModbusRtuTransportFactoryOptions` in Core
+   - Factory contract now owned by Core layer
+
+2. **Infrastructure Layer Alignment**
+   - Modified `ModbusRtuTransportFactory` to implement Core interface
+   - Deleted Infrastructure version of options (avoid dual DTO)
+   - Factory uses Core options as input
+
+3. **Test Coverage**
+   - 8 new tests added verifying Core contract implementation
+   - Tests verify: interface implementation, namespace correctness
+   - All tests pass
+
+4. **Layer Boundary Compliance**
+   - Core does NOT reference Infrastructure
+   - Core does NOT reference System.IO.Ports
+   - No TcpClient/Socket reference
+   - No WPF reference
+   - No file system access
+   - No Registry access
+
+### G9H Scope Control
+
+**In Scope**:
+- ✅ Core factory interface
+- ✅ Core options DTO
+- ✅ Infrastructure factory alignment
+- ✅ 8 unit tests
+- ✅ Documentation updates
+
+**Out of Scope** (deferred):
+- ❌ ModbusViewModel integration
+- ❌ ModbusPage integration
+- ❌ App layer changes
+- ❌ UI changes
+- ❌ Real serial port opening
+
+### G9H Test Results
+
+| Metric | Value |
+|--------|-------|
+| Total Tests | 750 passed |
+| New Tests | 8 |
+| Previous Tests | 742 |
+| Failed Tests | 0 |
+
+### Key Architecture Decisions from G9H
+
+| Decision | Rationale |
+|----------|-----------|
+| Core Owns Contract | Factory interface in Core enables ViewModel to depend on Core only |
+| Core Owns Options | Options DTO in Core avoids dual DTO confusion |
+| Infrastructure Implements | Factory implements Core interface, not standalone |
+| Delete Infrastructure Options | Removed duplicate options to avoid confusion |
+| ViewModel Can Depend on Core | Future ViewModel can use Core contract only |
+
+### Current State After G9H
+
+- ✅ Test count: 750 passed (was 742, +8 new tests)
+- ✅ Version: v0.4.9 (unchanged)
+- ✅ Core factory contract complete
+- ✅ Core options DTO complete
+- ✅ Infrastructure factory aligned
+- ❌ Still not integrated with ModbusViewModel
+- ❌ Still not integrated with ModbusPage
+- ❌ Still no App layer injection
+
+### What G9H Does NOT Include
+
+1. **No ViewModel Integration**: Factory contract is standalone, not connected to ModbusViewModel
+2. **No UI Integration**: No UI modifications
+3. **No App Startup**: No factory registration in App startup
+4. **No Real I/O**: Factory does NOT open serial ports
+
+### Next Phase Recommendation
+
+**Recommended**: G9I - ModbusViewModel RTU Factory Injection
+
+**Why G9I Next**:
+- G9H provides Core factory contract
+- G9I can inject Core contract into ModbusViewModel
+- G9I will add Connect/Send commands using factory
+- G9I will NOT modify SerialPortService
+
+**Do NOT Skip G9I**:
+- ❌ Do NOT inject Infrastructure factory directly
+- ❌ Do NOT bypass Core contract
+- ❌ Do NOT create factory in ViewModel
+
+---
+
 *G9E RTU Composition Planning Review: May 2026*
 *G9F Infrastructure Serial Ownership Coordinator Review: June 2026*
 *G9G RTU Transport Factory Review: June 2026*
+*G9H RTU Transport Factory Core Contract Review: June 2026*

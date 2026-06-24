@@ -1285,15 +1285,63 @@ This document outlines the phased development plan for SerialAssistant.Win, orga
 
 ---
 
-### Feature G9H: ModbusViewModel RTU Connect/Send Integration
+### Feature G9H: RTU Transport Factory Core Contract Alignment
+
+**Status**: ✅ Completed
+
+**Goal**: Align factory contract to Core layer
+
+**Scope**:
+- Create `IModbusRtuTransportFactory` in Core
+- Create `ModbusRtuTransportFactoryOptions` in Core
+- Modify Infrastructure factory to implement Core contract
+- Delete Infrastructure version of options
+
+**Files Created**:
+- `src/SerialAssistant.Core/Modbus/Transport/IModbusRtuTransportFactory.cs`
+- `src/SerialAssistant.Core/Modbus/Transport/ModbusRtuTransportFactoryOptions.cs`
+
+**Files Modified**:
+- `src/SerialAssistant.Infrastructure/Modbus/Transport/ModbusRtuTransportFactory.cs`
+- `src/SerialAssistant.Tests/Infrastructure/Modbus/ModbusRtuTransportFactoryTests.cs`
+
+**Files Deleted**:
+- `src/SerialAssistant.Infrastructure/Modbus/Transport/ModbusRtuTransportFactoryOptions.cs` (moved to Core)
+
+**Test Count**:
+- Before G9H: 742 tests
+- After G9H: 750 tests
+- Added: 8 new tests
+
+**Version Status**:
+- Still v0.4.9 (no changes)
+
+**Key Decisions**:
+- Core owns factory contract (`IModbusRtuTransportFactory`)
+- Core owns options DTO (`ModbusRtuTransportFactoryOptions`)
+- Infrastructure implements Core interface
+- Deleted Infrastructure options to avoid dual DTO confusion
+- ViewModel can now depend on Core contract only
+
+**Acceptance Criteria Met**:
+- ✅ Core factory interface exists
+- ✅ Core options DTO exists
+- ✅ Infrastructure factory implements Core interface
+- ✅ Tests pass (8 new tests)
+- ✅ No App/Core boundary violations
+- ✅ No UI changes
+
+---
+
+### Feature G9I: ModbusViewModel RTU Factory Injection
 
 **Status**: ⏳ Pending
 
-**Goal**: Inject transport into ViewModel, add Connect/Send commands
+**Goal**: Inject Core factory contract into ViewModel, add Connect/Send commands
 
 **Scope**:
-- Add `IModbusRtuTransport` dependency to ModbusViewModel
-- Add `ConnectCommand` using transport
+- Add `IModbusRtuTransportFactory` dependency to ModbusViewModel
+- Add `ConnectCommand` using factory
 - Add `SendRequestCommand` using transport
 - Add `DisconnectCommand` using transport
 - Update DI registration
@@ -1306,15 +1354,16 @@ This document outlines the phased development plan for SerialAssistant.Win, orga
 - No direct adapter creation in ViewModel
 - No System.IO.Ports in ViewModel
 - No ownership logic in ViewModel
+- No Infrastructure factory reference in ViewModel
 
 **Acceptance Criteria**:
-- ViewModel uses injected transport
+- ViewModel uses injected Core factory contract
 - Commands work with fake adapter in tests
 - No layer boundary violations
 
 ---
 
-### Feature G9I: Minimal UI RTU Parameter Binding
+### Feature G9J: Minimal UI RTU Parameter Binding
 
 **Status**: ⏳ Pending
 

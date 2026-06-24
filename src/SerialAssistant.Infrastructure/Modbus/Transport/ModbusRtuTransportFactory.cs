@@ -4,12 +4,13 @@ using SerialAssistant.Core.Services;
 namespace SerialAssistant.Infrastructure.Modbus.Transport;
 
 /* Factory for creating Modbus RTU transport with real serial adapter.
+ * Implements IModbusRtuTransportFactory from Core layer.
  * Composes SystemIoPortsModbusRtuSerialAdapter, ModbusRtuTransport, and ownership coordinator.
  * Does NOT open serial port during creation.
  * Does NOT expose System.IO.Ports to App layer.
  * Does not depend on UI framework, network client APIs, or disk I/O APIs.
  */
-public sealed class ModbusRtuTransportFactory
+public sealed class ModbusRtuTransportFactory : IModbusRtuTransportFactory
 {
     private readonly ISerialPortOwnershipCoordinator _ownershipCoordinator;
 

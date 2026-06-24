@@ -1,7 +1,8 @@
-namespace SerialAssistant.Infrastructure.Modbus.Transport;
+namespace SerialAssistant.Core.Modbus.Transport;
 
 /* Factory options for creating Modbus RTU transport.
- * Does not reference System.IO.Ports, WPF, or disk I/O APIs.
+ * Defined in Core layer as cross-layer DTO.
+ * Does NOT reference Infrastructure, System.IO.Ports, WPF, or disk I/O APIs.
  * All timeout values are in milliseconds.
  */
 public class ModbusRtuTransportFactoryOptions
