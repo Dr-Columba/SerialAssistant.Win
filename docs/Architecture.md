@@ -2087,5 +2087,131 @@ G9F implements the real `SerialPortOwnershipCoordinator` in Infrastructure layer
 
 ---
 
+## G9G: RTU Transport Factory Architecture (June 2026)
+
+### G9G Overview
+
+G9G implements the `ModbusRtuTransportFactory` in Infrastructure layer, enabling composition of RTU transport components without exposing System.IO.Ports to App layer.
+
+### Architecture Position
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                        App Layer                                │
+│  ┌─────────────────────────────────────────────────────────┐   │
+│  │  MainWindowViewModel                                     │   │
+│  │  TerminalViewModel                                       │   │
+│  │  ModbusViewModel                                         │   │
+│  │                                                          │   │
+│  │  NOTE: App does NOT create factory directly              │   │
+│  │        App does NOT reference System.IO.Ports            │   │
+│  │        App receives IModbusRtuTransport via injection    │   │
+│  └─────────────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────────┘
+                              │
+                              │ Uses interfaces
+                              ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                        Core Layer                               │
+│  ┌─────────────────────────────────────────────────────────┐   │
+│  │  IModbusRtuTransport (interface) ✅                      │   │
+│  │  ModbusTransportOptions ✅                               │   │
+│  │  ISerialPortOwnershipCoordinator ✅                      │   │
+│  │                                                          │   │
+│  │  NOTE: Core defines contracts, not implementation        │   │
+│  └─────────────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────────┘
+                              │
+                              │ Implements
+                              ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                    Infrastructure Layer                         │
+│  ┌─────────────────────────────────────────────────────────┐   │
+│  │  ModbusRtuTransportFactory ✅ NEW                        │   │
+│  │  ModbusRtuTransportFactoryOptions ✅ NEW                 │   │
+│  │                                                          │   │
+│  │  - Creates SystemIoPortsModbusRtuSerialAdapter           │   │
+│  │  - Creates ModbusRtuTransport                            │   │
+│  │  - Injects ownership coordinator                         │   │
+│  │  - Returns IModbusRtuTransport interface                 │   │
+│  │  - Does NOT open serial port on Create                   │   │
+│  │  - Does NOT claim ownership on Create                    │   │
+│  │                                                          │   │
+│  │  NOTE: Factory hides System.IO.Ports from App            │   │
+│  └─────────────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Factory Composition Flow
+
+```
+ModbusRtuTransportFactory.Create(options)
+    │
+    ├── 1. Validate options
+    │       - PortName required
+    │       - BaudRate > 0
+    │       - DataBits 5-8
+    │       - Timeouts >= 0
+    │
+    ├── 2. Create SystemIoPortsModbusRtuSerialAdapter
+    │       - portName, baudRate, dataBits
+    │       - parity, stopBits
+    │       - readTimeout, writeTimeout
+    │
+    ├── 3. Create ModbusTransportOptions
+    │       - sendTimeout, receiveTimeout
+    │       - validateResponse, maxResponseBytes
+    │
+    ├── 4. Create ModbusRtuTransport
+    │       - portName, adapter
+    │       - ownershipCoordinator, transportOptions
+    │
+    └── 5. Return IModbusRtuTransport
+```
+
+### Key Architecture Decisions
+
+1. **Factory in Infrastructure**: Factory belongs to Infrastructure, not Core or App
+2. **Options as Input**: `ModbusRtuTransportFactoryOptions` provides serial settings
+3. **Interface Return**: Factory returns `IModbusRtuTransport` to hide implementation
+4. **No I/O on Create**: Factory does NOT open serial port during creation
+5. **No Ownership Claim**: Factory does NOT claim ownership during creation
+6. **No System.IO.Ports Exposure**: App layer never sees System.IO.Ports types
+
+### Current Integration Status
+
+| Component | Integration Status |
+|-----------|-------------------|
+| ModbusRtuTransportFactory | ✅ Implemented |
+| ModbusViewModel | ❌ Not integrated |
+| ModbusPage | ❌ Not integrated |
+| App Startup | ❌ Not integrated |
+
+### G9G Scope Control
+
+**In Scope**:
+- ✅ ModbusRtuTransportFactory implementation
+- ✅ ModbusRtuTransportFactoryOptions implementation
+- ✅ 25 unit tests
+- ✅ Documentation updates
+
+**Out of Scope**:
+- ❌ ModbusViewModel integration
+- ❌ ModbusPage integration
+- ❌ App layer changes
+- ❌ UI changes
+- ❌ Real serial port opening
+
+### Next Phase Architecture
+
+**G9H**: ModbusViewModel RTU Connect/Send Integration
+- ViewModel will receive factory via injection
+- ViewModel will create transport using factory
+- ViewModel will add Connect/Send commands
+- ViewModel will NOT reference System.IO.Ports
+
+---
+
 *G9E RTU Composition Planning: May 2026*
 *G9F Infrastructure Serial Ownership Coordinator: June 2026*
+*G9G RTU Transport Factory: June 2026*

@@ -1795,5 +1795,103 @@ ModbusRtuTransport (Infrastructure)
 
 ---
 
+## G9G: RTU Transport Factory Review (June 2026)
+
+### G9G Completion Status
+
+**G9G Phase**: ✅ Completed
+
+**Implementation Date**: 2026-06-24
+
+### What G9G Accomplished
+
+1. **Infrastructure Layer Implementation**
+   - Created `ModbusRtuTransportFactoryOptions` in Infrastructure
+   - Created `ModbusRtuTransportFactory` in Infrastructure
+   - Factory composes: adapter + transport + ownership coordinator
+   - Factory returns `IModbusRtuTransport` interface
+
+2. **Test Coverage**
+   - 25 new tests added in `ModbusRtuTransportFactoryTests`
+   - Tests cover: null checks, valid options, defaults, validation, multiple transports
+   - All tests pass
+
+3. **Layer Boundary Compliance**
+   - No System.IO.Ports exposure to App
+   - No TcpClient/Socket reference
+   - No WPF reference
+   - No file system access
+   - No Registry access
+
+### G9G Scope Control
+
+**In Scope**:
+- ✅ ModbusRtuTransportFactory implementation
+- ✅ ModbusRtuTransportFactoryOptions implementation
+- ✅ 25 unit tests
+- ✅ Documentation updates
+
+**Out of Scope** (deferred):
+- ❌ ModbusViewModel integration
+- ❌ ModbusPage integration
+- ❌ App layer changes
+- ❌ UI changes
+- ❌ Real serial port opening
+
+### G9G Test Results
+
+| Metric | Value |
+|--------|-------|
+| Total Tests | 742 passed |
+| New Tests | 25 |
+| Previous Tests | 717 |
+| Failed Tests | 0 |
+
+### Key Architecture Decisions from G9G
+
+| Decision | Rationale |
+|----------|-----------|
+| Factory in Infrastructure | Factory belongs to Infrastructure, not Core or App |
+| Options as Input | Options class provides serial settings without exposing System.IO.Ports |
+| Interface Return | Factory returns interface to hide implementation details |
+| No I/O on Create | Factory does NOT open serial port during creation |
+| No Ownership Claim | Factory does NOT claim ownership during creation |
+| No System.IO.Ports Exposure | App layer never sees System.IO.Ports types |
+
+### Current State After G9G
+
+- ✅ Test count: 742 passed (was 717, +25 new tests)
+- ✅ Version: v0.4.9 (unchanged)
+- ✅ Factory implementation complete
+- ✅ Options implementation complete
+- ❌ Still not integrated with ModbusViewModel
+- ❌ Still not integrated with ModbusPage
+- ❌ Still no App layer injection
+
+### What G9G Does NOT Include
+
+1. **No ViewModel Integration**: Factory is standalone, not connected to ModbusViewModel
+2. **No UI Integration**: No UI modifications
+3. **No App Startup**: No factory registration in App startup
+4. **No Real I/O**: Factory does NOT open serial ports
+
+### Next Phase Recommendation
+
+**Recommended**: G9H - ModbusViewModel RTU Connect/Send Integration
+
+**Why G9H Next**:
+- G9G provides factory for creating RTU transport
+- G9H will inject factory into ModbusViewModel
+- G9H will enable RTU connect/send in ViewModel
+- G9H will NOT modify SerialPortService
+
+**Do NOT Skip G9H**:
+- ❌ Do NOT use factory directly in UI code
+- ❌ Do NOT bypass ViewModel layer
+- ❌ Do NOT create factory in App startup yet
+
+---
+
 *G9E RTU Composition Planning Review: May 2026*
 *G9F Infrastructure Serial Ownership Coordinator Review: June 2026*
+*G9G RTU Transport Factory Review: June 2026*

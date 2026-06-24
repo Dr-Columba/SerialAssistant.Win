@@ -1380,6 +1380,65 @@ G9F is a code phase that implements the real `SerialPortOwnershipCoordinator` in
 
 ---
 
+## G9G: RTU Transport Factory Verification
+
+### G9G Overview
+
+G9G is a code phase that implements the `ModbusRtuTransportFactory` in Infrastructure layer.
+
+### G9G.1 Factory Files Verification
+
+- [ ] **Step G9G.1** Verify `src/SerialAssistant.Infrastructure/Modbus/Transport/ModbusRtuTransportFactory.cs` exists
+- [ ] **Step G9G.2** Verify `src/SerialAssistant.Infrastructure/Modbus/Transport/ModbusRtuTransportFactoryOptions.cs` exists
+- [ ] **Step G9G.3** Verify factory has `Create` method
+- [ ] **Step G9G.4** Verify factory constructor takes `ISerialPortOwnershipCoordinator`
+- [ ] **Step G9G.5** Verify factory returns `IModbusRtuTransport`
+
+### G9G.2 Test File Verification
+
+- [ ] **Step G9G.6** Verify `src/SerialAssistant.Tests/Infrastructure/Modbus/ModbusRtuTransportFactoryTests.cs` exists
+- [ ] **Step G9G.7** Verify test count increased from 717 to 742
+
+### G9G.3 Scope Control Verification
+
+- [ ] **Step G9G.8** Run `git diff --name-only -- src/SerialAssistant.App/` - Verify NO changes
+- [ ] **Step G9G.9** Run `git diff --name-only -- src/SerialAssistant.Core/` - Verify NO changes
+- [ ] **Step G9G.10** Run `git diff --name-only -- src/SerialAssistant.Infrastructure/SerialPortService.cs` - Verify NO changes
+- [ ] **Step G9G.11** Run `git diff --name-only -- src/SerialAssistant.Infrastructure/Services/SerialPortOwnershipCoordinator.cs` - Verify NO changes
+- [ ] **Step G9G.12** Run `git diff --name-only -- MainWindow.xaml` - Verify NO changes
+
+### G9G.4 Layer Boundary Verification
+
+- [ ] **Step G9G.13** Run `Select-String -Path .\src\SerialAssistant.Infrastructure\Modbus\Transport\ModbusRtuTransportFactory.cs,.\src\SerialAssistant.Infrastructure\Modbus\Transport\ModbusRtuTransportFactoryOptions.cs -Pattern "System.Windows","TcpClient","Socket","File.","Directory.","Registry"` - Verify NO matches
+- [ ] **Step G9G.14** Run `Select-String -Path .\src\SerialAssistant.App\**\*.cs -Pattern "System.IO.Ports","SystemIoPortsModbusRtuSerialAdapter","ModbusRtuTransportFactory"` - Verify NO matches (App should not reference factory or adapter)
+- [ ] **Step G9G.15** Run `Select-String -Path .\src\SerialAssistant.Core\**\*.cs -Pattern "System.IO.Ports","SystemIoPortsModbusRtuSerialAdapter","ModbusRtuTransportFactory"` - Verify NO matches (Core should not reference Infrastructure)
+
+### G9G.5 Build and Test Verification
+
+- [ ] **Step G9G.16** Run `git diff --check` - Verify no trailing whitespace
+- [ ] **Step G9G.17** Run `dotnet build .\SerialAssistant.Win.sln -c Debug` - Verify build passes with 0 warnings, 0 errors
+- [ ] **Step G9G.18** Run `dotnet test .\SerialAssistant.Win.sln -c Debug` - Verify test count shows 742 passed
+
+### G9G.6 Factory Behavior Verification
+
+- [ ] **Step G9G.19** Verify factory Create method does NOT open serial port (check transport.IsConnected is false after Create)
+- [ ] **Step G9G.20** Verify factory Create method does NOT claim ownership (check coordinator.IsOwned is false after Create)
+
+### G9G.7 Version Verification
+
+- [ ] **Step G9G.21** Verify MainWindow.xaml version is still v0.4.9 (no changes)
+
+### G9G.8 Documentation Verification
+
+- [ ] **Step G9G.22** Verify `docs/ModbusTransportPlan.md` contains G9G Factory Implementation Notes
+- [ ] **Step G9G.23** Verify `docs/ModbusPlan.md` contains G9G status
+- [ ] **Step G9G.24** Verify `docs/PhasePlan.md` shows G9G as Completed
+- [ ] **Step G9G.25** Verify `docs/Architecture.md` contains G9G factory architecture
+- [ ] **Step G9G.26** Verify `docs/FinalReview.md` contains G9G review
+- [ ] **Step G9G.27** Verify `docs/FeatureReports/FeatureG9G-RtuTransportFactory.md` exists
+
+---
+
 ## Tester Information
 
 - **Tester Name**: _________________________

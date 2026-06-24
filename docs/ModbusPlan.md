@@ -1567,6 +1567,61 @@ G9A is a **documentation-only phase** that reviews existing serial port service 
 
 ---
 
+## G9G RTU Transport Factory Implementation (June 2026)
+
+**Phase**: G9G - RTU Transport Factory Implementation
+
+**Status**: ✅ Completed
+
+### What G9G Delivered
+
+1. **Infrastructure Layer Implementation**:
+   - `ModbusRtuTransportFactoryOptions` - factory input model
+   - `ModbusRtuTransportFactory` - factory that creates RTU transport
+   - Factory composes: adapter + transport + ownership coordinator
+   - Factory returns `IModbusRtuTransport` interface
+
+2. **Test Layer Additions**:
+   - `ModbusRtuTransportFactoryTests` - 25 comprehensive tests
+   - Tests cover: null checks, valid options, defaults, validation, multiple transports
+
+3. **No Version Changes**:
+   - Version still v0.4.9
+
+### What G9G Did NOT Deliver
+
+- ❌ No integration with ModbusViewModel
+- ❌ No integration with ModbusPage
+- ❌ No App layer changes
+- ❌ No UI changes
+- ❌ No real serial port opening
+
+### Test Count Update
+
+- **Before G9G**: 717 tests
+- **After G9G**: 742 tests
+- **Added**: 25 new tests
+
+### Version Update
+
+- **Version**: Still v0.4.9 (no changes)
+
+### Next Phase Recommendation
+
+**Recommended**: G9H - ModbusViewModel RTU Connect/Send Integration
+
+**Why G9H Next**:
+- G9G provides factory for creating RTU transport
+- G9H will inject factory into ModbusViewModel
+- G9H will enable RTU connect/send in ViewModel
+
+**Do NOT Skip G9H**:
+- ❌ Do NOT use factory directly in UI code
+- ❌ Do NOT bypass ViewModel layer
+- ❌ Do NOT create factory in App startup yet
+
+---
+
 *Document created: 2026-05-26*
 *Last updated: 2026-06-24*
-*Phase: G9F - Infrastructure Serial Ownership Coordinator Complete*
+*Phase: G9G - RTU Transport Factory Implementation Complete*
