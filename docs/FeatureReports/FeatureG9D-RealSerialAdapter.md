@@ -18,7 +18,10 @@
 - Corrected App ViewModels check: removed overly broad "SerialPort" pattern that would match ISerialPortService/SerialPortSettings/SerialPortInfo
 - Added missing documentation updates: ModbusTransportPlan.md, ModbusPlan.md, PhasePlan.md, Architecture.md, ManualTestChecklist.md, FinalReview.md
 - Modified Files section now accurately reflects actual git diff
-- Test count: 686 passed (39 new tests)
+- Removed stale non-recursive Core verification command in Layer Boundary Compliance section
+- Core verification now uses `src\SerialAssistant.Core\**\*.cs` throughout the report
+- Test count remains 686 passed
+- No code changes
 
 ## Modified Files
 
@@ -144,10 +147,10 @@ public SystemIoPortsModbusRtuSerialAdapter(
 Select-String -Path .\src\SerialAssistant.Infrastructure\Modbus\Transport\SystemIoPortsModbusRtuSerialAdapter.cs -Pattern "System.IO.Ports","SerialPort"
 
 # Verify App/ViewModels do NOT contain System.IO.Ports
-Select-String -Path .\src\SerialAssistant.App\ViewModels\*.cs -Pattern "System.IO.Ports"
+Select-String -Path .\src\SerialAssistant.App\ViewModels\*.cs -Pattern "System.IO.Ports","TcpClient","Socket","SystemIoPortsModbusRtuSerialAdapter"
 
 # Verify Core does NOT contain System.IO.Ports
-Select-String -Path .\src\SerialAssistant.Core\*.cs -Pattern "using System.IO.Ports;"
+Select-String -Path .\src\SerialAssistant.Core\**\*.cs -Pattern "System.IO.Ports","TcpClient","Socket","SystemIoPortsModbusRtuSerialAdapter"
 ```
 
 ## Version Display Update
