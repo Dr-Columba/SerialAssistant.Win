@@ -1717,3 +1717,98 @@ G9D will add real System.IO.Ports serial adapter and perform manual hardware ver
 *G9A Modbus RTU Transport Capability Review: May 2026*
 *G9B Serial Port Ownership Coordinator Contracts: May 2026*
 *G9C Modbus RTU Transport with Fake Serial: May 2026*
+
+## G9D: Real Modbus RTU Serial Adapter (May 2026)
+
+### G9D Status: ✅ Completed
+
+### What G9D Added
+
+1. **Infrastructure Layer**:
+   - `SystemIoPortsModbusRtuSerialAdapter` - real serial port adapter
+   - Implements `IModbusRtuSerialAdapter` interface
+   - Uses `System.IO.Ports.SerialPort` for real communication
+
+2. **Test Layer**:
+   - `SystemIoPortsModbusRtuSerialAdapterTests` - 39 unit tests
+   - All tests run without real hardware
+
+3. **Version Update**:
+   - Updated from v0.4.8 to v0.4.9
+
+### G9D Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                        App Layer                                │
+│  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐ │
+│  │ MainWindowVM    │  │ TerminalVM      │  │ ModbusVM        │ │
+│  │ (unchanged)     │  │ (unchanged)     │  │ (unchanged)     │ │
+│  └─────────────────┘  └─────────────────┘  └─────────────────┘ │
+│                                                                 │
+│  ❌ No System.IO.Ports references                              │
+│  ❌ No SystemIoPortsModbusRtuSerialAdapter references          │
+└─────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────┐
+│                    Infrastructure Layer                         │
+│  ┌─────────────────────────────────────────────────────────┐   │
+│  │ SystemIoPortsModbusRtuSerialAdapter (NEW)               │   │
+│  │   - Implements IModbusRtuSerialAdapter                  │   │
+│  │   - Uses System.IO.Ports.SerialPort                     │   │
+│  │   - String-based Parity/StopBits parameters             │   │
+│  └─────────────────────────────────────────────────────────┘   │
+│                                                                 │
+│  ✅ System.IO.Ports allowed ONLY in this adapter               │
+└─────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────┐
+│                        Core Layer                               │
+│  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐ │
+│  │ IModbusRtu      │  │ ModbusRtu       │  │ Ownership       │ │
+│  │ SerialAdapter   │  │ Transport       │  │ Coordinator     │ │
+│  │ (unchanged)     │  │ (unchanged)     │  │ (unchanged)     │ │
+│  └─────────────────┘  └─────────────────┘  └─────────────────┘ │
+│                                                                 │
+│  ❌ No System.IO.Ports references                              │
+│  ❌ No SerialPort references                                   │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### G9D Layer Boundary Compliance
+
+| Layer | System.IO.Ports | SystemIoPortsModbusRtuSerialAdapter | Status |
+|-------|-----------------|-------------------------------------|--------|
+| Core | ❌ Forbidden | ❌ Forbidden | ✅ Compliant |
+| Infrastructure (Adapter) | ✅ Allowed | ✅ Owns | ✅ Compliant |
+| Infrastructure (Other) | ❌ Forbidden | ❌ Forbidden | ✅ Compliant |
+| App | ❌ Forbidden | ❌ Forbidden | ✅ Compliant |
+| Tests | ✅ Allowed | ✅ Tests | ✅ Compliant |
+
+### G9D Test Coverage
+
+| Test Class | Tests |
+|-----------|-------|
+| SystemIoPortsModbusRtuSerialAdapterTests | 39 |
+
+**Total Tests**: 686 (was 647 after G9C)
+
+### Key G9D Decisions
+
+1. **Adapter Pattern**: Real serial access via `SystemIoPortsModbusRtuSerialAdapter`
+2. **System.IO.Ports Isolation**: Only Infrastructure adapter references System.IO.Ports
+3. **String Parameters**: Parity/StopBits use strings to avoid exposing System.IO.Ports types
+4. **No Hardware Tests**: All tests run without real serial ports
+5. **No App Integration**: Adapter not injected into ModbusViewModel
+
+### Next Phase: G9E
+
+**G9E Scope**:
+- RTU Transport Composition
+- UI Integration Planning
+- Manual Hardware Verification Checklist
+- Ownership Coordinator Integration with UI
+
+---
+
+*G9D Real Modbus RTU Serial Adapter: May 2026*

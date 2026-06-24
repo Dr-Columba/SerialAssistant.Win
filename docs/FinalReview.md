@@ -1527,3 +1527,83 @@ ModbusRtuTransport (Infrastructure)
 *G9A Modbus RTU Transport Capability Review: May 2026*
 *G9B Serial Port Ownership Coordinator Contracts Review: May 2026*
 *G9C Modbus RTU Transport with Fake Serial Adapter Review: May 2026*
+
+## G9D: Real Modbus RTU Serial Adapter (May 2026)
+
+### G9D Status: ✅ Completed
+
+### What G9D Delivered
+
+1. **Infrastructure Layer Additions**:
+   - `SystemIoPortsModbusRtuSerialAdapter` - real serial port adapter
+   - Implements `IModbusRtuSerialAdapter` interface
+   - Uses `System.IO.Ports` for real serial communication
+   - Location: `src/SerialAssistant.Infrastructure/Modbus/Transport/`
+
+2. **Test Layer Additions**:
+   - `SystemIoPortsModbusRtuSerialAdapterTests` - 39 unit tests
+   - All tests run without real hardware
+   - Location: `src/SerialAssistant.Tests/Infrastructure/Modbus/`
+
+3. **Version Update**:
+   - Updated from v0.4.8 to v0.4.9
+
+### What G9D Did NOT Deliver
+
+- ❌ No App layer integration
+- ❌ No ModbusViewModel injection
+- ❌ No UI controls for RTU configuration
+- ❌ No real hardware communication in tests
+- ❌ No hardware verification (optional, deferred)
+
+### G9D Layer Boundary Compliance
+
+| Rule | Status | Notes |
+|------|--------|-------|
+| Core: No System.IO.Ports | ✅ | No direct serial access |
+| Core: No SerialPort | ✅ | SerialPortInfo is data model, not IO |
+| App: No System.IO.Ports | ✅ | No direct serial access |
+| App: No SystemIoPortsModbusRtuSerialAdapter | ✅ | Adapter not injected |
+| Infrastructure: Only adapter uses System.IO.Ports | ✅ | Isolated in adapter |
+
+### G9D Test Coverage
+
+| Metric | Value |
+|--------|-------|
+| Total Tests Before G9D | 647 |
+| New Tests Added | 39 |
+| Total Tests After G9D | 686 |
+| Failed Tests | 0 |
+
+### Key G9D Decisions
+
+1. **Adapter Pattern**: Real serial access via `SystemIoPortsModbusRtuSerialAdapter`
+2. **System.IO.Ports Isolation**: Only Infrastructure adapter references System.IO.Ports
+3. **String Parameters**: Parity/StopBits use strings to avoid exposing System.IO.Ports types
+4. **No Hardware Tests**: All tests run without real serial ports
+5. **No App Integration**: Adapter not injected into ModbusViewModel
+
+### What G9D Does NOT Deliver
+
+- ❌ UI integration (deferred to G9E)
+- ❌ Real hardware verification (optional)
+- ❌ ModbusViewModel injection
+
+### Next Phase Recommendation
+
+**Recommended**: G9E - RTU Transport Composition and UI Integration Planning
+
+**Why G9E Next**:
+- G9D provides real serial adapter
+- G9E will integrate adapter with ModbusRtuTransport
+- G9E will plan UI controls for RTU configuration
+- G9E will create manual verification checklist
+
+**Do NOT Skip G9E**:
+- ❌ Do NOT directly modify UI without planning
+- ❌ Do NOT inject adapter into ModbusViewModel without composition
+- ❌ Do NOT write serial IO code in App layer
+
+---
+
+*G9D Real Modbus RTU Serial Adapter Review: May 2026*

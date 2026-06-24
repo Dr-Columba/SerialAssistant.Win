@@ -1205,6 +1205,73 @@ G9C is a code phase that implements ModbusRtuTransport in Infrastructure layer u
 
 ---
 
+## G9D: Real Modbus RTU Serial Adapter Verification
+
+### G9D Overview
+
+G9D is a code phase that implements real System.IO.Ports serial adapter in Infrastructure layer, without App layer integration or hardware tests.
+
+### G9D.1 Infrastructure Verification
+
+- [ ] **Step G9D.1** Verify `SystemIoPortsModbusRtuSerialAdapter` exists in `src/SerialAssistant.Infrastructure/Modbus/Transport/`
+- [ ] **Step G9D.2** Verify adapter implements `IModbusRtuSerialAdapter` interface
+- [ ] **Step G9D.3** Verify adapter contains `System.IO.Ports` reference
+- [ ] **Step G9D.4** Verify adapter does NOT contain TcpClient/Socket/System.Windows/File./Directory./Registry
+
+### G9D.2 Tests Verification
+
+- [ ] **Step G9D.5** Verify `SystemIoPortsModbusRtuSerialAdapterTests` exists in `src/SerialAssistant.Tests/Infrastructure/Modbus/`
+- [ ] **Step G9D.6** Verify test count increased from 647 to 686
+- [ ] **Step G9D.7** Verify all 39 new tests pass without hardware
+
+### G9D.3 No App Logic Changes
+
+- [ ] **Step G9D.8** Verify `MainWindowViewModel` has NO changes
+- [ ] **Step G9D.9** Verify `TerminalViewModel` has NO changes
+- [ ] **Step G9D.10** Verify `ModbusViewModel` has NO changes
+- [ ] **Step G9D.11** Verify NO `SystemIoPortsModbusRtuSerialAdapter` references in App/ViewModels
+
+### G9D.4 No View Changes
+
+- [ ] **Step G9D.12** Verify `ModbusPage.xaml` has NO changes
+- [ ] **Step G9D.13** Verify `TerminalPage.xaml` has NO changes
+
+### G9D.5 No Core Changes
+
+- [ ] **Step G9D.14** Verify `src/SerialAssistant.Core` has NO changes
+- [ ] **Step G9D.15** Verify Core does NOT contain `using System.IO.Ports;`
+- [ ] **Step G9D.16** Verify Core does NOT contain `SystemIoPortsModbusRtuSerialAdapter` references
+
+### G9D.6 Version Verification
+
+- [ ] **Step G9D.17** Verify MainWindow.xaml version shows v0.4.9
+
+### G9D.7 Build and Test
+
+- [ ] **Step G9D.18** Run `git diff --check` - Verify no trailing whitespace
+- [ ] **Step G9D.19** Run `dotnet build` - Verify build passes (0 warnings, 0 errors)
+- [ ] **Step G9D.20** Run `dotnet test` - Verify all 686 tests pass
+
+### G9D.8 Documentation Verification
+
+- [ ] **Step G9D.21** Verify `docs/ModbusTransportPlan.md` contains G9D Implementation Notes
+- [ ] **Step G9D.22** Verify `docs/ModbusPlan.md` contains G9D status and test count
+- [ ] **Step G9D.23** Verify `docs/PhasePlan.md` shows G9D as Completed
+- [ ] **Step G9D.24** Verify `docs/Architecture.md` contains G9D architecture documentation
+- [ ] **Step G9D.25** Verify `docs/FinalReview.md` contains G9D review
+- [ ] **Step G9D.26** Verify `docs/FeatureReports/FeatureG9D-RealSerialAdapter.md` exists
+
+### G9D.9 Optional Hardware Verification
+
+**Note**: Hardware verification is OPTIONAL and NOT required for automated tests.
+
+- [ ] **Step G9D.27** (Optional) Connect real Modbus RTU device or virtual COM port pair
+- [ ] **Step G9D.28** (Optional) Create manual test program using `SystemIoPortsModbusRtuSerialAdapter`
+- [ ] **Step G9D.29** (Optional) Verify real serial communication works
+- [ ] **Step G9D.30** (Optional) Document hardware verification results
+
+---
+
 ## Tester Information
 
 - **Tester Name**: _________________________

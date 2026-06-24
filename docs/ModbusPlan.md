@@ -1391,8 +1391,63 @@ G9A is a **documentation-only phase** that reviews existing serial port service 
 - ❌ Do NOT skip hardware verification
 - ❌ Do NOT implement App layer changes before verification
 
+## G9D Modbus RTU Real Serial Adapter (May 2026)
+
+**Phase**: G9D - Real Modbus RTU Serial Adapter Implementation
+
+**Status**: ✅ Completed
+
+### What G9D Delivered
+
+1. **Infrastructure Layer Additions**:
+   - `SystemIoPortsModbusRtuSerialAdapter` - real serial port adapter
+   - Implements `IModbusRtuSerialAdapter` interface
+   - Uses `System.IO.Ports` for real serial communication
+
+2. **Test Layer Additions**:
+   - `SystemIoPortsModbusRtuSerialAdapterTests` - 39 unit tests
+   - All tests run without real hardware
+   - Parameter validation tests
+
+3. **Version Update**:
+   - Updated from v0.4.8 to v0.4.9
+
+### What G9D Did NOT Deliver
+
+- ❌ No App layer integration
+- ❌ No ModbusViewModel injection
+- ❌ No UI controls for RTU configuration
+- ❌ No real hardware communication in tests
+
+### Test Count Update
+
+- **Before G9D**: 647 tests
+- **After G9D**: 686 tests
+- **Added**: 39 new tests
+
+### Key Architecture Decisions
+
+1. **System.IO.Ports Only in Infrastructure**: Adapter is the only G9D code allowed to reference System.IO.Ports
+2. **String-based Parameters**: Parity and StopBits use strings to avoid exposing System.IO.Ports types to callers
+3. **No Hardware Tests**: All tests use validation logic, not real ports
+4. **Defensive Copy**: WriteAsync copies input bytes before writing
+
+### Next Phase Recommendation
+
+**Recommended**: G9E - RTU Transport Composition and UI Integration Planning
+
+**Why G9E Next**:
+- G9D provides real serial adapter
+- G9E will integrate adapter into ModbusRtuTransport
+- G9E will add UI controls for RTU configuration
+- G9E will create manual verification checklist
+
+**Do NOT Skip G9E**:
+- ❌ Do NOT directly modify UI without planning
+- ❌ Do NOT inject adapter into ModbusViewModel without composition
+
 ---
 
 *Document created: 2026-05-26*
 *Last updated: 2026-05-29*
-*Phase: G9C - Modbus RTU Transport with Fake Serial Adapter Complete*
+*Phase: G9D - Real Modbus RTU Serial Adapter Complete*

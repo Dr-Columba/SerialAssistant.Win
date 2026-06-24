@@ -12,6 +12,14 @@
 
 **Parent Branch**: `main` (tag v0.4.8)
 
+## Fix Notes
+
+- Corrected User Verification Commands: Core check now uses recursive path `src\SerialAssistant.Core\**\*.cs`
+- Corrected App ViewModels check: removed overly broad "SerialPort" pattern that would match ISerialPortService/SerialPortSettings/SerialPortInfo
+- Added missing documentation updates: ModbusTransportPlan.md, ModbusPlan.md, PhasePlan.md, Architecture.md, ManualTestChecklist.md, FinalReview.md
+- Modified Files section now accurately reflects actual git diff
+- Test count: 686 passed (39 new tests)
+
 ## Modified Files
 
 ### New Files Created
@@ -27,6 +35,12 @@
 | File | Location | Change |
 |------|----------|--------|
 | `MainWindow.xaml` | `src/SerialAssistant.App/` | Version updated to v0.4.9 |
+| `ModbusTransportPlan.md` | `docs/` | Added G9D Implementation Notes |
+| `ModbusPlan.md` | `docs/` | Added G9D status and test count |
+| `PhasePlan.md` | `docs/` | Updated G9D status, added G9E planning |
+| `Architecture.md` | `docs/` | Added G9D architecture section |
+| `ManualTestChecklist.md` | `docs/` | Added G9D verification checklist |
+| `FinalReview.md` | `docs/` | Added G9D review section |
 
 ## Scope Control
 
@@ -36,7 +50,7 @@
 - ✅ Implement `IModbusRtuSerialAdapter` interface
 - ✅ Add 39 no-hardware unit tests
 - ✅ Update version display to v0.4.9
-- ✅ Update documentation
+- ✅ Update documentation (ModbusTransportPlan.md, ModbusPlan.md, PhasePlan.md, Architecture.md, ManualTestChecklist.md, FinalReview.md)
 
 ### Out of Scope ❌
 
@@ -180,11 +194,13 @@ git diff --name-only -- src/SerialAssistant.Core/
 
 Select-String -Path .\src\SerialAssistant.Infrastructure\Modbus\Transport\SystemIoPortsModbusRtuSerialAdapter.cs -Pattern "System.IO.Ports","SerialPort","TcpClient","Socket","System.Windows","File.","Directory.","Registry"
 
-Select-String -Path .\src\SerialAssistant.App\ViewModels\*.cs -Pattern "System.IO.Ports","SerialPort","TcpClient","Socket","SystemIoPortsModbusRtuSerialAdapter"
+Select-String -Path .\src\SerialAssistant.App\ViewModels\*.cs -Pattern "System.IO.Ports","TcpClient","Socket","SystemIoPortsModbusRtuSerialAdapter"
 
-Select-String -Path .\src\SerialAssistant.Core\*.cs -Pattern "using System.IO.Ports;"
+Select-String -Path .\src\SerialAssistant.Core\**\*.cs -Pattern "System.IO.Ports","TcpClient","Socket","SystemIoPortsModbusRtuSerialAdapter"
 
 Select-String -Path .\src\SerialAssistant.App\MainWindow.xaml -Pattern "v0.4.9"
+
+Select-String -Path .\docs\FeatureReports\FeatureG9D-RealSerialAdapter.md,.\docs\ModbusTransportPlan.md,.\docs\ModbusPlan.md,.\docs\PhasePlan.md,.\docs\Architecture.md,.\docs\ManualTestChecklist.md,.\docs\FinalReview.md -Pattern "G9D","G9E","686","39","SystemIoPortsModbusRtuSerialAdapter","System.IO.Ports","v0.4.9"
 ```
 
 ## Manual Hardware Verification Plan

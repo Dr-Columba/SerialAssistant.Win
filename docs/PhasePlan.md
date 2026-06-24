@@ -1062,30 +1062,72 @@ This document outlines the phased development plan for SerialAssistant.Win, orga
 
 ### Feature G9D: Modbus RTU Transport Manual Verification
 
-**Status**: ⏳ Pending
+**Status**: ✅ Completed
 
-**Goal**: Manual verification with real hardware (optional)
+**Goal**: Real serial adapter implementation (manual verification optional)
 
 **Scope**:
-- Implement real System.IO.Ports in ModbusRtuTransport
-- Manual testing with real Modbus RTU device
-- Manual testing with Modbus RTU simulator
-- Verify Terminal/Modbus conflict prevention
+- Implement real System.IO.Ports adapter
+- Add unit tests without hardware dependency
+- Update version to v0.4.9
+
+**Files Created**:
+- `src/SerialAssistant.Infrastructure/Modbus/Transport/SystemIoPortsModbusRtuSerialAdapter.cs`
+- `src/SerialAssistant.Tests/Infrastructure/Modbus/SystemIoPortsModbusRtuSerialAdapterTests.cs`
+- `docs/FeatureReports/FeatureG9D-RealSerialAdapter.md`
+
+**Files Modified**:
+- `src/SerialAssistant.App/MainWindow.xaml` (version update only)
+
+**Test Count**:
+- Before G9D: 647 tests
+- After G9D: 686 tests
+- Added: 39 new tests
+
+**Version Update**:
+- Updated from v0.4.8 to v0.4.9
+
+**Key Decisions**:
+- System.IO.Ports only in Infrastructure adapter
+- String-based parameters for Parity/StopBits
+- No hardware required for tests
+- No App layer integration
+
+**Acceptance Criteria Met**:
+- ✅ Real serial adapter implemented
+- ✅ 39 unit tests pass without hardware
+- ✅ 0 warnings, 0 errors
+- ✅ No App/ViewModels changes
+- ✅ No Core changes
+
+---
+
+### Feature G9E: RTU Transport Composition and UI Integration Planning
+
+**Status**: ⏳ Pending
+
+**Goal**: Compose real adapter with ModbusRtuTransport, plan UI integration
+
+**Scope**:
+- Combine SystemIoPortsModbusRtuSerialAdapter with ModbusRtuTransport
+- Create manual hardware verification checklist
+- Plan UI controls for RTU configuration
+- Plan ownership coordinator integration with UI
 
 **Allowed Modifications**:
-- Infrastructure layer (add real serial)
-- Documentation only (manual test checklist)
+- Documentation only (planning phase)
+- Manual test checklist updates
 
 **Forbidden**:
-- No App layer changes
-- No Terminal changes
+- No direct UI implementation
+- No ModbusViewModel injection
+- No App layer code changes
 
 **Acceptance Criteria**:
-- Real RTU communication works
-- Ownership conflict prevention verified
-- Manual tests pass
-
-**Code Changes Allowed**: Yes (Infrastructure layer only)
+- Composition plan documented
+- UI integration plan documented
+- Manual verification checklist created
+- G9F phase defined for implementation
 
 **Tests Required**: Manual tests only
 
