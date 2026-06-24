@@ -4,7 +4,7 @@ namespace SerialAssistant.Infrastructure.Services;
 
 /* Real implementation of serial port ownership coordinator.
  * Tracks ownership per port name with thread-safe dictionary.
- * Does NOT reference System.IO.Ports, WPF, or file system.
+ * Does not depend on serial-port APIs, WPF, or disk I/O APIs.
  * Does NOT modify existing SerialPortService or ModbusRtuTransport.
  */
 public sealed class SerialPortOwnershipCoordinator : ISerialPortOwnershipCoordinator
