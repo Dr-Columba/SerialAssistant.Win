@@ -1103,3 +1103,72 @@ public class FakeModbusTransport : IModbusTransport
 4. **UI Planning**: Define minimal integration approach
 5. **Phase Sequence**: Define G9F-G9J roadmap
 
+---
+
+## G9F Infrastructure Serial Ownership Coordinator Implementation
+
+### G9F Status: ✅ Completed
+
+### What G9F Delivered
+
+1. **Infrastructure Layer Implementation**:
+   - `SerialPortOwnershipCoordinator` - real ownership coordinator
+   - Implements `ISerialPortOwnershipCoordinator` interface
+   - Thread-safe ownership tracking per port name
+   - Case-insensitive port name comparison
+   - OwnershipChanged event support
+
+2. **Test Layer Additions**:
+   - `SerialPortOwnershipCoordinatorTests` - 31 comprehensive tests
+   - Tests cover: claim, release, ownership queries, edge cases, events
+
+3. **No Version Changes**:
+   - Version still v0.4.9
+
+### What G9F Did NOT Deliver
+
+- ❌ No integration with SerialPortService (Terminal)
+- ❌ No integration with ModbusRtuTransport
+- ❌ No App layer changes
+- ❌ No ViewModel changes
+- ❌ No UI changes
+
+### G9F Test Coverage
+
+- **Before G9F**: 686 tests
+- **After G9F**: 717 tests
+- **Added**: 31 new tests
+
+### Key G9F Decisions
+
+1. **Infrastructure Only**: Coordinator implemented in Infrastructure layer
+2. **Thread-Safe**: Uses lock for concurrent access protection
+3. **Case-Insensitive**: Port names compared case-insensitively
+4. **Event Support**: OwnershipChanged event raised on state changes
+5. **No IO Dependencies**: Does NOT reference System.IO.Ports, TcpClient, Socket, WPF, File, Registry
+
+### Ownership Behavior
+
+| Method | Behavior |
+|--------|----------|
+| TryClaimOwnership | Returns true if unowned or same owner; false if owned by different owner |
+| TryReleaseOwnership | Returns true if owned by same owner; false otherwise |
+| GetCurrentOwner | Returns current owner or None |
+| IsOwned | Returns true if owned by Terminal or ModbusRtu |
+| IsOwnedBy | Returns true if owned by specified owner |
+
+### Next Phase Recommendation
+
+**Recommended**: G9G - RTU Transport Factory Implementation
+
+**Why G9G Next**:
+- G9F provides real ownership coordinator
+- G9G will create factory that composes transport with adapter
+- Factory will inject coordinator into transport
+- Factory will hide System.IO.Ports from App layer
+
+**Do NOT Skip G9G**:
+- ❌ Do NOT inject coordinator directly into ViewModel
+- ❌ Do NOT create adapter in App layer
+- ❌ Do NOT bypass factory pattern
+

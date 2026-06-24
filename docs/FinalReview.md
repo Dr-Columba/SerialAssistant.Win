@@ -1699,4 +1699,101 @@ ModbusRtuTransport (Infrastructure)
 
 ---
 
+## G9F: Infrastructure Serial Ownership Coordinator Review (June 2026)
+
+### G9F Completion Status
+
+**G9F Phase**: ✅ Completed
+
+**Implementation Date**: 2026-06-24
+
+### What G9F Accomplished
+
+1. **Infrastructure Layer Implementation**
+   - Created `SerialPortOwnershipCoordinator` in `src/SerialAssistant.Infrastructure/Services/`
+   - Implements `ISerialPortOwnershipCoordinator` interface from Core
+   - Thread-safe ownership tracking using lock
+   - Case-insensitive port name comparison
+   - OwnershipChanged event support
+
+2. **Test Coverage**
+   - 31 new tests added in `SerialPortOwnershipCoordinatorTests`
+   - Tests cover: claim, release, ownership queries, edge cases, events
+   - All tests pass
+
+3. **Layer Boundary Compliance**
+   - No System.IO.Ports reference
+   - No TcpClient/Socket reference
+   - No WPF reference
+   - No file system access
+   - No Registry access
+
+### G9F Scope Control
+
+**In Scope**:
+- ✅ SerialPortOwnershipCoordinator implementation
+- ✅ 31 unit tests
+- ✅ Documentation updates
+
+**Out of Scope** (deferred):
+- ❌ SerialPortService integration
+- ❌ ModbusRtuTransport integration
+- ❌ App layer changes
+- ❌ ViewModel changes
+- ❌ UI changes
+
+### G9F Test Results
+
+| Metric | Value |
+|--------|-------|
+| Total Tests | 717 passed |
+| New Tests | 31 |
+| Previous Tests | 686 |
+| Failed Tests | 0 |
+
+### Key Architecture Decisions from G9F
+
+| Decision | Rationale |
+|----------|-----------|
+| Infrastructure Only | Coordinator belongs to Infrastructure, not Core or App |
+| Thread-Safe | Uses lock for concurrent access protection |
+| Case-Insensitive | Port names compared case-insensitively for robustness |
+| No IO Dependencies | Does NOT reference System.IO.Ports, TcpClient, Socket |
+| Idempotent Claim | Same owner can claim again without error |
+| Event on Change | OwnershipChanged raised only on actual state change |
+
+### Current State After G9F
+
+- ✅ Test count: 717 passed (was 686, +31 new tests)
+- ✅ Version: v0.4.9 (unchanged)
+- ✅ Ownership coordinator implemented
+- ❌ Still not integrated with SerialPortService
+- ❌ Still not integrated with ModbusRtuTransport
+- ❌ Still no App layer injection
+
+### What G9F Does NOT Include
+
+1. **No Integration**: Coordinator is standalone, not connected to Terminal or Modbus
+2. **No Factory**: No factory implementation yet (G9G)
+3. **No ViewModel Changes**: ModbusViewModel unchanged
+4. **No UI Changes**: No UI modifications
+
+### Next Phase Recommendation
+
+**Recommended**: G9G - RTU Transport Factory Implementation
+
+**Why G9G Next**:
+- G9F provides real ownership coordinator
+- G9G will create factory that composes transport with adapter
+- Factory will inject coordinator into transport
+- Factory will hide System.IO.Ports from App layer
+
+**Do NOT Skip G9G**:
+- ❌ Do NOT inject coordinator directly into ViewModel
+- ❌ Do NOT create adapter in App layer
+- ❌ Do NOT bypass factory pattern
+
+---
+
 *G9E RTU Composition Planning Review: May 2026*
+*G9F Infrastructure Serial Ownership Coordinator Review: June 2026*

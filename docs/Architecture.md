@@ -1984,4 +1984,108 @@ G9D will add real System.IO.Ports serial adapter and perform manual hardware ver
 
 ---
 
+## G9F: Infrastructure Serial Ownership Coordinator Architecture (June 2026)
+
+### G9F Overview
+
+G9F implements the real `SerialPortOwnershipCoordinator` in Infrastructure layer, completing the ownership coordination capability.
+
+### Architecture Position
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                        App Layer                                │
+│  ┌─────────────────────────────────────────────────────────┐   │
+│  │  MainWindowViewModel                                     │   │
+│  │  TerminalViewModel                                       │   │
+│  │  ModbusViewModel                                         │   │
+│  │                                                          │   │
+│  │  NOTE: App does NOT manage ownership authority           │   │
+│  │        App does NOT reference coordinator directly       │   │
+│  └─────────────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────────┘
+                              │
+                              │ Uses interfaces
+                              ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                        Core Layer                               │
+│  ┌─────────────────────────────────────────────────────────┐   │
+│  │  ISerialPortOwnershipCoordinator (interface) ✅          │   │
+│  │  SerialPortOwner (enum) ✅                               │   │
+│  │  SerialPortOwnershipChangedEventArgs ✅                  │   │
+│  │                                                          │   │
+│  │  NOTE: Core defines contracts, not implementation        │   │
+│  └─────────────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────────┘
+                              │
+                              │ Implements
+                              ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                    Infrastructure Layer                         │
+│  ┌─────────────────────────────────────────────────────────┐   │
+│  │  SerialPortOwnershipCoordinator ✅ NEW                   │   │
+│  │                                                          │   │
+│  │  - Thread-safe ownership tracking                        │   │
+│  │  - Case-insensitive port name comparison                 │   │
+│  │  - OwnershipChanged event support                        │   │
+│  │  - No System.IO.Ports reference                          │   │
+│  │                                                          │   │
+│  │  NOTE: Coordinator is NOT yet integrated with:           │   │
+│  │        - SerialPortService (Terminal)                    │   │
+│  │        - ModbusRtuTransport (Modbus)                     │   │
+│  └─────────────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Key Architecture Decisions
+
+1. **Core Defines Interface**: `ISerialPortOwnershipCoordinator` in Core
+2. **Infrastructure Implements**: `SerialPortOwnershipCoordinator` in Infrastructure
+3. **App Does NOT Manage**: App layer is NOT ownership authority
+4. **Thread-Safe**: Uses lock for concurrent access
+5. **No IO Dependencies**: No System.IO.Ports, TcpClient, Socket, WPF, File, Registry
+
+### Current Integration Status
+
+| Component | Integration Status |
+|-----------|-------------------|
+| SerialPortService (Terminal) | ❌ Not integrated |
+| ModbusRtuTransport (Modbus) | ❌ Not integrated |
+| MainWindowViewModel | ❌ Not integrated |
+| TerminalViewModel | ❌ Not integrated |
+| ModbusViewModel | ❌ Not integrated |
+
+### Ownership Behavior
+
+| Method | Behavior |
+|--------|----------|
+| TryClaimOwnership | Returns true if unowned or same owner |
+| TryReleaseOwnership | Returns true if owned by same owner |
+| GetCurrentOwner | Returns current owner or None |
+| IsOwned | Returns true if owned by Terminal or ModbusRtu |
+| IsOwnedBy | Returns true if owned by specified owner |
+
+### G9F Scope Control
+
+**In Scope**:
+- ✅ SerialPortOwnershipCoordinator implementation
+- ✅ 31 unit tests
+- ✅ Documentation updates
+
+**Out of Scope**:
+- ❌ SerialPortService integration
+- ❌ ModbusRtuTransport integration
+- ❌ App layer changes
+- ❌ UI changes
+
+### Next Phase Architecture
+
+**G9G**: Factory Implementation
+- Factory will compose transport with adapter
+- Factory will inject coordinator into transport
+- Factory will hide System.IO.Ports from App
+
+---
+
 *G9E RTU Composition Planning: May 2026*
+*G9F Infrastructure Serial Ownership Coordinator: June 2026*
