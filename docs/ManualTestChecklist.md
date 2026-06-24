@@ -1316,7 +1316,7 @@ G9E is a documentation phase that plans RTU transport composition and UI integra
 ### G9E.6 Phase Roadmap Verification
 
 - [ ] **Step G9E.21** Verify G9F: Infrastructure Serial Ownership Coordinator is defined
-- [ ] **Step G9E.22** Verify G9G: RTU Transport Factory / Composition Root is defined
+- [ ] **Step G9E.22** Verify G9G: RTU Transport Factory Implementation is defined
 - [ ] **Step G9E.23** Verify G9H: ModbusViewModel RTU Connect/Send Integration is defined
 - [ ] **Step G9E.24** Verify G9I: Minimal UI RTU Parameter Binding is defined
 - [ ] **Step G9E.25** Verify G9J: Manual RTU Hardware Verification is defined

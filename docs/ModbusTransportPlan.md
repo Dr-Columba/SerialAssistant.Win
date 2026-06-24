@@ -1031,7 +1031,9 @@ public class FakeModbusTransport : IModbusTransport
 1. **App Does NOT Create Real Adapter**:
    - `ModbusViewModel` must NOT directly create `SystemIoPortsModbusRtuSerialAdapter`
    - App layer is forbidden from using `System.IO.Ports`
-   - Infrastructure provides factory or composition root
+   - Infrastructure provides factory implementations
+   - App startup may assemble dependencies (composition root)
+   - App must not directly instantiate `SystemIoPortsModbusRtuSerialAdapter`
 
 2. **ViewModel Only Consumes Interfaces**:
    - ViewModel receives `IModbusRtuTransport` as dependency
@@ -1083,7 +1085,7 @@ public class FakeModbusTransport : IModbusTransport
 | Phase | Goal |
 |-------|------|
 | G9F | Infrastructure Serial Ownership Coordinator Implementation |
-| G9G | RTU Transport Factory / Composition Root |
+| G9G | RTU Transport Factory Implementation |
 | G9H | ModbusViewModel RTU Connect/Send Integration |
 | G9I | Minimal UI RTU Parameter Binding |
 | G9J | Manual RTU Hardware Verification |

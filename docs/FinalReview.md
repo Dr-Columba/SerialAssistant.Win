@@ -1617,7 +1617,8 @@ ModbusRtuTransport (Infrastructure)
 1. **Composition Strategy Documentation**:
    - App does NOT create real adapter
    - ViewModel only consumes interfaces
-   - Infrastructure provides factory/composition root
+   - Infrastructure provides factory implementations
+   - App startup may assemble dependencies (composition root)
    - Core does NOT reference Infrastructure
 
 2. **Ownership Strategy Documentation**:
@@ -1632,7 +1633,7 @@ ModbusRtuTransport (Infrastructure)
 
 4. **Phase Roadmap**:
    - G9F: Infrastructure Serial Ownership Coordinator
-   - G9G: RTU Transport Factory / Composition Root
+   - G9G: RTU Transport Factory Implementation
    - G9H: ModbusViewModel RTU Connect/Send Integration
    - G9I: Minimal UI RTU Parameter Binding
    - G9J: Manual RTU Hardware Verification

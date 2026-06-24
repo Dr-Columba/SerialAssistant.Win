@@ -1170,7 +1170,8 @@ This document outlines the phased development plan for SerialAssistant.Win, orga
 **Key Decisions**:
 - App does NOT create real adapter
 - ViewModel only consumes interfaces
-- Infrastructure provides factory/composition root
+- Infrastructure provides factory implementations
+- App startup may assemble dependencies
 - Ownership coordinator must be implemented first (G9F)
 
 **Acceptance Criteria Met**:
@@ -1211,7 +1212,7 @@ This document outlines the phased development plan for SerialAssistant.Win, orga
 
 ---
 
-### Feature G9G: RTU Transport Factory / Composition Root
+### Feature G9G: RTU Transport Factory Implementation
 
 **Status**: ⏳ Pending
 

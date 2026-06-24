@@ -1822,7 +1822,8 @@ G9D will add real System.IO.Ports serial adapter and perform manual hardware ver
 1. **Composition Strategy Documentation**:
    - App does NOT create real adapter
    - ViewModel only consumes interfaces
-   - Infrastructure provides factory/composition root
+   - Infrastructure provides factory implementations
+   - App startup may assemble dependencies
 
 2. **Ownership Strategy Documentation**:
    - Terminal vs Modbus RTU port conflict prevention
@@ -1834,7 +1835,7 @@ G9D will add real System.IO.Ports serial adapter and perform manual hardware ver
 
 4. **Phase Roadmap**:
    - G9F: Infrastructure Serial Ownership Coordinator
-   - G9G: RTU Transport Factory / Composition Root
+   - G9G: RTU Transport Factory Implementation
    - G9H: ModbusViewModel RTU Connect/Send Integration
    - G9I: Minimal UI RTU Parameter Binding
    - G9J: Manual RTU Hardware Verification
@@ -1850,12 +1851,17 @@ G9D will add real System.IO.Ports serial adapter and perform manual hardware ver
 │  │   - Can create adapter? ❌ NO                                │
 │  └─────────────────┘                                            │
 │                                                                 │
-│  ❌ Missing: Composition Root / Factory                         │
+│  ❌ Missing: Factory implementation                              │
 │  ❌ Missing: Ownership Coordinator Implementation               │
 └─────────────────────────────────────────────────────────────────┘
 
 ┌─────────────────────────────────────────────────────────────────┐
 │                    Infrastructure Layer                         │
+│  ┌─────────────────────────────────────────────────────────┐   │
+│  │ IModbusRtuSerialAdapter (interface)                      │   │
+│  │   - Serial adapter abstraction ✅                         │   │
+│  │   - NOT a Core interface                                  │   │
+│  └─────────────────────────────────────────────────────────┘   │
 │  ┌─────────────────────────────────────────────────────────┐   │
 │  │ ModbusRtuTransport                                       │   │
 │  │   - Accepts IModbusRtuSerialAdapter ✅                   │   │
@@ -1867,16 +1873,21 @@ G9D will add real System.IO.Ports serial adapter and perform manual hardware ver
 │  │   - Uses System.IO.Ports ✅                              │   │
 │  └─────────────────────────────────────────────────────────┘   │
 │                                                                 │
-│  ❌ Missing: Who creates the adapter?                           │
-│  ❌ Missing: Who creates the transport?                         │
-│  ❌ Missing: Who implements ownership coordinator?              │
+│  ❌ Missing: Factory implementation                             │
+│  ❌ Missing: Ownership coordinator implementation               │
 └─────────────────────────────────────────────────────────────────┘
 
 ┌─────────────────────────────────────────────────────────────────┐
 │                        Core Layer                               │
-│  ✅ All interfaces defined                                      │
+│  ┌─────────────────┐  ┌─────────────────┐                      │
+│  │ IModbusRtu      │  │ ISerialPort     │                      │
+│  │ Transport       │  │ Ownership       │                      │
+│  │ ✅              │  │ Coordinator ✅  │                      │
+│  └─────────────────┘  └─────────────────┘                      │
+│                                                                 │
+│  ✅ All Core interfaces defined                                 │
 │  ✅ No Infrastructure references                                │
-│  ✅ No System.IO.Ports references                               │
+│  Note: IModbusRtuSerialAdapter is NOT in Core                   │
 └─────────────────────────────────────────────────────────────────┘
 ```
 

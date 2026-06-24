@@ -96,12 +96,16 @@
 │  │   - Can create adapter? ❌ NO (App cannot use System.IO.Ports)│
 │  └─────────────────┘                                            │
 │                                                                 │
-│  ❌ Missing: Composition Root / Factory                         │
+│  ❌ Missing: Factory for transport creation                      │
 │  ❌ Missing: Ownership Coordinator Implementation               │
 └─────────────────────────────────────────────────────────────────┘
 
 ┌─────────────────────────────────────────────────────────────────┐
 │                    Infrastructure Layer                         │
+│  ┌─────────────────────────────────────────────────────────┐   │
+│  │ IModbusRtuSerialAdapter (interface)                      │   │
+│  │   - Serial adapter abstraction ✅                         │   │
+│  └─────────────────────────────────────────────────────────┘   │
 │  ┌─────────────────────────────────────────────────────────┐   │
 │  │ ModbusRtuTransport                                       │   │
 │  │   - Accepts IModbusRtuSerialAdapter ✅                   │   │
@@ -113,20 +117,24 @@
 │  │   - Uses System.IO.Ports ✅                              │   │
 │  └─────────────────────────────────────────────────────────┘   │
 │                                                                 │
-│  ❌ Missing: Who creates the adapter?                           │
-│  ❌ Missing: Who creates the transport?                         │
-│  ❌ Missing: Who implements ownership coordinator?              │
+│  ❌ Missing: Factory implementation                             │
+│  ❌ Missing: Ownership coordinator implementation               │
 └─────────────────────────────────────────────────────────────────┘
 
 ┌─────────────────────────────────────────────────────────────────┐
 │                        Core Layer                               │
 │  ┌─────────────────┐  ┌─────────────────┐                      │
 │  │ IModbusRtu      │  │ ISerialPort     │                      │
-│  │ SerialAdapter   │  │ Ownership       │                      │
+│  │ Transport       │  │ Ownership       │                      │
 │  │ ✅              │  │ Coordinator ✅  │                      │
 │  └─────────────────┘  └─────────────────┘                      │
+│  ┌─────────────────┐  ┌─────────────────┐                      │
+│  │ ModbusTransport │  │ SerialPortOwner │                      │
+│  │ Options ✅      │  │ ✅              │                      │
+│  └─────────────────┘  └─────────────────┘                      │
 │                                                                 │
-│  ✅ Complete: All interfaces defined                            │
+│  ✅ Complete: All Core interfaces defined                        │
+│  Note: IModbusRtuSerialAdapter is NOT in Core                   │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
@@ -142,8 +150,11 @@
 - ViewModel should only consume interfaces
 
 **Solution**:
-- Infrastructure provides factory or composition root
-- App receives pre-configured `IModbusRtuTransport` via DI or service locator
+- Infrastructure provides factory implementations
+- App startup may assemble dependencies (composition root)
+- App must not directly reference `System.IO.Ports`
+- App must not directly instantiate `SystemIoPortsModbusRtuSerialAdapter`
+- ViewModel receives pre-configured `IModbusRtuTransport` via dependency injection
 - Factory creates adapter internally within Infrastructure
 
 ### Principle 2: ViewModel Only Consumes Interfaces
@@ -191,18 +202,26 @@
 │  │ ModbusViewModel │                                            │
 │  │   - IModbusRtuTransport (injected) ✅                       │
 │  │   - Calls ConnectAsync/SendRequestAsync/DisconnectAsync     │
+│  │   - Only consumes Core transport interfaces                  │
 │  └─────────────────┘                                            │
 │                                                                 │
 │  Future: G9H - ViewModel receives transport via DI             │
+│  Note: App must NOT directly instantiate SystemIoPorts adapter  │
 └─────────────────────────────────────────────────────────────────┘
 
 ┌─────────────────────────────────────────────────────────────────┐
 │                    Infrastructure Layer                         │
 │  ┌─────────────────────────────────────────────────────────┐   │
+│  │ IModbusRtuSerialAdapter (interface in Infrastructure)    │   │
+│  │   - Serial adapter abstraction                            │   │
+│  │   - NOT a Core interface                                  │   │
+│  └─────────────────────────────────────────────────────────┘   │
+│  ┌─────────────────────────────────────────────────────────┐   │
 │  │ ModbusRtuTransportFactory (G9G)                          │   │
 │  │   - Creates SystemIoPortsModbusRtuSerialAdapter          │   │
 │  │   - Creates ModbusRtuTransport                            │   │
 │  │   - Injects ownership coordinator                         │   │
+│  │   - Factory implementation in Infrastructure              │   │
 │  └─────────────────────────────────────────────────────────┘   │
 │  ┌─────────────────────────────────────────────────────────┐   │
 │  │ SerialPortOwnershipCoordinatorImpl (G9F)                 │   │
@@ -212,12 +231,23 @@
 │  └─────────────────────────────────────────────────────────┘   │
 │                                                                 │
 │  Future: G9F - Ownership coordinator implementation            │
-│  Future: G9G - Factory/composition root                        │
+│  Future: G9G - Factory implementation                           │
 └─────────────────────────────────────────────────────────────────┘
 
 ┌─────────────────────────────────────────────────────────────────┐
 │                        Core Layer                               │
-│  ✅ All interfaces defined (unchanged)                          │
+│  ┌─────────────────┐  ┌─────────────────┐                      │
+│  │ IModbusRtu      │  │ ISerialPort     │                      │
+│  │ Transport       │  │ Ownership       │                      │
+│  │ (interface)     │  │ Coordinator     │                      │
+│  └─────────────────┘  └─────────────────┘                      │
+│  ┌─────────────────┐  ┌─────────────────┐                      │
+│  │ ModbusTransport │  │ SerialPortOwner │                      │
+│  │ Options         │  │ (enum)          │                      │
+│  └─────────────────┘  └─────────────────┘                      │
+│                                                                 │
+│  ✅ All Core interfaces defined (unchanged)                     │
+│  Note: IModbusRtuSerialAdapter is NOT in Core                   │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
@@ -384,7 +414,7 @@ UI Parameters → ModbusViewModel → IModbusRtuTransport.ConnectAsync(portName,
 - Tests pass
 - No layer boundary violations
 
-### G9G: RTU Transport Factory / Composition Root
+### G9G: RTU Transport Factory Implementation
 
 **Goal**: Create factory that composes transport with adapter
 

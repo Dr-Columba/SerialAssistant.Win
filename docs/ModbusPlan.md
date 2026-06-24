@@ -1457,7 +1457,8 @@ G9A is a **documentation-only phase** that reviews existing serial port service 
    - Defined how components will be assembled
    - App does NOT create real adapter
    - ViewModel only consumes interfaces
-   - Infrastructure provides factory/composition root
+   - Infrastructure provides factory implementations
+   - App startup may assemble dependencies
 
 2. **Ownership Strategy Documentation**:
    - Terminal vs Modbus RTU port conflict prevention
@@ -1471,7 +1472,7 @@ G9A is a **documentation-only phase** that reviews existing serial port service 
 
 4. **Phase Roadmap**:
    - G9F: Infrastructure Serial Ownership Coordinator
-   - G9G: RTU Transport Factory / Composition Root
+   - G9G: RTU Transport Factory Implementation
    - G9H: ModbusViewModel RTU Connect/Send Integration
    - G9I: Minimal UI RTU Parameter Binding
    - G9J: Manual RTU Hardware Verification
