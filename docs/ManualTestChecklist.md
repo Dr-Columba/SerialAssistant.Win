@@ -1272,6 +1272,57 @@ G9D is a code phase that implements real System.IO.Ports serial adapter in Infra
 
 ---
 
+## G9E: RTU Composition Planning Verification
+
+### G9E Overview
+
+G9E is a documentation phase that plans RTU transport composition and UI integration strategy. No code changes.
+
+### G9E.1 No Code Changes Verification
+
+- [ ] **Step G9E.1** Run `git diff --name-only -- src/` - Verify NO src changes
+- [ ] **Step G9E.2** Run `git diff --name-only -- src/SerialAssistant.Tests/` - Verify NO test changes
+- [ ] **Step G9E.3** Verify MainWindow.xaml version is still v0.4.9
+
+### G9E.2 Build and Test Verification
+
+- [ ] **Step G9E.4** Run `git diff --check` - Verify no trailing whitespace
+- [ ] **Step G9E.5** Run `dotnet build` - Verify build passes (0 warnings, 0 errors)
+- [ ] **Step G9E.6** Run `dotnet test` - Verify all 686 tests pass (unchanged)
+
+### G9E.3 Documentation Verification
+
+- [ ] **Step G9E.7** Verify `docs/FeatureReports/FeatureG9E-RtuCompositionPlanning.md` exists
+- [ ] **Step G9E.8** Verify `docs/ModbusTransportPlan.md` contains G9E RTU Composition Plan
+- [ ] **Step G9E.9** Verify `docs/ModbusPlan.md` contains G9E status
+- [ ] **Step G9E.10** Verify `docs/PhasePlan.md` shows G9E as Completed and G9F-G9J as Pending
+- [ ] **Step G9E.11** Verify `docs/Architecture.md` contains G9E architecture planning
+- [ ] **Step G9E.12** Verify `docs/FinalReview.md` contains G9E review
+
+### G9E.4 Planning Content Verification
+
+- [ ] **Step G9E.13** Verify G9E report contains Current Transport Assets section
+- [ ] **Step G9E.14** Verify G9E report contains Composition Strategy section
+- [ ] **Step G9E.15** Verify G9E report contains Ownership Strategy section
+- [ ] **Step G9E.16** Verify G9E report contains UI Integration Strategy section
+- [ ] **Step G9E.17** Verify G9E report contains Recommended Next Phases (G9F-G9J)
+
+### G9E.5 Layer Boundary Verification
+
+- [ ] **Step G9E.18** Verify App does NOT directly reference SystemIoPortsModbusRtuSerialAdapter
+- [ ] **Step G9E.19** Verify Core does NOT reference Infrastructure
+- [ ] **Step G9E.20** Verify G9E report explains why ViewModel cannot create adapter
+
+### G9E.6 Phase Roadmap Verification
+
+- [ ] **Step G9E.21** Verify G9F: Infrastructure Serial Ownership Coordinator is defined
+- [ ] **Step G9E.22** Verify G9G: RTU Transport Factory / Composition Root is defined
+- [ ] **Step G9E.23** Verify G9H: ModbusViewModel RTU Connect/Send Integration is defined
+- [ ] **Step G9E.24** Verify G9I: Minimal UI RTU Parameter Binding is defined
+- [ ] **Step G9E.25** Verify G9J: Manual RTU Hardware Verification is defined
+
+---
+
 ## Tester Information
 
 - **Tester Name**: _________________________

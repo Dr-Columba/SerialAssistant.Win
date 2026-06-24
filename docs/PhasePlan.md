@@ -1135,6 +1135,196 @@ This document outlines the phased development plan for SerialAssistant.Win, orga
 
 ---
 
+### Feature G9E: RTU Transport Composition and UI Integration Planning
+
+**Status**: ✅ Completed
+
+**Goal**: Plan composition and UI integration (documentation only)
+
+**Scope**:
+- Document current transport assets
+- Plan composition strategy
+- Plan ownership strategy
+- Plan UI integration strategy
+- Define G9F-G9J roadmap
+
+**Files Created**:
+- `docs/FeatureReports/FeatureG9E-RtuCompositionPlanning.md`
+
+**Files Modified**:
+- `docs/ModbusTransportPlan.md`
+- `docs/ModbusPlan.md`
+- `docs/PhasePlan.md`
+- `docs/Architecture.md`
+- `docs/ManualTestChecklist.md`
+- `docs/FinalReview.md`
+
+**Test Count**:
+- Before G9E: 686 tests
+- After G9E: 686 tests (unchanged)
+- Added: 0 tests (documentation phase)
+
+**Version Status**:
+- Still v0.4.9 (no changes)
+
+**Key Decisions**:
+- App does NOT create real adapter
+- ViewModel only consumes interfaces
+- Infrastructure provides factory/composition root
+- Ownership coordinator must be implemented first (G9F)
+
+**Acceptance Criteria Met**:
+- ✅ Composition plan documented
+- ✅ UI integration plan documented
+- ✅ Ownership strategy documented
+- ✅ G9F-G9J roadmap defined
+
+---
+
+### Feature G9F: Infrastructure Serial Ownership Coordinator Implementation
+
+**Status**: ⏳ Pending
+
+**Goal**: Implement real ownership coordinator in Infrastructure
+
+**Scope**:
+- Create `SerialPortOwnershipCoordinatorImpl` in Infrastructure
+- Implement `ISerialPortOwnershipCoordinator` interface
+- Track ownership per port name
+- Raise `OwnershipChanged` events
+- Add unit tests
+
+**Allowed Modifications**:
+- Infrastructure layer (ownership coordinator)
+- Tests layer (coordinator tests)
+
+**Forbidden**:
+- No App layer changes
+- No UI changes
+- No ViewModel changes
+- No Core changes
+
+**Acceptance Criteria**:
+- Coordinator implementation exists
+- Tests pass
+- No layer boundary violations
+
+---
+
+### Feature G9G: RTU Transport Factory / Composition Root
+
+**Status**: ⏳ Pending
+
+**Goal**: Create factory that composes transport with adapter
+
+**Scope**:
+- Create `ModbusRtuTransportFactory` in Infrastructure
+- Factory creates `SystemIoPortsModbusRtuSerialAdapter`
+- Factory creates `ModbusRtuTransport` with adapter and coordinator
+- Factory returns `IModbusRtuTransport`
+- Add unit tests
+
+**Allowed Modifications**:
+- Infrastructure layer (factory)
+- Tests layer (factory tests)
+
+**Forbidden**:
+- No App layer changes
+- No UI changes
+- No ViewModel changes
+
+**Acceptance Criteria**:
+- Factory implementation exists
+- Tests pass
+- Factory does not expose System.IO.Ports types
+
+---
+
+### Feature G9H: ModbusViewModel RTU Connect/Send Integration
+
+**Status**: ⏳ Pending
+
+**Goal**: Inject transport into ViewModel, add Connect/Send commands
+
+**Scope**:
+- Add `IModbusRtuTransport` dependency to ModbusViewModel
+- Add `ConnectCommand` using transport
+- Add `SendRequestCommand` using transport
+- Add `DisconnectCommand` using transport
+- Update DI registration
+
+**Allowed Modifications**:
+- App layer (ViewModel DI, commands)
+- Infrastructure layer (DI registration)
+
+**Forbidden**:
+- No direct adapter creation in ViewModel
+- No System.IO.Ports in ViewModel
+- No ownership logic in ViewModel
+
+**Acceptance Criteria**:
+- ViewModel uses injected transport
+- Commands work with fake adapter in tests
+- No layer boundary violations
+
+---
+
+### Feature G9I: Minimal UI RTU Parameter Binding
+
+**Status**: ⏳ Pending
+
+**Goal**: Add minimal RTU connection parameters to UI
+
+**Scope**:
+- Add port name selection
+- Add baud rate selection
+- Add data bits selection
+- Add parity selection
+- Add stop bits selection
+- Add Connect/Disconnect buttons
+- Add connection status indicator
+
+**Allowed Modifications**:
+- App layer (ModbusPage UI, ViewModel bindings)
+
+**Forbidden**:
+- No complex state machine
+- No UI beautification
+- No advanced error display
+
+**Acceptance Criteria**:
+- UI parameters bind to ViewModel
+- Connect/Disconnect buttons work
+- Connection status displays correctly
+
+---
+
+### Feature G9J: Manual RTU Hardware Verification
+
+**Status**: ⏳ Pending
+
+**Goal**: Verify RTU communication with real hardware
+
+**Scope**:
+- Manual test with real Modbus RTU device
+- Manual test with virtual COM port pair
+- Document verification results
+- Update ManualTestChecklist
+
+**Allowed Modifications**:
+- Documentation only
+
+**Forbidden**:
+- No automated hardware tests
+- No changes to unit tests
+
+**Acceptance Criteria**:
+- Manual verification documented
+- Real communication works
+- Ownership conflict prevention verified
+
+---
+
 ### Feature G10: Modbus TCP Transport Integration
 
 **Status**: ⏳ Pending

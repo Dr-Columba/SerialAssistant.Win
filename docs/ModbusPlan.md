@@ -1438,16 +1438,79 @@ G9A is a **documentation-only phase** that reviews existing serial port service 
 
 **Why G9E Next**:
 - G9D provides real serial adapter
-- G9E will integrate adapter into ModbusRtuTransport
-- G9E will add UI controls for RTU configuration
-- G9E will create manual verification checklist
+- G9E will plan composition and UI integration
+- G9E is documentation phase (no code changes)
 
 **Do NOT Skip G9E**:
 - ❌ Do NOT directly modify UI without planning
 - ❌ Do NOT inject adapter into ModbusViewModel without composition
 
+## G9E RTU Composition Planning (May 2026)
+
+**Phase**: G9E - RTU Transport Composition and UI Integration Planning
+
+**Status**: ✅ Completed (Documentation Only)
+
+### What G9E Delivered
+
+1. **Composition Strategy Documentation**:
+   - Defined how components will be assembled
+   - App does NOT create real adapter
+   - ViewModel only consumes interfaces
+   - Infrastructure provides factory/composition root
+
+2. **Ownership Strategy Documentation**:
+   - Terminal vs Modbus RTU port conflict prevention
+   - Ownership coordinator implementation plan
+   - Integration flow diagram
+
+3. **UI Integration Strategy Documentation**:
+   - Minimal RTU parameter binding plan
+   - Phase G9I scope definition
+   - UI parameter flow diagram
+
+4. **Phase Roadmap**:
+   - G9F: Infrastructure Serial Ownership Coordinator
+   - G9G: RTU Transport Factory / Composition Root
+   - G9H: ModbusViewModel RTU Connect/Send Integration
+   - G9I: Minimal UI RTU Parameter Binding
+   - G9J: Manual RTU Hardware Verification
+
+### What G9E Did NOT Deliver
+
+- ❌ No code changes
+- ❌ No test changes
+- ❌ No version changes
+- ❌ No UI implementation
+- ❌ No factory implementation
+- ❌ No ViewModel changes
+
+### Test Count Update
+
+- **Before G9E**: 686 tests
+- **After G9E**: 686 tests (unchanged)
+- **Added**: 0 tests (documentation phase)
+
+### Version Update
+
+- **Version**: Still v0.4.9 (no changes)
+
+### Next Phase Recommendation
+
+**Recommended**: G9F - Infrastructure Serial Ownership Coordinator Implementation
+
+**Why G9F First**:
+- Ownership coordinator is foundational for conflict prevention
+- Must be implemented before factory can inject it
+- Must be implemented before ViewModel can use transport
+
+**Do NOT Skip G9F**:
+- ❌ Do NOT proceed to UI without ownership coordinator
+- ❌ Do NOT proceed to factory without ownership coordinator
+- ❌ Do NOT skip conflict prevention infrastructure
+
 ---
 
 *Document created: 2026-05-26*
 *Last updated: 2026-05-29*
-*Phase: G9D - Real Modbus RTU Serial Adapter Complete*
+*Phase: G9E - RTU Composition Planning Complete*
