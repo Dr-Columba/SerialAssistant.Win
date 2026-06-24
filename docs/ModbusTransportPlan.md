@@ -946,11 +946,57 @@ public class FakeModbusTransport : IModbusTransport
 4. **CRC Validation**: CRC validation in transport layer when enabled
 5. **No Real IO**: Defer real serial to G9D
 
-### Next Phase: G9D
+## G9D Implementation Notes
 
-**G9D Scope**:
-- Implement real System.IO.Ports serial adapter
-- Manual verification with real hardware
-- No App layer changes
-- No Terminal changes
+### G9D Status: ✅ Completed
+
+### What G9D Delivered
+
+1. **Infrastructure Layer Additions**:
+   - `SystemIoPortsModbusRtuSerialAdapter` - real serial port adapter
+   - Implements `IModbusRtuSerialAdapter` interface
+   - Location: `src/SerialAssistant.Infrastructure/Modbus/Transport/`
+
+2. **Test Layer Additions**:
+   - `SystemIoPortsModbusRtuSerialAdapterTests` - 39 unit tests
+   - No hardware required for tests
+   - Location: `src/SerialAssistant.Tests/Infrastructure/Modbus/`
+
+3. **Version Update**:
+   - Updated from v0.4.8 to v0.4.9
+
+### G9D Key Principles
+
+1. **System.IO.Ports Only in Infrastructure Adapter**: The adapter is the only G9D code allowed to reference System.IO.Ports
+2. **No App/ViewModels Integration**: G9D did not modify App layer or inject adapter into ModbusViewModel
+3. **No UI Changes**: Only version display updated
+4. **No Hardware Tests**: All 39 tests run without real serial ports
+5. **String-based Parameters**: Parity and StopBits use strings to avoid exposing System.IO.Ports types
+
+### G9D Test Coverage
+
+- 39 new tests added to `SystemIoPortsModbusRtuSerialAdapterTests`
+- Total tests: 686 (647 + 39)
+- All tests pass without hardware
+
+### Key G9D Decisions
+
+1. **Adapter Pattern**: Real serial access via `SystemIoPortsModbusRtuSerialAdapter`
+2. **Parameter Validation**: Adapter validates port name, baud rate, data bits before opening
+3. **Defensive Copy**: WriteAsync copies input bytes before writing
+4. **Inter-byte Idle**: ReadAsync uses 20ms idle for Modbus RTU frame detection
+5. **Exception Isolation**: Exceptions caught and converted to return values
+
+### Next Phase: G9E
+
+**G9E Scope**:
+- RTU Transport Composition (combine adapter with ModbusRtuTransport)
+- UI Integration Planning
+- Manual Hardware Verification Checklist
+- Ownership Coordinator Integration with UI
+
+**Do NOT Skip G9E**:
+- ❌ Do NOT directly modify UI without planning
+- ❌ Do NOT inject adapter into ModbusViewModel without composition
+- ❌ Do NOT skip manual verification planning
 
