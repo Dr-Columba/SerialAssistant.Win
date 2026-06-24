@@ -1000,3 +1000,106 @@ public class FakeModbusTransport : IModbusTransport
 - ❌ Do NOT inject adapter into ModbusViewModel without composition
 - ❌ Do NOT skip manual verification planning
 
+## G9E RTU Composition Plan
+
+### G9E Status: ✅ Completed (Documentation Only)
+
+### Current Assets
+
+**Core Layer**:
+- `IModbusRtuTransport` - RTU transport interface
+- `ModbusTransportOptions` - Transport configuration
+- `ModbusRequestContext` - Request context
+- `ModbusTransportResult` - Transport result
+- `ModbusTransportErrorCode` - Error codes
+- `ISerialPortOwnershipCoordinator` - Ownership coordinator interface
+- `SerialPortOwner` - Owner enum (None, Terminal, ModbusRtu)
+
+**Infrastructure Layer**:
+- `IModbusRtuSerialAdapter` - Serial adapter interface
+- `ModbusRtuTransport` - RTU transport implementation
+- `SystemIoPortsModbusRtuSerialAdapter` - Real serial adapter
+- `FakeModbusRtuSerialAdapter` - Test fake adapter
+
+**App Layer**:
+- `ModbusViewModel` - Modbus UI logic (unchanged)
+- `ModbusPage` - Modbus UI (unchanged)
+- `TerminalViewModel` - Terminal logic (unchanged)
+
+### Composition Strategy
+
+1. **App Does NOT Create Real Adapter**:
+   - `ModbusViewModel` must NOT directly create `SystemIoPortsModbusRtuSerialAdapter`
+   - App layer is forbidden from using `System.IO.Ports`
+   - Infrastructure provides factory implementations
+   - App startup may assemble dependencies (composition root)
+   - App must not directly instantiate `SystemIoPortsModbusRtuSerialAdapter`
+
+2. **ViewModel Only Consumes Interfaces**:
+   - ViewModel receives `IModbusRtuTransport` as dependency
+   - ViewModel calls `ConnectAsync()`, `SendRequestAsync()`, `DisconnectAsync()`
+   - Transport handles adapter and ownership internally
+
+3. **Core Does NOT Reference Infrastructure**:
+   - Core interfaces remain pure
+   - Infrastructure implements Core contracts
+
+4. **Infrastructure Does NOT Reference App**:
+   - Infrastructure provides services, not UI logic
+   - Infrastructure should not depend on WPF or App types
+
+### Ownership Strategy
+
+**Problem**: Terminal vs Modbus RTU Port Conflict
+
+**Ownership Rules**:
+- Terminal using port → Modbus RTU cannot claim
+- Modbus RTU using port → Terminal cannot claim
+- Owner must release before another can claim
+- Ownership authority NOT in MainWindowViewModel
+- Ownership coordinator in Infrastructure
+
+**Missing Implementation**:
+- Real `SerialPortOwnershipCoordinatorImpl` in Infrastructure
+- Integration with `SerialPortService` (Terminal)
+- Integration with `ModbusRtuTransport` (Modbus)
+
+### UI Integration Strategy
+
+**Phase G9I: Minimal RTU Parameter Binding**:
+- Port name selection
+- Baud rate selection
+- Data bits selection
+- Parity selection
+- Stop bits selection
+- Connect/Disconnect buttons
+- Connection status indicator
+
+**NOT in G9I**:
+- ❌ No complex state machine
+- ❌ No UI beautification
+- ❌ No advanced error display
+
+### Recommended Next Phases
+
+| Phase | Goal |
+|-------|------|
+| G9F | Infrastructure Serial Ownership Coordinator Implementation |
+| G9G | RTU Transport Factory Implementation |
+| G9H | ModbusViewModel RTU Connect/Send Integration |
+| G9I | Minimal UI RTU Parameter Binding |
+| G9J | Manual RTU Hardware Verification |
+
+### G9E Test Coverage
+
+- No test changes (documentation phase)
+- Test count remains 686
+
+### Key G9E Decisions
+
+1. **No Code Changes**: G9E is pure documentation
+2. **Composition Planning**: Define how components will be assembled
+3. **Ownership Planning**: Define conflict prevention strategy
+4. **UI Planning**: Define minimal integration approach
+5. **Phase Sequence**: Define G9F-G9J roadmap
+

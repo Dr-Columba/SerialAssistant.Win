@@ -1607,3 +1607,96 @@ ModbusRtuTransport (Infrastructure)
 ---
 
 *G9D Real Modbus RTU Serial Adapter Review: May 2026*
+
+## G9E: RTU Composition Planning (May 2026)
+
+### G9E Status: ✅ Completed (Documentation Only)
+
+### What G9E Delivered
+
+1. **Composition Strategy Documentation**:
+   - App does NOT create real adapter
+   - ViewModel only consumes interfaces
+   - Infrastructure provides factory implementations
+   - App startup may assemble dependencies (composition root)
+   - Core does NOT reference Infrastructure
+
+2. **Ownership Strategy Documentation**:
+   - Terminal vs Modbus RTU port conflict prevention
+   - Ownership coordinator implementation plan (G9F)
+   - Ownership integration flow diagram
+
+3. **UI Integration Strategy Documentation**:
+   - Minimal RTU parameter binding plan (G9I)
+   - UI parameter flow diagram
+   - Connect/Disconnect button plan
+
+4. **Phase Roadmap**:
+   - G9F: Infrastructure Serial Ownership Coordinator
+   - G9G: RTU Transport Factory Implementation
+   - G9H: ModbusViewModel RTU Connect/Send Integration
+   - G9I: Minimal UI RTU Parameter Binding
+   - G9J: Manual RTU Hardware Verification
+
+### What G9E Did NOT Deliver
+
+- ❌ No code changes
+- ❌ No test changes
+- ❌ No version changes
+- ❌ No UI implementation
+- ❌ No factory implementation
+- ❌ No ViewModel changes
+- ❌ No ownership coordinator implementation
+
+### G9E Test Coverage
+
+| Metric | Value |
+|--------|-------|
+| Tests Before G9E | 686 |
+| Tests After G9E | 686 |
+| Added | 0 (documentation phase) |
+
+### Key G9E Decisions
+
+1. **No Code Changes**: G9E is pure documentation phase
+2. **Composition Planning**: Define how components will be assembled
+3. **Ownership Planning**: Define conflict prevention strategy
+4. **UI Planning**: Define minimal integration approach
+5. **Phase Sequence**: Define G9F-G9J roadmap
+
+### Why ViewModel Cannot Create Adapter
+
+**Reason 1: Layer Boundary Violation**
+- App layer is forbidden from using `System.IO.Ports`
+- `SystemIoPortsModbusRtuSerialAdapter` uses `System.IO.Ports`
+- Direct instantiation would violate architecture
+
+**Reason 2: Dependency Direction**
+- ViewModel should depend on interfaces, not implementations
+- ViewModel should not know about serial port specifics
+- ViewModel should be testable without real hardware
+
+**Reason 3: Ownership Management**
+- ViewModel should not manage ownership coordinator
+- Ownership is cross-cutting concern
+- Should be managed by Infrastructure service
+
+### Next Phase Recommendation
+
+**Recommended**: G9F - Infrastructure Serial Ownership Coordinator Implementation
+
+**Why G9F First**:
+- Ownership coordinator is foundational for conflict prevention
+- Must be implemented before factory can inject it
+- Must be implemented before ViewModel can use transport
+- Must be implemented before UI can show ownership state
+
+**Do NOT Skip G9F**:
+- ❌ Do NOT proceed to UI without ownership coordinator
+- ❌ Do NOT proceed to factory without ownership coordinator
+- ❌ Do NOT skip conflict prevention infrastructure
+- ❌ Do NOT write serial IO code in App layer
+
+---
+
+*G9E RTU Composition Planning Review: May 2026*

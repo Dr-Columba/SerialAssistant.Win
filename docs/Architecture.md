@@ -1812,3 +1812,176 @@ G9D will add real System.IO.Ports serial adapter and perform manual hardware ver
 ---
 
 *G9D Real Modbus RTU Serial Adapter: May 2026*
+
+## G9E: RTU Composition Planning (May 2026)
+
+### G9E Status: ✅ Completed (Documentation Only)
+
+### What G9E Added
+
+1. **Composition Strategy Documentation**:
+   - App does NOT create real adapter
+   - ViewModel only consumes interfaces
+   - Infrastructure provides factory implementations
+   - App startup may assemble dependencies
+
+2. **Ownership Strategy Documentation**:
+   - Terminal vs Modbus RTU port conflict prevention
+   - Ownership coordinator implementation plan (G9F)
+
+3. **UI Integration Strategy Documentation**:
+   - Minimal RTU parameter binding plan (G9I)
+   - UI parameter flow diagram
+
+4. **Phase Roadmap**:
+   - G9F: Infrastructure Serial Ownership Coordinator
+   - G9G: RTU Transport Factory Implementation
+   - G9H: ModbusViewModel RTU Connect/Send Integration
+   - G9I: Minimal UI RTU Parameter Binding
+   - G9J: Manual RTU Hardware Verification
+
+### Current Architecture State
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                        App Layer                                │
+│  ┌─────────────────┐                                            │
+│  │ ModbusViewModel │                                            │
+│  │   - Has IModbusTransport? ❌ NO                             │
+│  │   - Can create adapter? ❌ NO                                │
+│  └─────────────────┘                                            │
+│                                                                 │
+│  ❌ Missing: Factory implementation                              │
+│  ❌ Missing: Ownership Coordinator Implementation               │
+└─────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────┐
+│                    Infrastructure Layer                         │
+│  ┌─────────────────────────────────────────────────────────┐   │
+│  │ IModbusRtuSerialAdapter (interface)                      │   │
+│  │   - Serial adapter abstraction ✅                         │   │
+│  │   - NOT a Core interface                                  │   │
+│  └─────────────────────────────────────────────────────────┘   │
+│  ┌─────────────────────────────────────────────────────────┐   │
+│  │ ModbusRtuTransport                                       │   │
+│  │   - Accepts IModbusRtuSerialAdapter ✅                   │   │
+│  │   - Accepts ISerialPortOwnershipCoordinator ✅           │   │
+│  └─────────────────────────────────────────────────────────┘   │
+│  ┌─────────────────────────────────────────────────────────┐   │
+│  │ SystemIoPortsModbusRtuSerialAdapter                      │   │
+│  │   - Implements IModbusRtuSerialAdapter ✅                │   │
+│  │   - Uses System.IO.Ports ✅                              │   │
+│  └─────────────────────────────────────────────────────────┘   │
+│                                                                 │
+│  ❌ Missing: Factory implementation                             │
+│  ❌ Missing: Ownership coordinator implementation               │
+└─────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────┐
+│                        Core Layer                               │
+│  ┌─────────────────┐  ┌─────────────────┐                      │
+│  │ IModbusRtu      │  │ ISerialPort     │                      │
+│  │ Transport       │  │ Ownership       │                      │
+│  │ ✅              │  │ Coordinator ✅  │                      │
+│  └─────────────────┘  └─────────────────┘                      │
+│                                                                 │
+│  ✅ All Core interfaces defined                                 │
+│  ✅ No Infrastructure references                                │
+│  Note: IModbusRtuSerialAdapter is NOT in Core                   │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Target Architecture (After G9F-G9J)
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                        App Layer                                │
+│  ┌─────────────────┐                                            │
+│  │ ModbusViewModel │                                            │
+│  │   - IModbusRtuTransport (injected) ✅                       │
+│  │   - ConnectCommand, SendCommand, DisconnectCommand          │
+│  └─────────────────┘                                            │
+│  ┌─────────────────┐                                            │
+│  │ ModbusPage UI   │                                            │
+│  │   - RTU parameters: Port, Baud, DataBits, Parity, StopBits  │
+│  │   - Connect/Disconnect buttons                               │
+│  │   - Connection status indicator                              │
+│  └─────────────────┘                                            │
+└─────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────┐
+│                    Infrastructure Layer                         │
+│  ┌─────────────────────────────────────────────────────────┐   │
+│  │ ModbusRtuTransportFactory (G9G)                          │   │
+│  │   - Creates SystemIoPortsModbusRtuSerialAdapter          │   │
+│  │   - Creates ModbusRtuTransport                            │   │
+│  │   - Injects ownership coordinator                         │   │
+│  └─────────────────────────────────────────────────────────┘   │
+│  ┌─────────────────────────────────────────────────────────┐   │
+│  │ SerialPortOwnershipCoordinatorImpl (G9F)                 │   │
+│  │   - Implements ISerialPortOwnershipCoordinator           │   │
+│  │   - Tracks current owner per port                         │   │
+│  │   - Prevents Terminal/Modbus conflicts                    │   │
+│  └─────────────────────────────────────────────────────────┘   │
+│  ┌─────────────────────────────────────────────────────────┐   │
+│  │ ModbusRtuTransport                                       │   │
+│  │   - Uses adapter for serial IO                           │   │
+│  │   - Uses coordinator for ownership                       │   │
+│  └─────────────────────────────────────────────────────────┘   │
+│  ┌─────────────────────────────────────────────────────────┐   │
+│  │ SystemIoPortsModbusRtuSerialAdapter                      │   │
+│  │   - Real serial port communication                       │   │
+│  └─────────────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────┐
+│                        Core Layer                               │
+│  ✅ All interfaces defined (unchanged)                          │
+│  ✅ No Infrastructure references                                │
+│  ✅ No System.IO.Ports references                               │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Forbidden Dependency Directions
+
+| From | To | Status |
+|------|-----|--------|
+| Core | Infrastructure | ❌ Forbidden |
+| Core | App | ❌ Forbidden |
+| Infrastructure | App | ❌ Forbidden |
+| Infrastructure | WPF | ❌ Forbidden |
+| App | System.IO.Ports | ❌ Forbidden |
+| App | SystemIoPortsModbusRtuSerialAdapter | ❌ Forbidden |
+
+### Why ViewModel Cannot Create Adapter
+
+**Reason 1: Layer Boundary Violation**
+- App layer is forbidden from using `System.IO.Ports`
+- `SystemIoPortsModbusRtuSerialAdapter` uses `System.IO.Ports`
+- Direct instantiation would violate architecture
+
+**Reason 2: Dependency Direction**
+- ViewModel should depend on interfaces, not implementations
+- ViewModel should not know about serial port specifics
+- ViewModel should be testable without real hardware
+
+**Reason 3: Ownership Management**
+- ViewModel should not manage ownership coordinator
+- Ownership is cross-cutting concern
+- Should be managed by Infrastructure service
+
+### G9E Test Coverage
+
+- No test changes (documentation phase)
+- Test count remains 686
+
+### Next Phase: G9F
+
+**G9F Scope**:
+- Implement `SerialPortOwnershipCoordinatorImpl` in Infrastructure
+- Add unit tests
+- No App layer changes
+
+---
+
+*G9E RTU Composition Planning: May 2026*
