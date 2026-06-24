@@ -1172,3 +1172,78 @@ public class FakeModbusTransport : IModbusTransport
 - ❌ Do NOT create adapter in App layer
 - ❌ Do NOT bypass factory pattern
 
+---
+
+## G9G RTU Transport Factory Implementation
+
+### G9G Status: ✅ Completed
+
+### What G9G Delivered
+
+1. **Infrastructure Layer Implementation**:
+   - `ModbusRtuTransportFactoryOptions` - factory input model
+   - `ModbusRtuTransportFactory` - factory that creates RTU transport
+   - Factory composes: adapter + transport + ownership coordinator
+   - Factory returns `IModbusRtuTransport` interface
+
+2. **Test Layer Additions**:
+   - `ModbusRtuTransportFactoryTests` - 25 comprehensive tests
+   - Tests cover: null checks, valid options, defaults, validation, multiple transports
+
+3. **No Version Changes**:
+   - Version still v0.4.9
+
+### What G9G Did NOT Deliver
+
+- ❌ No integration with ModbusViewModel
+- ❌ No integration with ModbusPage
+- ❌ No App layer changes
+- ❌ No UI changes
+- ❌ No real serial port opening
+
+### G9G Test Coverage
+
+- **Before G9G**: 717 tests
+- **After G9G**: 742 tests
+- **Added**: 25 new tests
+
+### Key G9G Decisions
+
+1. **Factory in Infrastructure**: Factory belongs to Infrastructure layer
+2. **Options as Input**: `ModbusRtuTransportFactoryOptions` provides serial settings
+3. **Interface Return**: Factory returns `IModbusRtuTransport` to hide implementation
+4. **No I/O on Create**: Factory does NOT open serial port during creation
+5. **No Ownership Claim**: Factory does NOT claim ownership during creation
+
+### Factory Composition Flow
+
+```
+ModbusRtuTransportFactory.Create(options)
+    │
+    ├── Create SystemIoPortsModbusRtuSerialAdapter
+    │       (portName, baudRate, dataBits, parity, stopBits, timeouts)
+    │
+    ├── Create ModbusTransportOptions
+    │       (sendTimeout, receiveTimeout, validateResponse, maxResponseBytes)
+    │
+    ├── Create ModbusRtuTransport
+    │       (portName, adapter, ownershipCoordinator, transportOptions)
+    │
+    └── Return IModbusRtuTransport
+```
+
+### Next Phase Recommendation
+
+**Recommended**: G9H - ModbusViewModel RTU Connect/Send Integration
+
+**Why G9H Next**:
+- G9G provides factory for creating RTU transport
+- G9H will inject factory into ModbusViewModel
+- G9H will enable RTU connect/send in ViewModel
+- G9H will NOT modify SerialPortService
+
+**Do NOT Skip G9H**:
+- ❌ Do NOT use factory directly in UI code
+- ❌ Do NOT bypass ViewModel layer
+- ❌ Do NOT create factory in App startup yet
+

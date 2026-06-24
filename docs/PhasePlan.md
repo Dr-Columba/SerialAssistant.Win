@@ -1233,30 +1233,55 @@ This document outlines the phased development plan for SerialAssistant.Win, orga
 
 ### Feature G9G: RTU Transport Factory Implementation
 
-**Status**: ⏳ Pending
+**Status**: ✅ Completed
 
 **Goal**: Create factory that composes transport with adapter
 
 **Scope**:
 - Create `ModbusRtuTransportFactory` in Infrastructure
+- Create `ModbusRtuTransportFactoryOptions` for factory input
 - Factory creates `SystemIoPortsModbusRtuSerialAdapter`
 - Factory creates `ModbusRtuTransport` with adapter and coordinator
 - Factory returns `IModbusRtuTransport`
 - Add unit tests
 
-**Allowed Modifications**:
-- Infrastructure layer (factory)
-- Tests layer (factory tests)
+**Files Created**:
+- `src/SerialAssistant.Infrastructure/Modbus/Transport/ModbusRtuTransportFactoryOptions.cs`
+- `src/SerialAssistant.Infrastructure/Modbus/Transport/ModbusRtuTransportFactory.cs`
+- `src/SerialAssistant.Tests/Infrastructure/Modbus/ModbusRtuTransportFactoryTests.cs`
 
-**Forbidden**:
-- No App layer changes
-- No UI changes
-- No ViewModel changes
+**Files Modified**:
+- `docs/ModbusTransportPlan.md`
+- `docs/ModbusPlan.md`
+- `docs/PhasePlan.md`
+- `docs/Architecture.md`
+- `docs/ManualTestChecklist.md`
+- `docs/FinalReview.md`
 
-**Acceptance Criteria**:
-- Factory implementation exists
-- Tests pass
-- Factory does not expose System.IO.Ports types
+**Test Count**:
+- Before G9G: 717 tests
+- After G9G: 742 tests
+- Added: 25 new tests
+
+**Version Status**:
+- Still v0.4.9 (no changes)
+
+**Key Decisions**:
+- Factory in Infrastructure layer
+- Options class for serial settings input
+- Factory returns interface to hide implementation
+- No I/O operations during Create
+- No ownership claim during Create
+- No System.IO.Ports types exposed to App
+
+**Acceptance Criteria Met**:
+- ✅ Factory implementation exists
+- ✅ Options implementation exists
+- ✅ Tests pass (25 new tests)
+- ✅ Factory does not expose System.IO.Ports types
+- ✅ No App/Core changes
+- ✅ No UI changes
+- ✅ No real serial port opening
 
 ---
 
